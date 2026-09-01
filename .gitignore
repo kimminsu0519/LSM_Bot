@@ -1,0 +1,14 @@
+# ROS 2 Build outputs
+lsm_ws/build/
+lsm_ws/install/
+lsm_ws/log/
+
+# Python Virtual Environment
+lsm_venv/
+*.pyc
+__pycache__/
+
+# System & IDE caches
+.vscode/
+.idea/
+.DS_Store
