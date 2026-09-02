@@ -2,6 +2,25 @@
 <sdf version="1.6">
   <world name="lsm_custom_warehouse">
     
+    <!-- GUI Camera Default View & Grid Configuration (0.6m Cell Length, 80 Count) -->
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>-21.0 -10.0 5.0 0 0.5 1.57</pose>
+      </camera>
+    </gui>
+
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.8 0.8 0.8 1</background>
+      <shadows>true</shadows>
+      <grid>
+        <cell_length>0.6</cell_length>
+        <cell_count>80</cell_count>
+        <normal>0 0 1</normal>
+        <pose>0 0 0.015 0 0 0</pose>
+      </grid>
+    </scene>
+
     <!-- Physics engine settings -->
     <physics default="0" name="default_physics" type="ode">
       <max_step_size>0.001</max_step_size>
@@ -11,16 +30,16 @@
 
     <gravity>0 0 -9.8</gravity>
 
-    <!-- Inline Sun Light -->
+    <!-- Sun Light -->
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
-      <pose>0 0 40 0 0 0</pose>
-      <diffuse>0.85 0.85 0.85 1</diffuse>
-      <specular>0.25 0.25 0.25 1</specular>
+      <pose>0 0 25 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
       <direction>-0.5 0.1 -0.9</direction>
     </light>
 
-    <!-- Inline Ground Plane with Large Grid Visualization -->
+    <!-- Ground Plane -->
     <model name="ground_plane">
       <static>true</static>
       <link name="link">
@@ -28,7 +47,7 @@
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>200 100</size>
+              <size>60 30</size>
             </plane>
           </geometry>
         </collision>
@@ -36,385 +55,379 @@
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>200 100</size>
+              <size>60 30</size>
             </plane>
           </geometry>
           <material>
-            <ambient>0.88 0.88 0.88 1</ambient>
-            <diffuse>0.88 0.88 0.88 1</diffuse>
+            <ambient>0.9 0.9 0.9 1</ambient>
+            <diffuse>0.9 0.9 0.9 1</diffuse>
           </material>
         </visual>
       </link>
     </model>
 
     <!-- ============================================================================== -->
-    <!-- WAREHOUSE OUTER BOUNDARY WALLS (정밀 수치: 가로 156.0m x 세로 36.0m x 높이 2.5m) -->
+    <!-- WAREHOUSE OUTER BOUNDARY WALLS (외벽 두께 0.3m가 내부 영역을 침범하지 않도록 외곽 이동) -->
+    <!-- 내부 공간: 가로 46.8m x 세로 10.8m x 높이 2.5m -->
     <!-- ============================================================================== -->
     <model name="wall_north">
       <static>true</static>
-      <pose>0 18.0 1.25 0 0 0</pose>
+      <pose>0 5.55 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>156.0 0.4 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>156.0 0.4 2.5</size></box></geometry>
-          <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material>
+        <collision name="col"><geometry><box><size>47.4 0.3 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>47.4 0.3 2.5</size></box></geometry>
+          <material><ambient>0.2 0.2 0.25 1</ambient><diffuse>0.3 0.3 0.35 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="wall_south">
       <static>true</static>
-      <pose>0 -18.0 1.25 0 0 0</pose>
+      <pose>0 -5.55 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>156.0 0.4 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>156.0 0.4 2.5</size></box></geometry>
-          <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material>
+        <collision name="col"><geometry><box><size>47.4 0.3 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>47.4 0.3 2.5</size></box></geometry>
+          <material><ambient>0.2 0.2 0.25 1</ambient><diffuse>0.3 0.3 0.35 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="wall_west">
       <static>true</static>
-      <pose>-78.0 0 1.25 0 0 0</pose>
+      <pose>-23.55 0 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>0.4 36.0 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>0.4 36.0 2.5</size></box></geometry>
-          <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material>
+        <collision name="col"><geometry><box><size>0.3 11.4 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.3 11.4 2.5</size></box></geometry>
+          <material><ambient>0.2 0.2 0.25 1</ambient><diffuse>0.3 0.3 0.35 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="wall_east">
       <static>true</static>
-      <pose>78.0 0 1.25 0 0 0</pose>
+      <pose>23.55 0 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>0.4 36.0 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>0.4 36.0 2.5</size></box></geometry>
-          <material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material>
+        <collision name="col"><geometry><box><size>0.3 11.4 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.3 11.4 2.5</size></box></geometry>
+          <material><ambient>0.2 0.2 0.25 1</ambient><diffuse>0.3 0.3 0.35 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <!-- ============================================================================== -->
-    <!-- LEFT AREA: 3 TOP BARS, 3 BOTTOM BARS & CENTERED LOWER CHARGING PAD -->
+    <!-- LEFT AREA: A-ZONE 6 GATES (Safety Orange: 픽업/입고 구역) & CHARGING PAD -->
     <!-- ============================================================================== -->
     <model name="gate_top_1">
       <static>true</static>
-      <pose>-58.0 10.5 1.25 0 0 0</pose>
+      <pose>-18.3 3.6 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>1.5 14.6 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>1.5 14.6 2.5</size></box></geometry>
-          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material>
+        <collision name="col"><geometry><box><size>0.6 3.6 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.6 3.6 2.5</size></box></geometry>
+          <material><ambient>0.9 0.45 0.1 1</ambient><diffuse>0.95 0.5 0.15 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="gate_top_2">
       <static>true</static>
-      <pose>-48.0 10.5 1.25 0 0 0</pose>
+      <pose>-15.9 3.6 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>1.5 14.6 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>1.5 14.6 2.5</size></box></geometry>
-          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material>
+        <collision name="col"><geometry><box><size>0.6 3.6 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.6 3.6 2.5</size></box></geometry>
+          <material><ambient>0.9 0.45 0.1 1</ambient><diffuse>0.95 0.5 0.15 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="gate_top_3">
       <static>true</static>
-      <pose>-38.0 10.5 1.25 0 0 0</pose>
+      <pose>-13.5 3.6 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>1.5 14.6 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>1.5 14.6 2.5</size></box></geometry>
-          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material>
+        <collision name="col"><geometry><box><size>0.6 3.6 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.6 3.6 2.5</size></box></geometry>
+          <material><ambient>0.9 0.45 0.1 1</ambient><diffuse>0.95 0.5 0.15 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="gate_bot_1">
       <static>true</static>
-      <pose>-58.0 -10.5 1.25 0 0 0</pose>
+      <pose>-18.3 -3.6 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>1.5 14.6 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>1.5 14.6 2.5</size></box></geometry>
-          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material>
+        <collision name="col"><geometry><box><size>0.6 3.6 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.6 3.6 2.5</size></box></geometry>
+          <material><ambient>0.9 0.45 0.1 1</ambient><diffuse>0.95 0.5 0.15 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="gate_bot_2">
       <static>true</static>
-      <pose>-48.0 -10.5 1.25 0 0 0</pose>
+      <pose>-15.9 -3.6 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>1.5 14.6 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>1.5 14.6 2.5</size></box></geometry>
-          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material>
+        <collision name="col"><geometry><box><size>0.6 3.6 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.6 3.6 2.5</size></box></geometry>
+          <material><ambient>0.9 0.45 0.1 1</ambient><diffuse>0.95 0.5 0.15 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="gate_bot_3">
       <static>true</static>
-      <pose>-38.0 -10.5 1.25 0 0 0</pose>
+      <pose>-13.5 -3.6 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>1.5 14.6 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>1.5 14.6 2.5</size></box></geometry>
-          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material>
+        <collision name="col"><geometry><box><size>0.6 3.6 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.6 3.6 2.5</size></box></geometry>
+          <material><ambient>0.9 0.45 0.1 1</ambient><diffuse>0.95 0.5 0.15 1</diffuse></material>
         </visual>
       </link>
     </model>
 
-    <!-- 스크린샷 2번 반영: 좌측 외벽(-78m)과 첫 번째 게이트 바(-58m)의 '중앙 하단 벽면'에 위치하는 연두색 충전소 -->
+    <!-- 충전소 패드 (Vibrant Lime Green) -->
     <model name="lower_left_centered_charging_pad">
       <static>true</static>
-      <pose>-68.0 -16.0 0.1 0 0 0</pose>
+      <pose>-21.0 -5.1 0.05 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>8.0 3.6 0.2</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>8.0 3.6 0.2</size></box></geometry>
-          <material><ambient>0.4 0.8 0.4 1</ambient><diffuse>0.5 0.9 0.5 1</diffuse></material>
+        <collision name="col"><geometry><box><size>1.2 0.6 0.1</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>1.2 0.6 0.1</size></box></geometry>
+          <material><ambient>0.3 0.85 0.3 1</ambient><diffuse>0.4 0.95 0.4 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <!-- ============================================================================== -->
-    <!-- CENTER AREA: 4x4 GRID BLOCKS WITH EXACT 4.0m GAP -->
+    <!-- CENTER AREA: B-ZONE 4x4 GRID BLOCKS (Steel Blue / Industrial Cyan: 공정 셀 구역) -->
     <!-- ============================================================================== -->
-
     <model name="block_1_1">
       <static>true</static>
-      <pose>-20.0 12.0 1.0 0 0 0</pose>
+      <pose>-6.9 3.6 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_1_2">
       <static>true</static>
-      <pose>-4.0 12.0 1.0 0 0 0</pose>
+      <pose>-2.7 3.6 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_1_3">
       <static>true</static>
-      <pose>12.0 12.0 1.0 0 0 0</pose>
+      <pose>1.5 3.6 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_1_4">
       <static>true</static>
-      <pose>28.0 12.0 1.0 0 0 0</pose>
+      <pose>5.7 3.6 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_2_1">
       <static>true</static>
-      <pose>-20.0 4.0 1.0 0 0 0</pose>
+      <pose>-6.9 1.2 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_2_2">
       <static>true</static>
-      <pose>-4.0 4.0 1.0 0 0 0</pose>
+      <pose>-2.7 1.2 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_2_3">
       <static>true</static>
-      <pose>12.0 4.0 1.0 0 0 0</pose>
+      <pose>1.5 1.2 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_2_4">
       <static>true</static>
-      <pose>28.0 4.0 1.0 0 0 0</pose>
+      <pose>5.7 1.2 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_3_1">
       <static>true</static>
-      <pose>-20.0 -4.0 1.0 0 0 0</pose>
+      <pose>-6.9 -1.2 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_3_2">
       <static>true</static>
-      <pose>-4.0 -4.0 1.0 0 0 0</pose>
+      <pose>-2.7 -1.2 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_3_3">
       <static>true</static>
-      <pose>12.0 -4.0 1.0 0 0 0</pose>
+      <pose>1.5 -1.2 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_3_4">
       <static>true</static>
-      <pose>28.0 -4.0 1.0 0 0 0</pose>
+      <pose>5.7 -1.2 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_4_1">
       <static>true</static>
-      <pose>-20.0 -12.0 1.0 0 0 0</pose>
+      <pose>-6.9 -3.6 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_4_2">
       <static>true</static>
-      <pose>-4.0 -12.0 1.0 0 0 0</pose>
+      <pose>-2.7 -3.6 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_4_3">
       <static>true</static>
-      <pose>12.0 -12.0 1.0 0 0 0</pose>
+      <pose>1.5 -3.6 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <model name="block_4_4">
       <static>true</static>
-      <pose>28.0 -12.0 1.0 0 0 0</pose>
+      <pose>5.7 -3.6 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>12.0 4.0 2.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>12.0 4.0 2.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>3.0 1.2 2.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>3.0 1.2 2.0</size></box></geometry>
+          <material><ambient>0.2 0.45 0.7 1</ambient><diffuse>0.25 0.5 0.75 1</diffuse></material>
         </visual>
       </link>
     </model>
 
     <!-- ============================================================================== -->
-    <!-- RIGHT AREA: SCREEN 3 MATCHING (VERTICAL WALL FROM TOP, 4 HORIZONTAL LINES FROM EAST WALL) -->
+    <!-- RIGHT AREA: VERTICAL DIVIDER WALL & C-ZONE 4 LINES (Emerald Green: 하역/출고 구역) -->
     <!-- ============================================================================== -->
-    <!-- Vertical Divider Wall extending from top wall (y=18) down to y=-6.0 -->
     <model name="vertical_divider_wall">
       <static>true</static>
-      <pose>44.0 6.0 1.25 0 0 0</pose>
+      <pose>12.3 1.2 1.25 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>1.5 24.0 2.5</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>1.5 24.0 2.5</size></box></geometry>
-          <material><ambient>0.25 0.25 0.25 1</ambient><diffuse>0.45 0.45 0.45 1</diffuse></material>
+        <collision name="col"><geometry><box><size>0.6 8.4 2.5</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>0.6 8.4 2.5</size></box></geometry>
+          <material><ambient>0.25 0.25 0.3 1</ambient><diffuse>0.35 0.35 0.4 1</diffuse></material>
         </visual>
       </link>
     </model>
 
-    <!-- 4 Horizontal Lines attached to East Wall (x=78) extending west to x=54 (Length = 24m) -->
-    <!-- Line 1 (Topmost, near North Wall) -->
     <model name="horizontal_line_1">
       <static>true</static>
-      <pose>66.0 15.5 0.5 0 0 0</pose>
+      <pose>19.8 3.9 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>24.0 1.8 1.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>24.0 1.8 1.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>7.2 0.6 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>7.2 0.6 1.0</size></box></geometry>
+          <material><ambient>0.15 0.65 0.3 1</ambient><diffuse>0.2 0.7 0.35 1</diffuse></material>
         </visual>
       </link>
     </model>
 
-    <!-- Line 2 -->
     <model name="horizontal_line_2">
       <static>true</static>
-      <pose>66.0 5.5 0.5 0 0 0</pose>
+      <pose>19.8 0.9 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>24.0 1.8 1.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>24.0 1.8 1.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>7.2 0.6 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>7.2 0.6 1.0</size></box></geometry>
+          <material><ambient>0.15 0.65 0.3 1</ambient><diffuse>0.2 0.7 0.35 1</diffuse></material>
         </visual>
       </link>
     </model>
 
-    <!-- Line 3 -->
     <model name="horizontal_line_3">
       <static>true</static>
-      <pose>66.0 -4.5 0.5 0 0 0</pose>
+      <pose>19.8 -2.1 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>24.0 1.8 1.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>24.0 1.8 1.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>7.2 0.6 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>7.2 0.6 1.0</size></box></geometry>
+          <material><ambient>0.15 0.65 0.3 1</ambient><diffuse>0.2 0.7 0.35 1</diffuse></material>
         </visual>
       </link>
     </model>
 
-    <!-- Line 4 (Bottommost, attached to South Wall) -->
     <model name="horizontal_line_4">
       <static>true</static>
-      <pose>66.0 -15.5 0.5 0 0 0</pose>
+      <pose>19.8 -5.1 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="col"><geometry><box><size>24.0 1.8 1.0</size></box></geometry></collision>
-        <visual name="vis"><geometry><box><size>24.0 1.8 1.0</size></box></geometry>
-          <material><ambient>0.35 0.35 0.35 1</ambient><diffuse>0.55 0.55 0.55 1</diffuse></material>
+        <collision name="col"><geometry><box><size>7.2 0.6 1.0</size></box></geometry></collision>
+        <visual name="vis"><geometry><box><size>7.2 0.6 1.0</size></box></geometry>
+          <material><ambient>0.15 0.65 0.3 1</ambient><diffuse>0.2 0.7 0.35 1</diffuse></material>
         </visual>
       </link>
     </model>

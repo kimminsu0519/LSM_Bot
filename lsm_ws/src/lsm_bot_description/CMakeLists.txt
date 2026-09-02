@@ -4,7 +4,7 @@ project(lsm_bot_description)
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY launch worlds
+  DIRECTORY launch worlds urdf
   DESTINATION share/${PROJECT_NAME}
 )
 
