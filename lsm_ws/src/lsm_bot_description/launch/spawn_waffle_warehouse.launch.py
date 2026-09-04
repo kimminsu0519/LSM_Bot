@@ -33,9 +33,9 @@ def generate_launch_description():
         description='Full path to world model file to load'
     )
 
-    # Load URDF for Waffle
-    urdf_file_name = 'turtlebot3_waffle.urdf'
-    urdf_path = os.path.join(pkg_turtlebot3_description, 'urdf', urdf_file_name)
+    # Load URDF for Waffle (with Gazebo Sim DiffDrive and GPU LiDAR plugins)
+    urdf_file_name = 'turtlebot3_waffle_gz.urdf'
+    urdf_path = os.path.join(pkg_lsm_bot_description, 'urdf', urdf_file_name)
 
     with open(urdf_path, 'r') as infp:
         robot_desc = infp.read()
@@ -62,7 +62,7 @@ def generate_launch_description():
         launch_arguments={'gz_args': ['-r --gui-config ', gui_config_path, ' ', world]}.items()
     )
 
-    # Spawn Waffle on Charging Pad (-68.0, -16.0, 0.2)
+    # Spawn Waffle on Charging Pad (-21.0, -5.1, 0.2)
     spawn_robot_node = Node(
         package='ros_gz_sim',
         executable='create',
@@ -76,16 +76,15 @@ def generate_launch_description():
         output='screen'
     )
 
-    # ROS-GZ Bridge for Clock & Cmd_vel & Scan
+    bridge_config_path = os.path.join(pkg_lsm_bot_description, 'config', 'ros_gz_bridge.yaml')
+
+    # ROS-GZ Bridge for Clock & Cmd_vel & Scan & Odom & TF
     bridge_node = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
-        arguments=[
-            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
-            '/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
-            '/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
-            '/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'
-        ],
+        parameters=[{
+            'config_file': bridge_config_path,
+        }],
         output='screen'
     )
 
