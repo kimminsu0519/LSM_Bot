@@ -52,12 +52,14 @@ def generate_launch_description():
         }]
     )
 
+    gui_config_path = os.path.join(pkg_lsm_bot_description, 'config', 'lsm_gui.config')
+
     # Start Gazebo Sim
     start_gazebo_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': ['-r ', world]}.items()
+        launch_arguments={'gz_args': ['-r --gui-config ', gui_config_path, ' ', world]}.items()
     )
 
     # Spawn Waffle on Charging Pad (-68.0, -16.0, 0.2)
