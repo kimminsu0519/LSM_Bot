@@ -1,0 +1,21 @@
+# [Goal]
+string task_id
+uint8 task_type
+string target_station_id
+geometry_msgs/PoseStamped target_pose
+
+uint8 TASK_TYPE_PICKUP=1
+uint8 TASK_TYPE_DELIVERY=2
+uint8 TASK_TYPE_RETURN_HOME=3
+
+---
+# [Result]
+bool success
+string message
+float32 total_execution_time
+
+---
+# [Feedback]
+uint8 current_state
+float32 distance_remaining
+float32 estimated_time_remaining
