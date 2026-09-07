@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LSM Bot - 풀기능 waypoints.yaml 에디터 (추가/삭제/이름변경/이동)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="js-yaml.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --panel-bg: rgba(18, 26, 44, 0.92);
+            --panel-border: rgba(255, 255, 255, 0.12);
+            --accent-cyan: #00f2fe;
+            --accent-blue: #4facfe;
+            --accent-orange: #ff9100;
+            --accent-green: #00e676;
+            --accent-red: #ff1744;
+            --accent-purple: #d500f9;
+            --text-main: #f0f4f8;
+            --text-muted: #8a99ad;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            height: 64px;
+            background: rgba(11, 15, 25, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #000;
+            font-size: 18px;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+        }
+
+        .brand-title {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ffffff, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-action {
+            border: none;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, var(--accent-blue), #7c4dff);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--accent-green), #00b0ff);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .main-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            overflow: hidden;
+        }
+
+        #viewport {
+            flex: 1;
+            height: 100%;
+            cursor: grab;
+            position: relative;
+            background: radial-gradient(circle at center, #131c31 0%, #0b0f19 100%);
+            overflow: hidden;
+        }
+
+        #viewport.dragging-wp { cursor: move !important; }
+        #viewport.adding-mode { cursor: crosshair !important; }
+
+        #map-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 360px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            border-left: 1px solid var(--panel-border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 16px;
+            z-index: 90;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* Inspector Card */
+        .inspector-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+        }
+
+        .field-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .input-num {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .input-num:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-delete {
+            background: rgba(255, 23, 68, 0.15);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: rgba(255, 23, 68, 0.3);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--panel-border);
+            padding: 9px 12px;
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .filter-btn.active {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 242, 254, 0.08);
+        }
+
+        .badge-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .search-box {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            outline: none;
+        }
+
+        /* Tooltip Card */
+        #tooltip {
+            position: absolute;
+            pointer-events: none;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: none;
+            z-index: 200;
+            min-width: 250px;
+        }
+
+        /* Mode Banner */
+        #mode-banner {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 145, 0, 0.95);
+            color: #000;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 20px;
+            display: none;
+            z-index: 150;
+            box-shadow: 0 0 20px rgba(255, 145, 0, 0.5);
+        }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0, 230, 118, 0.95);
+            color: #000;
+            font-weight: 700;
+            padding: 14px 28px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0, 230, 118, 0.5);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+        }
+
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Floating Controls */
+        .zoom-controls {
+            position: absolute;
+            bottom: 24px;
+            right: 384px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .ctrl-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ctrl-btn:hover { background: rgba(255, 255, 255, 0.15); }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <div class="brand-logo">LSM</div>
+            <div>
+                <div class="brand-title">Full WYSIWYG Waypoint Editor</div>
+                <div style="font-size: 11px; color: var(--text-muted);">이름 변경, 삭제, 신규 추가, 드래그 이동, 수치 편집</div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-action btn-add" id="btn-mode-add">
+                <span>➕ 새 노드 추가 모드</span>
+            </button>
+            <button class="btn-action btn-save" id="btn-save-all">
+                <span>💾 waypoints.yaml에 저장 반영</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div id="viewport">
+            <div id="mode-banner">📍 지도의 원하는 위치를 클릭하여 새 웨이포인트를 생성하세요! (취소: ESC)</div>
+            <canvas id="map-canvas"></canvas>
+            
+            <div class="zoom-controls">
+                <button class="ctrl-btn" id="btn-zoom-in">+</button>
+                <button class="ctrl-btn" id="btn-zoom-out">-</button>
+                <button class="ctrl-btn" id="btn-reset">⟲</button>
+            </div>
+            
+            <div id="tooltip">
+                <div style="font-size: 16px; font-weight: 700; color: var(--accent-cyan); font-family: 'Fira Code', monospace;" id="tt-id">wp-ws-a-1</div>
+                <div style="font-size: 12px; color: var(--text-muted);" id="tt-asset">Asset ID: WS-A-1</div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            
+            <!-- Selected Inspector -->
+            <div class="section-title">🎯 선택된 웨이포인트 편집</div>
+            <div class="inspector-card" id="inspector-card" style="display: none;">
+                <div class="field-row">
+                    <label class="field-label">Waypoint ID (이름):</label>
+                    <input type="text" class="input-num" id="inp-id">
+                </div>
+
+                <div class="field-row">
+                    <label class="field-label">Asset ID:</label>
+                    <input type="text" class="input-num" id="inp-asset">
+                </div>
+                
+                <div class="field-row">
+                    <label class="field-label">ROS 2 Position X (m):</label>
+                    <input type="number" step="0.05" class="input-num" id="inp-x">
+                </div>
+                
+                <div class="field-row">
+                    <label class="field-label">ROS 2 Position Y (m):</label>
+                    <input type="number" step="0.05" class="input-num" id="inp-y">
+                </div>
+
+                <div class="field-row">
+                    <label class="field-label">Heading Yaw (rad):</label>
+                    <input type="number" step="0.05" class="input-num" id="inp-yaw">
+                </div>
+
+                <div class="field-row">
+                    <label class="field-label">Description (설명):</label>
+                    <input type="text" class="input-num" id="inp-desc">
+                </div>
+
+                <button class="btn-delete" id="btn-delete-wp">🗑️ 이 노드 삭제하기</button>
+            </div>
+
+            <div id="no-select-hint" style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px; border: 1px dashed var(--panel-border); border-radius: 10px;">
+                지도 위의 점을 클릭하거나 드래그하면<br>이름, 좌표, 방향을 자유롭게 변경/삭제할 수 있습니다.
+            </div>
+
+            <div>
+                <div class="section-title">🔍 노드 검색</div>
+                <input type="text" class="search-box" id="search-input" placeholder="예: wp-charge-1, wp-ws-a-1...">
+            </div>
+
+            <div>
+                <div class="section-title">🎨 레이어 필터</div>
+                <div class="filter-group">
+                    <button class="filter-btn active" id="flt-dest">
+                        <span><span class="badge-dot" style="background: #00e676;"></span>정지 목적지 노드</span>
+                        <span class="stat-val" id="cnt-dest">0</span>
+                    </button>
+                    <button class="filter-btn active" id="flt-pass-a">
+                        <span><span class="badge-dot" style="background: #ffd600;"></span>Zone A 통로 노드</span>
+                        <span class="stat-val" id="cnt-pass-a">0</span>
+                    </button>
+                    <button class="filter-btn active" id="flt-pass-b">
+                        <span><span class="badge-dot" style="background: #00e5ff;"></span>Zone B 통로 노드</span>
+                        <span class="stat-val" id="cnt-pass-b">0</span>
+                    </button>
+                    <button class="filter-btn active" id="flt-pass-c">
+                        <span><span class="badge-dot" style="background: #f50057;"></span>Zone C 통로 노드</span>
+                        <span class="stat-val" id="cnt-pass-c">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Map Image Only Offset Alignment Calibration Panel -->
+            <div style="background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="font-size: 13px; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px;">
+                    <span>🖼️ 배경 지도 이미지 렌더링 위치 보정 (px)</span>
+                </div>
+                
+                <div style="display: flex; gap: 8px;">
+                    <div class="field-row" style="flex: 1;">
+                        <label class="field-label">이미지 Offset X (px):</label>
+                        <input type="number" step="1" class="input-num" id="cfg-img-offset-x" value="-5">
+                    </div>
+                    <div class="field-row" style="flex: 1;">
+                        <label class="field-label">이미지 Offset Y (px):</label>
+                        <input type="number" step="1" class="input-num" id="cfg-img-offset-y" value="5">
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                    <button class="btn-action" style="flex: 1; padding: 6px; font-size: 11px; background: rgba(255,255,255,0.08); color: #fff; justify-content: center;" id="btn-nudge-up">⬆️ Y-5</button>
+                    <button class="btn-action" style="flex: 1; padding: 6px; font-size: 11px; background: rgba(255,255,255,0.08); color: #fff; justify-content: center;" id="btn-nudge-down">⬇️ Y+5</button>
+                    <button class="btn-action" style="flex: 1; padding: 6px; font-size: 11px; background: rgba(255,255,255,0.08); color: #fff; justify-content: center;" id="btn-nudge-left">⬅️ X-5</button>
+                    <button class="btn-action" style="flex: 1; padding: 6px; font-size: 11px; background: rgba(255,255,255,0.08); color: #fff; justify-content: center;" id="btn-nudge-right">➡️ X+5</button>
+                </div>
+
+                <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+                    * <b>waypoints.yaml 야물 데이터는 변경되지 않으며</b>, 시각화 화면의 배경 지도만 정밀 이동합니다.
+                </div>
+            </div>
+
+            <div style="margin-top: auto; font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                💡 <b>에디터 기능 목록</b><br>
+                • <b>이름 변경</b>: Sidebar에서 ID / Asset ID 직관 수정<br>
+                • <b>노드 추가</b>: [➕ 새 노드 추가 모드] 후 지도를 클릭<br>
+                • <b>노드 삭제</b>: 선택 후 [🗑️ 이 노드 삭제하기] 클릭<br>
+                • <b>저장 반영</b>: [💾 waypoints.yaml에 저장 반영] 클릭
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast">waypoints.yaml 파일에 성공적으로 저장 반영되었습니다!</div>
+
+    <script>
+        const canvas = document.getElementById('map-canvas');
+        const ctx = canvas.getContext('2d');
+        const viewport = document.getElementById('viewport');
+        const tooltip = document.getElementById('tooltip');
+        const toast = document.getElementById('toast');
+
+        const mapImg = new Image();
+        mapImg.src = "map.png";
+
+        let waypointsData = [];
+        let selectedWp = null;
+        let isDraggingWp = false;
+        let isPanning = false;
+        let isAddingMode = false;
+
+        let scale = 1;
+        let panX = 0;
+        let panY = 0;
+        let startX, startY;
+        let hoveredWp = null;
+
+        // Filters
+        let showDest = true;
+        let showPassA = true;
+        let showPassB = true;
+        let showPassC = true;
+        let searchQuery = "";
+
+        async function fetchLiveYaml() {
+            try {
+                const response = await fetch('waypoints.yaml?t=' + Date.now());
+                const yamlText = await response.text();
+                const parsed = jsyaml.load(yamlText);
+                
+                const wps = parsed.waypoints || {};
+                waypointsData = [];
+
+                for (let k in wps) {
+                    const item = wps[k];
+                    const pose = item.pose || {x: 0, y: 0, z: 0, yaw: 0};
+                    waypointsData.push({
+                        id: k,
+                        asset_id: item.asset_id || k,
+                        description: item.description || '',
+                        x: parseFloat(pose.x),
+                        y: parseFloat(pose.y),
+                        z: parseFloat(pose.z || 0),
+                        yaw: parseFloat(pose.yaw || 0)
+                    });
+                }
+
+                updateStats();
+                draw();
+            } catch (err) {
+                console.error("YAML fetch error:", err);
+            }
+        }
+
+        function updateStats() {
+            const destCount = waypointsData.filter(w => w.id === 'wp-charge-1' || w.id.startsWith('wp-ws-')).length;
+            document.getElementById('cnt-dest').textContent = destCount;
+            document.getElementById('cnt-pass-a').textContent = waypointsData.filter(w => w.id.startsWith('wp-a-')).length;
+            document.getElementById('cnt-pass-b').textContent = waypointsData.filter(w => w.id.startsWith('wp-b-')).length;
+            document.getElementById('cnt-pass-c').textContent = waypointsData.filter(w => w.id.startsWith('wp-c-')).length;
+        }
+
+        mapImg.onload = () => {
+            canvas.width = mapImg.width;
+            canvas.height = mapImg.height;
+            resetView();
+            fetchLiveYaml();
+        };
+
+        function resetView() {
+            const vWidth = viewport.clientWidth;
+            const vHeight = viewport.clientHeight;
+            scale = Math.min(vWidth / mapImg.width, vHeight / mapImg.height) * 0.95;
+            panX = (vWidth - mapImg.width * scale) / 2;
+            panY = (vHeight - mapImg.height * scale) / 2;
+            draw();
+        }
+
+        let imgOffsetX = -5; // Image render offset X (px) default
+        let imgOffsetY = 5;  // Image render offset Y (px) default
+
+        function gzToPixel(gx, gy) {
+            const ux = gx + 23.32;
+            const uy = gy + 5.63;
+            const px = (ux / 0.015) + 25.0;
+            const py = mapImg.height - (uy / 0.015) - 15.0;
+            return { px, py };
+        }
+
+        function pixelToGz(px, py) {
+            const ux = (px - 25.0) * 0.015;
+            const uy = (mapImg.height - py - 15.0) * 0.015;
+            const gx = Math.round((ux - 23.32) * 100) / 100;
+            const gy = Math.round((uy - 5.63) * 100) / 100;
+            return { gx, gy };
+        }
+
+        function draw() {
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(mapImg, imgOffsetX, imgOffsetY);
+
+            waypointsData.forEach(wp => {
+                const isDest = wp.id === 'wp-charge-1' || wp.id.startsWith('wp-ws-');
+                const isPassA = wp.id.startsWith('wp-a-');
+                const isPassB = wp.id.startsWith('wp-b-');
+                const isPassC = wp.id.startsWith('wp-c-');
+
+                if (isDest && !showDest) return;
+                if (isPassA && !showPassA) return;
+                if (isPassB && !showPassB) return;
+                if (isPassC && !showPassC) return;
+
+                if (searchQuery && !wp.id.toLowerCase().includes(searchQuery) && !wp.asset_id.toLowerCase().includes(searchQuery)) {
+                    return;
+                }
+
+                const { px, py } = gzToPixel(wp.x, wp.y);
+                const isSelected = (selectedWp && selectedWp.id === wp.id);
+                const isHovered = (hoveredWp && hoveredWp.id === wp.id);
+
+                ctx.beginPath();
+                let radius = isDest ? 10 : 5;
+                let color = "#ffffff";
+
+                if (wp.id === "wp-charge-1") color = "#00e676";
+                else if (wp.id.startsWith("wp-ws-a-")) color = "#ff9100";
+                else if (wp.id.startsWith("wp-ws-b-")) color = "#00b0ff";
+                else if (wp.id.startsWith("wp-ws-c-")) color = "#d500f9";
+                else if (isPassA) color = "#ffd600";
+                else if (isPassB) color = "#00e5ff";
+                else if (isPassC) color = "#f50057";
+
+                if (isSelected) radius *= 2.0;
+                else if (isHovered) radius *= 1.5;
+
+                if (isSelected) {
+                    ctx.beginPath();
+                    ctx.arc(px, py, radius + 8, 0, Math.PI * 2);
+                    ctx.strokeStyle = "#00f2fe";
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+
+                ctx.beginPath();
+                ctx.arc(px, py, radius, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.lineWidth = isSelected ? 3 : 1.5;
+                ctx.strokeStyle = "#000000";
+                ctx.stroke();
+
+                if (isDest || isSelected) {
+                    ctx.save();
+                    ctx.translate(px, py);
+                    ctx.rotate(-wp.yaw);
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(radius * 2.2, 0);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            });
+
+            ctx.restore();
+            canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        }
+
+        function selectWaypoint(wp) {
+            selectedWp = wp;
+            if (!wp) {
+                document.getElementById('inspector-card').style.display = 'none';
+                document.getElementById('no-select-hint').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('inspector-card').style.display = 'flex';
+            document.getElementById('no-select-hint').style.display = 'none';
+
+            document.getElementById('inp-id').value = wp.id;
+            document.getElementById('inp-asset').value = wp.asset_id;
+            document.getElementById('inp-x').value = wp.x.toFixed(2);
+            document.getElementById('inp-y').value = wp.y.toFixed(2);
+            document.getElementById('inp-yaw').value = wp.yaw.toFixed(2);
+            document.getElementById('inp-desc').value = wp.description;
+
+            draw();
+        }
+
+        // Renaming / Input Field Listeners
+        document.getElementById('inp-id').oninput = (e) => {
+            if (selectedWp) {
+                selectedWp.id = e.target.value.trim();
+                draw();
+            }
+        };
+
+        document.getElementById('inp-asset').oninput = (e) => {
+            if (selectedWp) {
+                selectedWp.asset_id = e.target.value.trim();
+            }
+        };
+
+        document.getElementById('inp-x').oninput = (e) => {
+            if (selectedWp) {
+                selectedWp.x = parseFloat(e.target.value) || 0;
+                draw();
+            }
+        };
+
+        document.getElementById('inp-y').oninput = (e) => {
+            if (selectedWp) {
+                selectedWp.y = parseFloat(e.target.value) || 0;
+                draw();
+            }
+        };
+
+        document.getElementById('inp-yaw').oninput = (e) => {
+            if (selectedWp) {
+                selectedWp.yaw = parseFloat(e.target.value) || 0;
+                draw();
+            }
+        };
+
+        document.getElementById('inp-desc').oninput = (e) => {
+            if (selectedWp) {
+                selectedWp.description = e.target.value;
+            }
+        };
+
+        // Delete Waypoint
+        document.getElementById('btn-delete-wp').onclick = () => {
+            if (selectedWp) {
+                if (confirm(`웨이포인트 '${selectedWp.id}' 노드를 지우시겠습니까?`)) {
+                    waypointsData = waypointsData.filter(w => w.id !== selectedWp.id);
+                    selectWaypoint(null);
+                    updateStats();
+                    draw();
+                    showToast("웨이포인트 노드가 삭제되었습니다.");
+                }
+            }
+        };
+
+        // Mode Add Waypoint Toggle
+        document.getElementById('btn-mode-add').onclick = () => {
+            isAddingMode = !isAddingMode;
+            const btn = document.getElementById('btn-mode-add');
+            const banner = document.getElementById('mode-banner');
+
+            if (isAddingMode) {
+                btn.style.background = 'linear-gradient(135deg, var(--accent-orange), #ff1744)';
+                btn.innerHTML = '<span>❌ 추가 모드 취소 (ESC)</span>';
+                banner.style.display = 'block';
+                viewport.classList.add('adding-mode');
+            } else {
+                btn.style.background = 'linear-gradient(135deg, var(--accent-blue), #7c4dff)';
+                btn.innerHTML = '<span>➕ 새 노드 추가 모드</span>';
+                banner.style.display = 'none';
+                viewport.classList.remove('adding-mode');
+            }
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isAddingMode) {
+                document.getElementById('btn-mode-add').click();
+            }
+        });
+
+        // Canvas Click & Mouse Events
+        viewport.addEventListener('mousedown', (e) => {
+            const rect = viewport.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const imgX = (mouseX - panX) / scale;
+            const imgY = (mouseY - panY) / scale;
+
+            // Handle Add Mode
+            if (isAddingMode) {
+                const { gx, gy } = pixelToGz(imgX, imgY);
+                const nextSeq = waypointsData.length + 1;
+                let zone = "a";
+                if (gx > 12.5) zone = "c";
+                else if (gx >= -13.0) zone = "b";
+
+                const newId = prompt("새 웨이포인트 노드 ID를 입력하세요:", `wp-${zone}-new-${nextSeq}`);
+                if (newId) {
+                    const newWp = {
+                        id: newId.trim(),
+                        asset_id: newId.trim().toUpperCase().replace("WP-", "P-"),
+                        description: "New Interactive Waypoint",
+                        x: gx,
+                        y: gy,
+                        z: 0.0,
+                        yaw: 0.0
+                    };
+                    waypointsData.push(newWp);
+                    selectWaypoint(newWp);
+                    updateStats();
+                    draw();
+                    showToast(`새 노드 '${newWp.id}' 생성 완료!`);
+                }
+                document.getElementById('btn-mode-add').click(); // exit add mode
+                return;
+            }
+
+            let clicked = null;
+            for (let wp of waypointsData) {
+                const { px, py } = gzToPixel(wp.x, wp.y);
+                const dist = Math.hypot(imgX - px, imgY - py);
+                const isDest = wp.id === 'wp-charge-1' || wp.id.startsWith('wp-ws-');
+                const threshold = isDest ? 16 : 10;
+
+                if (dist < threshold) {
+                    clicked = wp;
+                    break;
+                }
+            }
+
+            if (clicked) {
+                selectWaypoint(clicked);
+                isDraggingWp = true;
+                viewport.classList.add('dragging-wp');
+            } else {
+                isPanning = true;
+                startX = e.clientX - panX;
+                startY = e.clientY - panY;
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            const rect = viewport.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const imgX = (mouseX - panX) / scale;
+            const imgY = (mouseY - panY) / scale;
+
+            if (isDraggingWp && selectedWp) {
+                const { gx, gy } = pixelToGz(imgX, imgY);
+                selectedWp.x = gx;
+                selectedWp.y = gy;
+
+                document.getElementById('inp-x').value = gx.toFixed(2);
+                document.getElementById('inp-y').value = gy.toFixed(2);
+                draw();
+                return;
+            }
+
+            if (isPanning) {
+                panX = e.clientX - startX;
+                panY = e.clientY - startY;
+                draw();
+                return;
+            }
+
+            let found = null;
+            for (let wp of waypointsData) {
+                const { px, py } = gzToPixel(wp.x, wp.y);
+                const dist = Math.hypot(imgX - px, imgY - py);
+                const isDest = wp.id === 'wp-charge-1' || wp.id.startsWith('wp-ws-');
+                const threshold = isDest ? 14 : 9;
+
+                if (dist < threshold) {
+                    found = wp;
+                    break;
+                }
+            }
+
+            if (found !== hoveredWp) {
+                hoveredWp = found;
+                draw();
+
+                if (hoveredWp) {
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = (e.clientX + 15) + 'px';
+                    tooltip.style.top = (e.clientY + 15) + 'px';
+
+                    document.getElementById('tt-id').textContent = hoveredWp.id;
+                    document.getElementById('tt-asset').textContent = `Asset ID: ${hoveredWp.asset_id}`;
+                } else {
+                    tooltip.style.display = 'none';
+                }
+            } else if (hoveredWp) {
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY + 15) + 'px';
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingWp = false;
+            isPanning = false;
+            viewport.classList.remove('dragging-wp');
+        });
+
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
+            const mouseX = e.clientX - viewport.offsetLeft;
+            const mouseY = e.clientY - viewport.offsetTop;
+
+            panX = mouseX - (mouseX - panX) * zoomFactor;
+            panY = mouseY - (mouseY - panY) * zoomFactor;
+            scale *= zoomFactor;
+            draw();
+        });
+
+        document.getElementById('btn-zoom-in').onclick = () => { scale *= 1.25; draw(); };
+        document.getElementById('btn-zoom-out').onclick = () => { scale *= 0.8; draw(); };
+        document.getElementById('btn-reset').onclick = resetView;
+
+        // Save Back to YAML
+        document.getElementById('btn-save-all').onclick = async () => {
+            let yamlText = "# ==============================================================================\n";
+            yamlText += "# 📍 LSM BOT WAYPOINTS DATABASE (waypoints.yaml)\n";
+            yamlText += "# Frame: map\n";
+            yamlText += "# Full Interactive WYSIWYG Editor Saved\n";
+            yamlText += "# ==============================================================================\n\n";
+            yamlText += "waypoints:\n";
+
+            const groups = {
+                charge: waypointsData.filter(w => w.id === 'wp-charge-1'),
+                destA: waypointsData.filter(w => w.id.startsWith('wp-ws-a-')),
+                destB: waypointsData.filter(w => w.id.startsWith('wp-ws-b-')),
+                destC: waypointsData.filter(w => w.id.startsWith('wp-ws-c-')),
+                passA: waypointsData.filter(w => w.id.startsWith('wp-a-')),
+                passB: waypointsData.filter(w => w.id.startsWith('wp-b-')),
+                passC: waypointsData.filter(w => w.id.startsWith('wp-c-')),
+                other: waypointsData.filter(w => 
+                    w.id !== 'wp-charge-1' && 
+                    !w.id.startsWith('wp-ws-a-') && !w.id.startsWith('wp-ws-b-') && !w.id.startsWith('wp-ws-c-') &&
+                    !w.id.startsWith('wp-a-') && !w.id.startsWith('wp-b-') && !w.id.startsWith('wp-c-')
+                )
+            };
+
+            const writeGroup = (title, items) => {
+                if (!items || items.length === 0) return;
+                yamlText += `\n  # ----------------------------------------------------------------------------\n`;
+                yamlText += `  # ${title}\n`;
+                yamlText += `  # ----------------------------------------------------------------------------\n`;
+                items.forEach(w => {
+                    const ux = Math.round((w.x + 23.70) * 100) / 100;
+                    const uy = Math.round((w.y + 5.85) * 100) / 100;
+                    yamlText += `  ${w.id}:\n`;
+                    yamlText += `    asset_id: "${w.asset_id}"\n`;
+                    yamlText += `    description: "${w.description}"\n`;
+                    yamlText += `    user_pose: {x: ${ux.toFixed(2)}, y: ${uy.toFixed(2)}, yaw: ${w.yaw.toFixed(4)}}\n`;
+                    yamlText += `    pose: {x: ${w.x.toFixed(2)}, y: ${w.y.toFixed(2)}, z: ${(w.z || 0.0).toFixed(2)}, yaw: ${w.yaw.toFixed(4)}}\n\n`;
+                });
+            };
+
+            writeGroup("🏠 1. CHARGING STATION & HOME BASE", groups.charge);
+            writeGroup("🏭 2. ZONE A - INPUT / LOADING GATES (WS-A-1 ~ WS-A-6)", groups.destA);
+            writeGroup("📦 3. ZONE B - CENTRAL STORAGE CELLS (WS-B-1-1 ~ WS-B-4-4)", groups.destB);
+            writeGroup("🚚 4. ZONE C - OUTPUT / UNLOADING LINES (WS-C-1 ~ WS-C-4)", groups.destC);
+            writeGroup("🧭 5. ZONE A - CORRIDOR PASSAGE NODES", groups.passA);
+            writeGroup("🧭 6. ZONE B - CORRIDOR PASSAGE NODES", groups.passB);
+            writeGroup("🧭 7. ZONE C - CORRIDOR PASSAGE NODES", groups.passC);
+            writeGroup("🌐 8. OTHER CUSTOM WAYPOINTS", groups.other);
+
+            try {
+                const res = await fetch('/api/save-yaml', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ yaml_text: yamlText })
+                });
+                const result = await res.json();
+                
+                if (result.status === 'success') {
+                    showToast("waypoints.yaml 파일에 성공적으로 저장 반영되었습니다! 💾");
+                } else {
+                    alert("저장 실패: " + result.message);
+                }
+            } catch (err) {
+                console.error("Save error:", err);
+                alert("저장 중 오류가 발생했습니다.");
+            }
+        };
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Filters
+        const toggleFilter = (btnId, key) => {
+            const btn = document.getElementById(btnId);
+            btn.classList.toggle('active');
+            if (key === 'dest') showDest = !showDest;
+            if (key === 'passA') showPassA = !showPassA;
+            if (key === 'passB') showPassB = !showPassB;
+            if (key === 'passC') showPassC = !showPassC;
+            draw();
+        };
+
+        document.getElementById('flt-dest').onclick = () => toggleFilter('flt-dest', 'dest');
+        document.getElementById('flt-pass-a').onclick = () => toggleFilter('flt-pass-a', 'passA');
+        document.getElementById('flt-pass-b').onclick = () => toggleFilter('flt-pass-b', 'passB');
+        document.getElementById('flt-pass-c').onclick = () => toggleFilter('flt-pass-c', 'passC');
+
+        document.getElementById('search-input').oninput = (e) => {
+            searchQuery = e.target.value.trim().toLowerCase();
+            draw();
+        };
+        // Background Image Offset Calibration Handlers
+        const updateImgOffset = () => {
+            imgOffsetX = parseFloat(document.getElementById('cfg-img-offset-x').value) || 0;
+            imgOffsetY = parseFloat(document.getElementById('cfg-img-offset-y').value) || 0;
+            draw();
+        };
+
+        document.getElementById('cfg-img-offset-x').oninput = updateImgOffset;
+        document.getElementById('cfg-img-offset-y').oninput = updateImgOffset;
+
+        // Image Nudge Buttons (Moves background map image only, without modifying waypoints.yaml)
+        document.getElementById('btn-nudge-up').onclick = () => {
+            const el = document.getElementById('cfg-img-offset-y');
+            el.value = (parseFloat(el.value) - 5).toFixed(0);
+            updateImgOffset();
+        };
+
+        document.getElementById('btn-nudge-down').onclick = () => {
+            const el = document.getElementById('cfg-img-offset-y');
+            el.value = (parseFloat(el.value) + 5).toFixed(0);
+            updateImgOffset();
+        };
+
+        document.getElementById('btn-nudge-left').onclick = () => {
+            const el = document.getElementById('cfg-img-offset-x');
+            el.value = (parseFloat(el.value) - 5).toFixed(0);
+            updateImgOffset();
+        };
+
+        document.getElementById('btn-nudge-right').onclick = () => {
+            const el = document.getElementById('cfg-img-offset-x');
+            el.value = (parseFloat(el.value) + 5).toFixed(0);
+            updateImgOffset();
+        };
+    </script>
+</body>
+</html>

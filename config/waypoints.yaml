@@ -1,0 +1,1280 @@
+# ==============================================================================
+# 📍 LSM BOT WAYPOINTS DATABASE (waypoints.yaml)
+# Frame: map
+# Dual Coordinate Specification:
+#   - user_pose: Bottom-Left Map Image Start Origin (140pt, 900pt) -> (0,0)m
+#   - pose: Warehouse Center Origin (0,0)m [ROS 2 & Nav2 Native Execution]
+# Heading Yaw Angle: Automatically calculated from Draw.io Arrow Start/End Points
+# ==============================================================================
+
+waypoints:
+
+  # ----------------------------------------------------------------------------
+  # 🏠 1. CHARGING STATION & HOME BASE
+  # Main charging pad location
+  # ----------------------------------------------------------------------------
+  wp-charge-1:
+    asset_id: "CHARGE-1"
+    description: "Main AMR Charging Station & Home Base"
+    user_pose: {x: 2.32, y: 0.38, yaw: 3.1416}
+    pose: {x: -21.0, y: -5.25, z: 0.0, yaw: 3.1416}
+
+
+  # ----------------------------------------------------------------------------
+  # 🏭 2. ZONE A - INPUT / LOADING GATES (WS-A-1 ~ WS-A-6)
+  # Raw material & component pickup stop locations
+  # ----------------------------------------------------------------------------
+  wp-ws-a-1:
+    asset_id: "WS-A-1"
+    description: "Zone A Loading Gate 1"
+    user_pose: {x: 4.42, y: 8.78, yaw: 0.0}
+    pose: {x: -18.9, y: 3.15, z: 0.0, yaw: 0.0}
+
+  wp-ws-a-2:
+    asset_id: "WS-A-2"
+    description: "Zone A Loading Gate 2"
+    user_pose: {x: 6.83, y: 8.78, yaw: 0.0}
+    pose: {x: -16.49, y: 3.15, z: 0.0, yaw: 0.0}
+
+  wp-ws-a-3:
+    asset_id: "WS-A-3"
+    description: "Zone A Loading Gate 3"
+    user_pose: {x: 9.22, y: 8.78, yaw: 0.0}
+    pose: {x: -14.1, y: 3.15, z: 0.0, yaw: 0.0}
+
+  wp-ws-a-4:
+    asset_id: "WS-A-4"
+    description: "Zone A Loading Gate 4"
+    user_pose: {x: 4.42, y: 2.17, yaw: 0.0}
+    pose: {x: -18.9, y: -3.46, z: 0.0, yaw: 0.0}
+
+  wp-ws-a-5:
+    asset_id: "WS-A-5"
+    description: "Zone A Loading Gate 5"
+    user_pose: {x: 6.83, y: 2.17, yaw: 0.0}
+    pose: {x: -16.49, y: -3.46, z: 0.0, yaw: 0.0}
+
+  wp-ws-a-6:
+    asset_id: "WS-A-6"
+    description: "Zone A Loading Gate 6"
+    user_pose: {x: 9.22, y: 2.17, yaw: 0.0}
+    pose: {x: -14.1, y: -3.46, z: 0.0, yaw: 0.0}
+
+
+  # ----------------------------------------------------------------------------
+  # 📦 3. ZONE B - CENTRAL STORAGE CELLS (WS-B-1-1 ~ WS-B-4-4)
+  # 16 Storage & processing cell stop locations
+  # ----------------------------------------------------------------------------
+  wp-ws-b-1-1:
+    asset_id: "WS-B-1-1"
+    description: "Zone B Storage Cell (Row 1, Col 1)"
+    user_pose: {x: 16.43, y: 9.97, yaw: -1.5708}
+    pose: {x: -6.89, y: 4.34, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-1-2:
+    asset_id: "WS-B-1-2"
+    description: "Zone B Storage Cell (Row 1, Col 2)"
+    user_pose: {x: 20.62, y: 9.97, yaw: -1.5708}
+    pose: {x: -2.7, y: 4.34, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-1-3:
+    asset_id: "WS-B-1-3"
+    description: "Zone B Storage Cell (Row 1, Col 3)"
+    user_pose: {x: 24.82, y: 9.97, yaw: -1.5708}
+    pose: {x: 1.5, y: 4.34, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-1-4:
+    asset_id: "WS-B-1-4"
+    description: "Zone B Storage Cell (Row 1, Col 4)"
+    user_pose: {x: 29.02, y: 9.97, yaw: -1.5708}
+    pose: {x: 5.7, y: 4.34, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-2-1:
+    asset_id: "WS-B-2-1"
+    description: "Zone B Storage Cell (Row 2, Col 1)"
+    user_pose: {x: 16.43, y: 7.57, yaw: -1.5708}
+    pose: {x: -6.89, y: 1.94, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-2-2:
+    asset_id: "WS-B-2-2"
+    description: "Zone B Storage Cell (Row 2, Col 2)"
+    user_pose: {x: 20.62, y: 7.57, yaw: -1.5708}
+    pose: {x: -2.7, y: 1.94, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-2-3:
+    asset_id: "WS-B-2-3"
+    description: "Zone B Storage Cell (Row 2, Col 3)"
+    user_pose: {x: 24.82, y: 7.57, yaw: -1.5708}
+    pose: {x: 1.5, y: 1.94, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-2-4:
+    asset_id: "WS-B-2-4"
+    description: "Zone B Storage Cell (Row 2, Col 4)"
+    user_pose: {x: 29.02, y: 7.57, yaw: -1.5708}
+    pose: {x: 5.7, y: 1.94, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-3-1:
+    asset_id: "WS-B-3-1"
+    description: "Zone B Storage Cell (Row 3, Col 1)"
+    user_pose: {x: 16.43, y: 5.17, yaw: -1.5708}
+    pose: {x: -6.89, y: -0.46, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-3-2:
+    asset_id: "WS-B-3-2"
+    description: "Zone B Storage Cell (Row 3, Col 2)"
+    user_pose: {x: 20.62, y: 5.17, yaw: -1.5708}
+    pose: {x: -2.7, y: -0.46, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-3-3:
+    asset_id: "WS-B-3-3"
+    description: "Zone B Storage Cell (Row 3, Col 3)"
+    user_pose: {x: 24.82, y: 5.17, yaw: -1.5708}
+    pose: {x: 1.5, y: -0.46, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-3-4:
+    asset_id: "WS-B-3-4"
+    description: "Zone B Storage Cell (Row 3, Col 4)"
+    user_pose: {x: 29.02, y: 5.17, yaw: -1.5708}
+    pose: {x: 5.7, y: -0.46, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-4-1:
+    asset_id: "WS-B-4-1"
+    description: "Zone B Storage Cell (Row 4, Col 1)"
+    user_pose: {x: 16.43, y: 2.77, yaw: -1.5708}
+    pose: {x: -6.89, y: -2.86, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-4-2:
+    asset_id: "WS-B-4-2"
+    description: "Zone B Storage Cell (Row 4, Col 2)"
+    user_pose: {x: 20.62, y: 2.77, yaw: -1.5708}
+    pose: {x: -2.7, y: -2.86, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-4-3:
+    asset_id: "WS-B-4-3"
+    description: "Zone B Storage Cell (Row 4, Col 3)"
+    user_pose: {x: 24.82, y: 2.77, yaw: -1.5708}
+    pose: {x: 1.5, y: -2.86, z: 0.0, yaw: -1.5708}
+
+  wp-ws-b-4-4:
+    asset_id: "WS-B-4-4"
+    description: "Zone B Storage Cell (Row 4, Col 4)"
+    user_pose: {x: 29.02, y: 2.77, yaw: -1.5708}
+    pose: {x: 5.7, y: -2.86, z: 0.0, yaw: -1.5708}
+
+
+  # ----------------------------------------------------------------------------
+  # 🚚 4. ZONE C - OUTPUT / UNLOADING LINES (WS-C-1 ~ WS-C-4)
+  # Final product unloading stop locations
+  # ----------------------------------------------------------------------------
+  wp-ws-c-1:
+    asset_id: "WS-C-1"
+    description: "Zone C Unloading Line 1"
+    user_pose: {x: 41.02, y: 9.97, yaw: -1.5708}
+    pose: {x: 17.7, y: 4.34, z: 0.0, yaw: -1.5708}
+
+  wp-ws-c-2:
+    asset_id: "WS-C-2"
+    description: "Zone C Unloading Line 2"
+    user_pose: {x: 41.02, y: 6.97, yaw: -1.5708}
+    pose: {x: 17.7, y: 1.34, z: 0.0, yaw: -1.5708}
+
+  wp-ws-c-3:
+    asset_id: "WS-C-3"
+    description: "Zone C Unloading Line 3"
+    user_pose: {x: 41.02, y: 3.97, yaw: -1.5708}
+    pose: {x: 17.7, y: -1.66, z: 0.0, yaw: -1.5708}
+
+  wp-ws-c-4:
+    asset_id: "WS-C-4"
+    description: "Zone C Unloading Line 4"
+    user_pose: {x: 41.02, y: 0.97, yaw: -1.5708}
+    pose: {x: 17.7, y: -4.66, z: 0.0, yaw: -1.5708}
+
+
+  # ----------------------------------------------------------------------------
+  # 🧭 5. ZONE A - CORRIDOR PASSAGE NODES
+  # Zone A passage nodes
+  # ----------------------------------------------------------------------------
+  wp-a-1-1:
+    asset_id: "P-A-1-1"
+    description: "Zone A Passage Node (wp-a-1-1)"
+    user_pose: {x: 1.12, y: 10.28, yaw: 0.0}
+    pose: {x: -22.2, y: 4.65, z: 0.0, yaw: 0.0}
+
+  wp-a-1-2:
+    asset_id: "P-A-1-2"
+    description: "Zone A Passage Node (wp-a-1-2)"
+    user_pose: {x: 2.32, y: 10.29, yaw: 0.0}
+    pose: {x: -21.0, y: 4.66, z: 0.0, yaw: 0.0}
+
+  wp-a-1-3:
+    asset_id: "P-A-1-3"
+    description: "Zone A Passage Node (wp-a-1-3)"
+    user_pose: {x: 3.51, y: 10.26, yaw: 0.0}
+    pose: {x: -19.81, y: 4.63, z: 0.0, yaw: 0.0}
+
+  wp-a-2-1:
+    asset_id: "P-A-2-1"
+    description: "Zone A Passage Node (wp-a-2-1)"
+    user_pose: {x: 1.12, y: 9.06, yaw: 0.0}
+    pose: {x: -22.2, y: 3.43, z: 0.0, yaw: 0.0}
+
+  wp-a-2-2:
+    asset_id: "P-A-2-2"
+    description: "Zone A Passage Node (wp-a-2-2)"
+    user_pose: {x: 2.32, y: 9.07, yaw: 0.0}
+    pose: {x: -21.0, y: 3.44, z: 0.0, yaw: 0.0}
+
+  wp-a-2-3:
+    asset_id: "P-A-2-3"
+    description: "Zone A Passage Node (wp-a-2-3)"
+    user_pose: {x: 3.51, y: 9.04, yaw: 0.0}
+    pose: {x: -19.81, y: 3.41, z: 0.0, yaw: 0.0}
+
+  wp-a-3-1:
+    asset_id: "P-A-3-1"
+    description: "Zone A Passage Node (wp-a-3-1)"
+    user_pose: {x: 1.13, y: 7.88, yaw: -1.5691}
+    pose: {x: -22.19, y: 2.25, z: 0.0, yaw: -1.5691}
+
+  wp-a-3-2:
+    asset_id: "P-A-3-2"
+    description: "Zone A Passage Node (wp-a-3-2)"
+    user_pose: {x: 2.33, y: 7.89, yaw: -1.5691}
+    pose: {x: -20.99, y: 2.26, z: 0.0, yaw: -1.5691}
+
+  wp-a-3-3:
+    asset_id: "P-A-3-3"
+    description: "Zone A Passage Node (wp-a-3-3)"
+    user_pose: {x: 3.52, y: 7.86, yaw: -1.5691}
+    pose: {x: -19.8, y: 2.23, z: 0.0, yaw: -1.5691}
+
+  wp-a-4-1:
+    asset_id: "P-A-4-1"
+    description: "Zone A Passage Node (wp-a-4-1)"
+    user_pose: {x: 1.12, y: 6.69, yaw: 0.0}
+    pose: {x: -22.2, y: 1.06, z: 0.0, yaw: 0.0}
+
+  wp-a-4-2:
+    asset_id: "P-A-4-2"
+    description: "Zone A Passage Node (wp-a-4-2)"
+    user_pose: {x: 2.32, y: 6.71, yaw: 0.0}
+    pose: {x: -21.0, y: 1.08, z: 0.0, yaw: 0.0}
+
+  wp-a-4-3:
+    asset_id: "P-A-4-3"
+    description: "Zone A Passage Node (wp-a-4-3)"
+    user_pose: {x: 3.51, y: 6.67, yaw: 0.0}
+    pose: {x: -19.81, y: 1.04, z: 0.0, yaw: 0.0}
+
+  wp-a-4-4:
+    asset_id: "P-A-4-4"
+    description: "Zone A Passage Node (wp-a-4-4)"
+    user_pose: {x: 5.02, y: 6.67, yaw: 0.0}
+    pose: {x: -18.3, y: 1.04, z: 0.0, yaw: 0.0}
+
+  wp-a-4-5:
+    asset_id: "P-A-4-5"
+    description: "Zone A Passage Node (wp-a-4-5)"
+    user_pose: {x: 6.22, y: 6.67, yaw: 0.0}
+    pose: {x: -17.1, y: 1.04, z: 0.0, yaw: 0.0}
+
+  wp-a-4-6:
+    asset_id: "P-A-4-6"
+    description: "Zone A Passage Node (wp-a-4-6)"
+    user_pose: {x: 7.46, y: 6.67, yaw: 0.0}
+    pose: {x: -15.86, y: 1.04, z: 0.0, yaw: 0.0}
+
+  wp-a-4-7:
+    asset_id: "P-A-4-7"
+    description: "Zone A Passage Node (wp-a-4-7)"
+    user_pose: {x: 8.69, y: 6.67, yaw: 0.0}
+    pose: {x: -14.63, y: 1.04, z: 0.0, yaw: 0.0}
+
+  wp-a-4-8:
+    asset_id: "P-A-4-8"
+    description: "Zone A Passage Node (wp-a-4-8)"
+    user_pose: {x: 9.82, y: 6.67, yaw: 0.0}
+    pose: {x: -13.5, y: 1.04, z: 0.0, yaw: 0.0}
+
+  wp-a-5-1:
+    asset_id: "P-A-5-1"
+    description: "Zone A Passage Node (wp-a-5-1)"
+    user_pose: {x: 1.14, y: 5.47, yaw: 0.0}
+    pose: {x: -22.18, y: -0.16, z: 0.0, yaw: 0.0}
+
+  wp-a-5-2:
+    asset_id: "P-A-5-2"
+    description: "Zone A Passage Node (wp-a-5-2)"
+    user_pose: {x: 2.34, y: 5.49, yaw: 0.0}
+    pose: {x: -20.98, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-a-5-3:
+    asset_id: "P-A-5-3"
+    description: "Zone A Passage Node (wp-a-5-3)"
+    user_pose: {x: 3.52, y: 5.46, yaw: 0.0}
+    pose: {x: -19.8, y: -0.17, z: 0.0, yaw: 0.0}
+
+  wp-a-5-4:
+    asset_id: "P-A-5-4"
+    description: "Zone A Passage Node (wp-a-5-4)"
+    user_pose: {x: 5.02, y: 5.49, yaw: 0.0}
+    pose: {x: -18.3, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-a-5-5:
+    asset_id: "P-A-5-5"
+    description: "Zone A Passage Node (wp-a-5-5)"
+    user_pose: {x: 6.22, y: 5.49, yaw: 0.0}
+    pose: {x: -17.1, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-a-5-6:
+    asset_id: "P-A-5-6"
+    description: "Zone A Passage Node (wp-a-5-6)"
+    user_pose: {x: 7.46, y: 5.49, yaw: 0.0}
+    pose: {x: -15.86, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-a-5-7:
+    asset_id: "P-A-5-7"
+    description: "Zone A Passage Node (wp-a-5-7)"
+    user_pose: {x: 8.69, y: 5.49, yaw: 0.0}
+    pose: {x: -14.63, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-a-5-8:
+    asset_id: "P-A-5-8"
+    description: "Zone A Passage Node (wp-a-5-8)"
+    user_pose: {x: 9.82, y: 5.49, yaw: 0.0}
+    pose: {x: -13.5, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-a-6-1:
+    asset_id: "P-A-6-1"
+    description: "Zone A Passage Node (wp-a-6-1)"
+    user_pose: {x: 1.14, y: 4.3, yaw: 0.0}
+    pose: {x: -22.18, y: -1.33, z: 0.0, yaw: 0.0}
+
+  wp-a-6-2:
+    asset_id: "P-A-6-2"
+    description: "Zone A Passage Node (wp-a-6-2)"
+    user_pose: {x: 2.34, y: 4.31, yaw: 0.0}
+    pose: {x: -20.98, y: -1.32, z: 0.0, yaw: 0.0}
+
+  wp-a-6-3:
+    asset_id: "P-A-6-3"
+    description: "Zone A Passage Node (wp-a-6-3)"
+    user_pose: {x: 3.52, y: 4.28, yaw: 0.0}
+    pose: {x: -19.8, y: -1.35, z: 0.0, yaw: 0.0}
+
+  wp-a-6-4:
+    asset_id: "P-A-6-4"
+    description: "Zone A Passage Node (wp-a-6-4)"
+    user_pose: {x: 5.02, y: 4.27, yaw: 0.0}
+    pose: {x: -18.3, y: -1.36, z: 0.0, yaw: 0.0}
+
+  wp-a-6-5:
+    asset_id: "P-A-6-5"
+    description: "Zone A Passage Node (wp-a-6-5)"
+    user_pose: {x: 6.22, y: 4.27, yaw: 0.0}
+    pose: {x: -17.1, y: -1.36, z: 0.0, yaw: 0.0}
+
+  wp-a-6-6:
+    asset_id: "P-A-6-6"
+    description: "Zone A Passage Node (wp-a-6-6)"
+    user_pose: {x: 7.46, y: 4.27, yaw: 0.0}
+    pose: {x: -15.86, y: -1.36, z: 0.0, yaw: 0.0}
+
+  wp-a-6-7:
+    asset_id: "P-A-6-7"
+    description: "Zone A Passage Node (wp-a-6-7)"
+    user_pose: {x: 8.69, y: 4.27, yaw: 0.0}
+    pose: {x: -14.63, y: -1.36, z: 0.0, yaw: 0.0}
+
+  wp-a-6-8:
+    asset_id: "P-A-6-8"
+    description: "Zone A Passage Node (wp-a-6-8)"
+    user_pose: {x: 9.82, y: 4.27, yaw: 0.0}
+    pose: {x: -13.5, y: -1.36, z: 0.0, yaw: 0.0}
+
+  wp-a-7-1:
+    asset_id: "P-A-7-1"
+    description: "Zone A Passage Node (wp-a-7-1)"
+    user_pose: {x: 1.13, y: 3.07, yaw: 0.0}
+    pose: {x: -22.19, y: -2.56, z: 0.0, yaw: 0.0}
+
+  wp-a-7-2:
+    asset_id: "P-A-7-2"
+    description: "Zone A Passage Node (wp-a-7-2)"
+    user_pose: {x: 2.33, y: 3.09, yaw: 0.0}
+    pose: {x: -20.99, y: -2.54, z: 0.0, yaw: 0.0}
+
+  wp-a-7-3:
+    asset_id: "P-A-7-3"
+    description: "Zone A Passage Node (wp-a-7-3)"
+    user_pose: {x: 3.52, y: 3.06, yaw: 0.0}
+    pose: {x: -19.8, y: -2.57, z: 0.0, yaw: 0.0}
+
+  wp-a-8-1:
+    asset_id: "P-A-8-1"
+    description: "Zone A Passage Node (wp-a-8-1)"
+    user_pose: {x: 1.13, y: 1.88, yaw: 0.0}
+    pose: {x: -22.19, y: -3.75, z: 0.0, yaw: 0.0}
+
+  wp-a-8-2:
+    asset_id: "P-A-8-2"
+    description: "Zone A Passage Node (wp-a-8-2)"
+    user_pose: {x: 2.33, y: 1.89, yaw: 0.0}
+    pose: {x: -20.99, y: -3.74, z: 0.0, yaw: 0.0}
+
+  wp-a-8-3:
+    asset_id: "P-A-8-3"
+    description: "Zone A Passage Node (wp-a-8-3)"
+    user_pose: {x: 3.52, y: 1.86, yaw: 0.0}
+    pose: {x: -19.8, y: -3.77, z: 0.0, yaw: 0.0}
+
+  wp-a-9-1:
+    asset_id: "P-A-9-1"
+    description: "Zone A Passage Node (wp-a-9-1)"
+    user_pose: {x: 1.12, y: 0.66, yaw: 0.0}
+    pose: {x: -22.2, y: -4.97, z: 0.0, yaw: 0.0}
+
+  wp-a-9-3:
+    asset_id: "P-A-9-3"
+    description: "Zone A Passage Node (wp-a-9-3)"
+    user_pose: {x: 3.53, y: 0.67, yaw: 0.0}
+    pose: {x: -19.79, y: -4.96, z: 0.0, yaw: 0.0}
+
+
+  # ----------------------------------------------------------------------------
+  # 🧭 6. ZONE B - CORRIDOR PASSAGE NODES
+  # Zone B passage nodes
+  # ----------------------------------------------------------------------------
+  wp-b-1-1:
+    asset_id: "P-B-1-1"
+    description: "Zone B Passage Node (wp-b-1-1)"
+    user_pose: {x: 10.72, y: 10.26, yaw: 0.0}
+    pose: {x: -12.6, y: 4.63, z: 0.0, yaw: 0.0}
+
+  wp-b-1-2:
+    asset_id: "P-B-1-2"
+    description: "Zone B Passage Node (wp-b-1-2)"
+    user_pose: {x: 12.53, y: 10.26, yaw: 0.0}
+    pose: {x: -10.79, y: 4.63, z: 0.0, yaw: 0.0}
+
+  wp-b-1-3:
+    asset_id: "P-B-1-3"
+    description: "Zone B Passage Node (wp-b-1-3)"
+    user_pose: {x: 14.32, y: 10.26, yaw: 0.0}
+    pose: {x: -9.0, y: 4.63, z: 0.0, yaw: 0.0}
+
+  wp-b-1-5:
+    asset_id: "P-B-1-5"
+    description: "Zone B Passage Node (wp-b-1-5)"
+    user_pose: {x: 18.52, y: 10.27, yaw: 0.0}
+    pose: {x: -4.8, y: 4.64, z: 0.0, yaw: 0.0}
+
+  wp-b-1-7:
+    asset_id: "P-B-1-7"
+    description: "Zone B Passage Node (wp-b-1-7)"
+    user_pose: {x: 22.72, y: 10.27, yaw: 0.0}
+    pose: {x: -0.6, y: 4.64, z: 0.0, yaw: 0.0}
+
+  wp-b-1-9:
+    asset_id: "P-B-1-9"
+    description: "Zone B Passage Node (wp-b-1-9)"
+    user_pose: {x: 26.93, y: 10.29, yaw: 0.0}
+    pose: {x: 3.61, y: 4.66, z: 0.0, yaw: 0.0}
+
+  wp-b-1-11:
+    asset_id: "P-B-1-11"
+    description: "Zone B Passage Node (wp-b-1-11)"
+    user_pose: {x: 31.12, y: 10.27, yaw: 0.0}
+    pose: {x: 7.8, y: 4.64, z: 0.0, yaw: 0.0}
+
+  wp-b-1-12:
+    asset_id: "P-B-1-12"
+    description: "Zone B Passage Node (wp-b-1-12)"
+    user_pose: {x: 32.92, y: 10.27, yaw: 0.0}
+    pose: {x: 9.6, y: 4.64, z: 0.0, yaw: 0.0}
+
+  wp-b-1-13:
+    asset_id: "P-B-1-13"
+    description: "Zone B Passage Node (wp-b-1-13)"
+    user_pose: {x: 34.73, y: 10.29, yaw: 0.0}
+    pose: {x: 11.41, y: 4.66, z: 0.0, yaw: 0.0}
+
+  wp-b-2-1:
+    asset_id: "P-B-2-1"
+    description: "Zone B Passage Node (wp-b-2-1)"
+    user_pose: {x: 10.72, y: 9.07, yaw: 0.0}
+    pose: {x: -12.6, y: 3.44, z: 0.0, yaw: 0.0}
+
+  wp-b-2-2:
+    asset_id: "P-B-2-2"
+    description: "Zone B Passage Node (wp-b-2-2)"
+    user_pose: {x: 12.53, y: 9.07, yaw: 0.0}
+    pose: {x: -10.79, y: 3.44, z: 0.0, yaw: 0.0}
+
+  wp-b-2-3:
+    asset_id: "P-B-2-3"
+    description: "Zone B Passage Node (wp-b-2-3)"
+    user_pose: {x: 14.32, y: 9.07, yaw: 0.0}
+    pose: {x: -9.0, y: 3.44, z: 0.0, yaw: 0.0}
+
+  wp-b-2-5:
+    asset_id: "P-B-2-5"
+    description: "Zone B Passage Node (wp-b-2-5)"
+    user_pose: {x: 18.52, y: 9.08, yaw: 0.0}
+    pose: {x: -4.8, y: 3.45, z: 0.0, yaw: 0.0}
+
+  wp-b-2-7:
+    asset_id: "P-B-2-7"
+    description: "Zone B Passage Node (wp-b-2-7)"
+    user_pose: {x: 22.72, y: 9.09, yaw: 0.0}
+    pose: {x: -0.6, y: 3.46, z: 0.0, yaw: 0.0}
+
+  wp-b-2-9:
+    asset_id: "P-B-2-9"
+    description: "Zone B Passage Node (wp-b-2-9)"
+    user_pose: {x: 26.93, y: 9.11, yaw: 0.0}
+    pose: {x: 3.61, y: 3.48, z: 0.0, yaw: 0.0}
+
+  wp-b-2-11:
+    asset_id: "P-B-2-11"
+    description: "Zone B Passage Node (wp-b-2-11)"
+    user_pose: {x: 31.12, y: 9.09, yaw: 0.0}
+    pose: {x: 7.8, y: 3.46, z: 0.0, yaw: 0.0}
+
+  wp-b-2-12:
+    asset_id: "P-B-2-12"
+    description: "Zone B Passage Node (wp-b-2-12)"
+    user_pose: {x: 32.92, y: 9.09, yaw: 0.0}
+    pose: {x: 9.6, y: 3.46, z: 0.0, yaw: 0.0}
+
+  wp-b-2-13:
+    asset_id: "P-B-2-13"
+    description: "Zone B Passage Node (wp-b-2-13)"
+    user_pose: {x: 34.73, y: 9.11, yaw: 0.0}
+    pose: {x: 11.41, y: 3.48, z: 0.0, yaw: 0.0}
+
+  wp-b-3-1:
+    asset_id: "P-B-3-1"
+    description: "Zone B Passage Node (wp-b-3-1)"
+    user_pose: {x: 10.72, y: 7.88, yaw: -1.57}
+    pose: {x: -12.6, y: 2.25, z: 0.0, yaw: -1.57}
+
+  wp-b-3-2:
+    asset_id: "P-B-3-2"
+    description: "Zone B Passage Node (wp-b-3-2)"
+    user_pose: {x: 12.53, y: 7.88, yaw: -1.57}
+    pose: {x: -10.79, y: 2.25, z: 0.0, yaw: -1.57}
+
+  wp-b-3-3:
+    asset_id: "P-B-3-3"
+    description: "Zone B Passage Node (wp-b-3-3)"
+    user_pose: {x: 14.32, y: 7.88, yaw: -1.57}
+    pose: {x: -9.0, y: 2.25, z: 0.0, yaw: -1.57}
+
+  wp-b-3-5:
+    asset_id: "P-B-3-5"
+    description: "Zone B Passage Node (wp-b-3-5)"
+    user_pose: {x: 18.52, y: 7.88, yaw: -1.57}
+    pose: {x: -4.8, y: 2.25, z: 0.0, yaw: -1.57}
+
+  wp-b-3-7:
+    asset_id: "P-B-3-7"
+    description: "Zone B Passage Node (wp-b-3-7)"
+    user_pose: {x: 22.72, y: 7.89, yaw: -1.57}
+    pose: {x: -0.6, y: 2.26, z: 0.0, yaw: -1.57}
+
+  wp-b-3-9:
+    asset_id: "P-B-3-9"
+    description: "Zone B Passage Node (wp-b-3-9)"
+    user_pose: {x: 26.93, y: 7.9, yaw: -1.57}
+    pose: {x: 3.61, y: 2.27, z: 0.0, yaw: -1.57}
+
+  wp-b-3-11:
+    asset_id: "P-B-3-11"
+    description: "Zone B Passage Node (wp-b-3-11)"
+    user_pose: {x: 31.12, y: 7.89, yaw: -1.57}
+    pose: {x: 7.8, y: 2.26, z: 0.0, yaw: -1.57}
+
+  wp-b-3-12:
+    asset_id: "P-B-3-12"
+    description: "Zone B Passage Node (wp-b-3-12)"
+    user_pose: {x: 32.92, y: 7.89, yaw: -1.57}
+    pose: {x: 9.6, y: 2.26, z: 0.0, yaw: -1.57}
+
+  wp-b-3-13:
+    asset_id: "P-B-3-13"
+    description: "Zone B Passage Node (wp-b-3-13)"
+    user_pose: {x: 34.73, y: 7.91, yaw: 0.0}
+    pose: {x: 11.41, y: 2.28, z: 0.0, yaw: 0.0}
+
+  wp-b-4-1:
+    asset_id: "P-B-4-1"
+    description: "Zone B Passage Node (wp-b-4-1)"
+    user_pose: {x: 10.72, y: 6.69, yaw: 0.0}
+    pose: {x: -12.6, y: 1.06, z: 0.0, yaw: 0.0}
+
+  wp-b-4-2:
+    asset_id: "P-B-4-2"
+    description: "Zone B Passage Node (wp-b-4-2)"
+    user_pose: {x: 12.53, y: 6.69, yaw: 0.0}
+    pose: {x: -10.79, y: 1.06, z: 0.0, yaw: 0.0}
+
+  wp-b-4-3:
+    asset_id: "P-B-4-3"
+    description: "Zone B Passage Node (wp-b-4-3)"
+    user_pose: {x: 14.32, y: 6.69, yaw: 0.0}
+    pose: {x: -9.0, y: 1.06, z: 0.0, yaw: 0.0}
+
+  wp-b-4-5:
+    asset_id: "P-B-4-5"
+    description: "Zone B Passage Node (wp-b-4-5)"
+    user_pose: {x: 18.52, y: 6.7, yaw: 0.0}
+    pose: {x: -4.8, y: 1.07, z: 0.0, yaw: 0.0}
+
+  wp-b-4-7:
+    asset_id: "P-B-4-7"
+    description: "Zone B Passage Node (wp-b-4-7)"
+    user_pose: {x: 22.72, y: 6.7, yaw: 0.0}
+    pose: {x: -0.6, y: 1.07, z: 0.0, yaw: 0.0}
+
+  wp-b-4-9:
+    asset_id: "P-B-4-9"
+    description: "Zone B Passage Node (wp-b-4-9)"
+    user_pose: {x: 26.93, y: 6.72, yaw: 0.0}
+    pose: {x: 3.61, y: 1.09, z: 0.0, yaw: 0.0}
+
+  wp-b-4-11:
+    asset_id: "P-B-4-11"
+    description: "Zone B Passage Node (wp-b-4-11)"
+    user_pose: {x: 31.12, y: 6.7, yaw: 0.0}
+    pose: {x: 7.8, y: 1.07, z: 0.0, yaw: 0.0}
+
+  wp-b-4-12:
+    asset_id: "P-B-4-12"
+    description: "Zone B Passage Node (wp-b-4-12)"
+    user_pose: {x: 32.92, y: 6.7, yaw: 0.0}
+    pose: {x: 9.6, y: 1.07, z: 0.0, yaw: 0.0}
+
+  wp-b-4-13:
+    asset_id: "P-B-4-13"
+    description: "Zone B Passage Node (wp-b-4-13)"
+    user_pose: {x: 34.73, y: 6.72, yaw: 0.0}
+    pose: {x: 11.41, y: 1.09, z: 0.0, yaw: 0.0}
+
+  wp-b-5-1:
+    asset_id: "P-B-5-1"
+    description: "Zone B Passage Node (wp-b-5-1)"
+    user_pose: {x: 10.72, y: 5.49, yaw: 0.0}
+    pose: {x: -12.6, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-b-5-2:
+    asset_id: "P-B-5-2"
+    description: "Zone B Passage Node (wp-b-5-2)"
+    user_pose: {x: 12.53, y: 5.49, yaw: 0.0}
+    pose: {x: -10.79, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-b-5-3:
+    asset_id: "P-B-5-3"
+    description: "Zone B Passage Node (wp-b-5-3)"
+    user_pose: {x: 14.32, y: 5.49, yaw: 0.0}
+    pose: {x: -9.0, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-b-5-5:
+    asset_id: "P-B-5-5"
+    description: "Zone B Passage Node (wp-b-5-5)"
+    user_pose: {x: 18.52, y: 5.5, yaw: 0.0}
+    pose: {x: -4.8, y: -0.13, z: 0.0, yaw: 0.0}
+
+  wp-b-5-7:
+    asset_id: "P-B-5-7"
+    description: "Zone B Passage Node (wp-b-5-7)"
+    user_pose: {x: 22.72, y: 5.5, yaw: 0.0}
+    pose: {x: -0.6, y: -0.13, z: 0.0, yaw: 0.0}
+
+  wp-b-5-9:
+    asset_id: "P-B-5-9"
+    description: "Zone B Passage Node (wp-b-5-9)"
+    user_pose: {x: 26.93, y: 5.52, yaw: 0.0}
+    pose: {x: 3.61, y: -0.11, z: 0.0, yaw: 0.0}
+
+  wp-b-5-11:
+    asset_id: "P-B-5-11"
+    description: "Zone B Passage Node (wp-b-5-11)"
+    user_pose: {x: 31.12, y: 5.5, yaw: 0.0}
+    pose: {x: 7.8, y: -0.13, z: 0.0, yaw: 0.0}
+
+  wp-b-5-12:
+    asset_id: "P-B-5-12"
+    description: "Zone B Passage Node (wp-b-5-12)"
+    user_pose: {x: 32.92, y: 5.5, yaw: 0.0}
+    pose: {x: 9.6, y: -0.13, z: 0.0, yaw: 0.0}
+
+  wp-b-5-13:
+    asset_id: "P-B-5-13"
+    description: "Zone B Passage Node (wp-b-5-13)"
+    user_pose: {x: 34.73, y: 5.52, yaw: 0.0}
+    pose: {x: 11.41, y: -0.11, z: 0.0, yaw: 0.0}
+
+  wp-b-6-1:
+    asset_id: "P-B-6-1"
+    description: "Zone B Passage Node (wp-b-6-1)"
+    user_pose: {x: 10.72, y: 4.27, yaw: 0.0}
+    pose: {x: -12.6, y: -1.36, z: 0.0, yaw: 0.0}
+
+  wp-b-6-2:
+    asset_id: "P-B-6-2"
+    description: "Zone B Passage Node (wp-b-6-2)"
+    user_pose: {x: 12.53, y: 4.27, yaw: 0.0}
+    pose: {x: -10.79, y: -1.36, z: 0.0, yaw: 0.0}
+
+  wp-b-6-3:
+    asset_id: "P-B-6-3"
+    description: "Zone B Passage Node (wp-b-6-3)"
+    user_pose: {x: 14.32, y: 4.27, yaw: 0.0}
+    pose: {x: -9.0, y: -1.36, z: 0.0, yaw: 0.0}
+
+  wp-b-6-5:
+    asset_id: "P-B-6-5"
+    description: "Zone B Passage Node (wp-b-6-5)"
+    user_pose: {x: 18.52, y: 4.27, yaw: 0.0}
+    pose: {x: -4.8, y: -1.36, z: 0.0, yaw: 0.0}
+
+  wp-b-6-7:
+    asset_id: "P-B-6-7"
+    description: "Zone B Passage Node (wp-b-6-7)"
+    user_pose: {x: 22.72, y: 4.28, yaw: 0.0}
+    pose: {x: -0.6, y: -1.35, z: 0.0, yaw: 0.0}
+
+  wp-b-6-9:
+    asset_id: "P-B-6-9"
+    description: "Zone B Passage Node (wp-b-6-9)"
+    user_pose: {x: 26.93, y: 4.3, yaw: 0.0}
+    pose: {x: 3.61, y: -1.33, z: 0.0, yaw: 0.0}
+
+  wp-b-6-11:
+    asset_id: "P-B-6-11"
+    description: "Zone B Passage Node (wp-b-6-11)"
+    user_pose: {x: 31.12, y: 4.28, yaw: 0.0}
+    pose: {x: 7.8, y: -1.35, z: 0.0, yaw: 0.0}
+
+  wp-b-6-12:
+    asset_id: "P-B-6-12"
+    description: "Zone B Passage Node (wp-b-6-12)"
+    user_pose: {x: 32.92, y: 4.28, yaw: 0.0}
+    pose: {x: 9.6, y: -1.35, z: 0.0, yaw: 0.0}
+
+  wp-b-6-13:
+    asset_id: "P-B-6-13"
+    description: "Zone B Passage Node (wp-b-6-13)"
+    user_pose: {x: 34.73, y: 4.3, yaw: 0.0}
+    pose: {x: 11.41, y: -1.33, z: 0.0, yaw: 0.0}
+
+  wp-b-7-1:
+    asset_id: "P-B-7-1"
+    description: "Zone B Passage Node (wp-b-7-1)"
+    user_pose: {x: 10.72, y: 3.09, yaw: 0.0}
+    pose: {x: -12.6, y: -2.54, z: 0.0, yaw: 0.0}
+
+  wp-b-7-2:
+    asset_id: "P-B-7-2"
+    description: "Zone B Passage Node (wp-b-7-2)"
+    user_pose: {x: 12.53, y: 3.09, yaw: 0.0}
+    pose: {x: -10.79, y: -2.54, z: 0.0, yaw: 0.0}
+
+  wp-b-7-3:
+    asset_id: "P-B-7-3"
+    description: "Zone B Passage Node (wp-b-7-3)"
+    user_pose: {x: 14.32, y: 3.09, yaw: 0.0}
+    pose: {x: -9.0, y: -2.54, z: 0.0, yaw: 0.0}
+
+  wp-b-7-5:
+    asset_id: "P-B-7-5"
+    description: "Zone B Passage Node (wp-b-7-5)"
+    user_pose: {x: 18.52, y: 3.1, yaw: 0.0}
+    pose: {x: -4.8, y: -2.53, z: 0.0, yaw: 0.0}
+
+  wp-b-7-7:
+    asset_id: "P-B-7-7"
+    description: "Zone B Passage Node (wp-b-7-7)"
+    user_pose: {x: 22.72, y: 3.1, yaw: 0.0}
+    pose: {x: -0.6, y: -2.53, z: 0.0, yaw: 0.0}
+
+  wp-b-7-9:
+    asset_id: "P-B-7-9"
+    description: "Zone B Passage Node (wp-b-7-9)"
+    user_pose: {x: 26.93, y: 3.12, yaw: 0.0}
+    pose: {x: 3.61, y: -2.51, z: 0.0, yaw: 0.0}
+
+  wp-b-7-11:
+    asset_id: "P-B-7-11"
+    description: "Zone B Passage Node (wp-b-7-11)"
+    user_pose: {x: 31.12, y: 3.1, yaw: 0.0}
+    pose: {x: 7.8, y: -2.53, z: 0.0, yaw: 0.0}
+
+  wp-b-7-12:
+    asset_id: "P-B-7-12"
+    description: "Zone B Passage Node (wp-b-7-12)"
+    user_pose: {x: 32.92, y: 3.1, yaw: 0.0}
+    pose: {x: 9.6, y: -2.53, z: 0.0, yaw: 0.0}
+
+  wp-b-7-13:
+    asset_id: "P-B-7-13"
+    description: "Zone B Passage Node (wp-b-7-13)"
+    user_pose: {x: 34.73, y: 3.12, yaw: 0.0}
+    pose: {x: 11.41, y: -2.51, z: 0.0, yaw: 0.0}
+
+  wp-b-8-1:
+    asset_id: "P-B-8-1"
+    description: "Zone B Passage Node (wp-b-8-1)"
+    user_pose: {x: 10.72, y: 1.88, yaw: 0.0}
+    pose: {x: -12.6, y: -3.75, z: 0.0, yaw: 0.0}
+
+  wp-b-8-2:
+    asset_id: "P-B-8-2"
+    description: "Zone B Passage Node (wp-b-8-2)"
+    user_pose: {x: 12.53, y: 1.88, yaw: 0.0}
+    pose: {x: -10.79, y: -3.75, z: 0.0, yaw: 0.0}
+
+  wp-b-8-3:
+    asset_id: "P-B-8-3"
+    description: "Zone B Passage Node (wp-b-8-3)"
+    user_pose: {x: 14.32, y: 1.88, yaw: 0.0}
+    pose: {x: -9.0, y: -3.75, z: 0.0, yaw: 0.0}
+
+  wp-b-8-5:
+    asset_id: "P-B-8-5"
+    description: "Zone B Passage Node (wp-b-8-5)"
+    user_pose: {x: 18.52, y: 1.88, yaw: 0.0}
+    pose: {x: -4.8, y: -3.75, z: 0.0, yaw: 0.0}
+
+  wp-b-8-7:
+    asset_id: "P-B-8-7"
+    description: "Zone B Passage Node (wp-b-8-7)"
+    user_pose: {x: 22.72, y: 1.89, yaw: 0.0}
+    pose: {x: -0.6, y: -3.74, z: 0.0, yaw: 0.0}
+
+  wp-b-8-9:
+    asset_id: "P-B-8-9"
+    description: "Zone B Passage Node (wp-b-8-9)"
+    user_pose: {x: 26.93, y: 1.91, yaw: 0.0}
+    pose: {x: 3.61, y: -3.72, z: 0.0, yaw: 0.0}
+
+  wp-b-8-11:
+    asset_id: "P-B-8-11"
+    description: "Zone B Passage Node (wp-b-8-11)"
+    user_pose: {x: 31.12, y: 1.89, yaw: 0.0}
+    pose: {x: 7.8, y: -3.74, z: 0.0, yaw: 0.0}
+
+  wp-b-8-12:
+    asset_id: "P-B-8-12"
+    description: "Zone B Passage Node (wp-b-8-12)"
+    user_pose: {x: 32.92, y: 1.89, yaw: 0.0}
+    pose: {x: 9.6, y: -3.74, z: 0.0, yaw: 0.0}
+
+  wp-b-8-13:
+    asset_id: "P-B-8-13"
+    description: "Zone B Passage Node (wp-b-8-13)"
+    user_pose: {x: 34.73, y: 1.91, yaw: 0.0}
+    pose: {x: 11.41, y: -3.72, z: 0.0, yaw: 0.0}
+
+  wp-b-8-14:
+    asset_id: "P-B-8-14"
+    description: "Zone B Passage Node (wp-b-8-14)"
+    user_pose: {x: 35.92, y: 1.88, yaw: 0.0}
+    pose: {x: 12.6, y: -3.75, z: 0.0, yaw: 0.0}
+
+  wp-b-9-1:
+    asset_id: "P-B-9-1"
+    description: "Zone B Passage Node (wp-b-9-1)"
+    user_pose: {x: 10.72, y: 0.67, yaw: 0.0}
+    pose: {x: -12.6, y: -4.96, z: 0.0, yaw: 0.0}
+
+  wp-b-9-2:
+    asset_id: "P-B-9-2"
+    description: "Zone B Passage Node (wp-b-9-2)"
+    user_pose: {x: 12.53, y: 0.67, yaw: 0.0}
+    pose: {x: -10.79, y: -4.96, z: 0.0, yaw: 0.0}
+
+  wp-b-9-3:
+    asset_id: "P-B-9-3"
+    description: "Zone B Passage Node (wp-b-9-3)"
+    user_pose: {x: 14.32, y: 0.67, yaw: 0.0}
+    pose: {x: -9.0, y: -4.96, z: 0.0, yaw: 0.0}
+
+  wp-b-9-4:
+    asset_id: "P-B-9-4"
+    description: "Zone B Passage Node (wp-b-9-4)"
+    user_pose: {x: 16.43, y: 0.66, yaw: 0.0}
+    pose: {x: -6.89, y: -4.97, z: 0.0, yaw: 0.0}
+
+  wp-b-9-5:
+    asset_id: "P-B-9-5"
+    description: "Zone B Passage Node (wp-b-9-5)"
+    user_pose: {x: 18.52, y: 0.67, yaw: 0.0}
+    pose: {x: -4.8, y: -4.96, z: 0.0, yaw: 0.0}
+
+  wp-b-9-6:
+    asset_id: "P-B-9-6"
+    description: "Zone B Passage Node (wp-b-9-6)"
+    user_pose: {x: 20.64, y: 0.67, yaw: 0.0}
+    pose: {x: -2.68, y: -4.96, z: 0.0, yaw: 0.0}
+
+  wp-b-9-7:
+    asset_id: "P-B-9-7"
+    description: "Zone B Passage Node (wp-b-9-7)"
+    user_pose: {x: 22.72, y: 0.68, yaw: 0.0}
+    pose: {x: -0.6, y: -4.95, z: 0.0, yaw: 0.0}
+
+  wp-b-9-8:
+    asset_id: "P-B-9-8"
+    description: "Zone B Passage Node (wp-b-9-8)"
+    user_pose: {x: 24.82, y: 0.66, yaw: 0.0}
+    pose: {x: 1.5, y: -4.97, z: 0.0, yaw: 0.0}
+
+  wp-b-9-9:
+    asset_id: "P-B-9-9"
+    description: "Zone B Passage Node (wp-b-9-9)"
+    user_pose: {x: 26.93, y: 0.7, yaw: 0.0}
+    pose: {x: 3.61, y: -4.93, z: 0.0, yaw: 0.0}
+
+  wp-b-9-10:
+    asset_id: "P-B-9-10"
+    description: "Zone B Passage Node (wp-b-9-10)"
+    user_pose: {x: 29.02, y: 0.67, yaw: 0.0}
+    pose: {x: 5.7, y: -4.96, z: 0.0, yaw: 0.0}
+
+  wp-b-9-11:
+    asset_id: "P-B-9-11"
+    description: "Zone B Passage Node (wp-b-9-11)"
+    user_pose: {x: 31.12, y: 0.68, yaw: 0.0}
+    pose: {x: 7.8, y: -4.95, z: 0.0, yaw: 0.0}
+
+  wp-b-9-12:
+    asset_id: "P-B-9-12"
+    description: "Zone B Passage Node (wp-b-9-12)"
+    user_pose: {x: 32.92, y: 0.68, yaw: 0.0}
+    pose: {x: 9.6, y: -4.95, z: 0.0, yaw: 0.0}
+
+  wp-b-9-13:
+    asset_id: "P-B-9-13"
+    description: "Zone B Passage Node (wp-b-9-13)"
+    user_pose: {x: 34.73, y: 0.7, yaw: 0.0}
+    pose: {x: 11.41, y: -4.93, z: 0.0, yaw: 0.0}
+
+  wp-b-9-14:
+    asset_id: "P-B-9-14"
+    description: "Zone B Passage Node (wp-b-9-14)"
+    user_pose: {x: 35.92, y: 0.68, yaw: 0.0}
+    pose: {x: 12.6, y: -4.95, z: 0.0, yaw: 0.0}
+
+
+  # ----------------------------------------------------------------------------
+  # 🧭 7. ZONE C - CORRIDOR PASSAGE NODES
+  # Zone C passage nodes
+  # ----------------------------------------------------------------------------
+  wp-c-1-1:
+    asset_id: "P-C-1-1"
+    description: "Zone C Passage Node (wp-c-1-1)"
+    user_pose: {x: 37.11, y: 10.29, yaw: 0.0}
+    pose: {x: 13.79, y: 4.66, z: 0.0, yaw: 0.0}
+
+  wp-c-1-2:
+    asset_id: "P-C-1-2"
+    description: "Zone C Passage Node (wp-c-1-2)"
+    user_pose: {x: 38.34, y: 10.29, yaw: 0.0}
+    pose: {x: 15.02, y: 4.66, z: 0.0, yaw: 0.0}
+
+  wp-c-1-3:
+    asset_id: "P-C-1-3"
+    description: "Zone C Passage Node (wp-c-1-3)"
+    user_pose: {x: 39.52, y: 10.28, yaw: 0.0}
+    pose: {x: 16.2, y: 4.65, z: 0.0, yaw: 0.0}
+
+  wp-c-1-5:
+    asset_id: "P-C-1-5"
+    description: "Zone C Passage Node (wp-c-1-5)"
+    user_pose: {x: 42.52, y: 10.29, yaw: 0.0}
+    pose: {x: 19.2, y: 4.66, z: 0.0, yaw: 0.0}
+
+  wp-c-1-6:
+    asset_id: "P-C-1-6"
+    description: "Zone C Passage Node (wp-c-1-6)"
+    user_pose: {x: 44.32, y: 10.29, yaw: 0.0}
+    pose: {x: 21.0, y: 4.66, z: 0.0, yaw: 0.0}
+
+  wp-c-1-7:
+    asset_id: "P-C-1-7"
+    description: "Zone C Passage Node (wp-c-1-7)"
+    user_pose: {x: 46.14, y: 10.28, yaw: 0.0}
+    pose: {x: 22.82, y: 4.65, z: 0.0, yaw: 0.0}
+
+  wp-c-2-1:
+    asset_id: "P-C-2-1"
+    description: "Zone C Passage Node (wp-c-2-1)"
+    user_pose: {x: 37.11, y: 9.39, yaw: 0.0}
+    pose: {x: 13.79, y: 3.76, z: 0.0, yaw: 0.0}
+
+  wp-c-2-2:
+    asset_id: "P-C-2-2"
+    description: "Zone C Passage Node (wp-c-2-2)"
+    user_pose: {x: 38.34, y: 9.39, yaw: 0.0}
+    pose: {x: 15.02, y: 3.76, z: 0.0, yaw: 0.0}
+
+  wp-c-3-1:
+    asset_id: "P-C-3-1"
+    description: "Zone C Passage Node (wp-c-3-1)"
+    user_pose: {x: 37.11, y: 8.48, yaw: 0.0}
+    pose: {x: 13.79, y: 2.85, z: 0.0, yaw: 0.0}
+
+  wp-c-3-2:
+    asset_id: "P-C-3-2"
+    description: "Zone C Passage Node (wp-c-3-2)"
+    user_pose: {x: 38.34, y: 8.48, yaw: 0.0}
+    pose: {x: 15.02, y: 2.85, z: 0.0, yaw: 0.0}
+
+  wp-c-3-3:
+    asset_id: "P-C-3-3"
+    description: "Zone C Passage Node (wp-c-3-3)"
+    user_pose: {x: 39.52, y: 8.47, yaw: 0.0}
+    pose: {x: 16.2, y: 2.84, z: 0.0, yaw: 0.0}
+
+  wp-c-3-4:
+    asset_id: "P-C-3-4"
+    description: "Zone C Passage Node (wp-c-3-4)"
+    user_pose: {x: 41.04, y: 8.48, yaw: 0.0}
+    pose: {x: 17.72, y: 2.85, z: 0.0, yaw: 0.0}
+
+  wp-c-3-5:
+    asset_id: "P-C-3-5"
+    description: "Zone C Passage Node (wp-c-3-5)"
+    user_pose: {x: 42.52, y: 8.47, yaw: 0.0}
+    pose: {x: 19.2, y: 2.84, z: 0.0, yaw: 0.0}
+
+  wp-c-3-6:
+    asset_id: "P-C-3-6"
+    description: "Zone C Passage Node (wp-c-3-6)"
+    user_pose: {x: 44.32, y: 8.47, yaw: 0.0}
+    pose: {x: 21.0, y: 2.84, z: 0.0, yaw: 0.0}
+
+  wp-c-3-7:
+    asset_id: "P-C-3-7"
+    description: "Zone C Passage Node (wp-c-3-7)"
+    user_pose: {x: 46.13, y: 8.45, yaw: 0.0}
+    pose: {x: 22.81, y: 2.82, z: 0.0, yaw: 0.0}
+
+  wp-c-4-1:
+    asset_id: "P-C-4-1"
+    description: "Zone C Passage Node (wp-c-4-1)"
+    user_pose: {x: 37.11, y: 7.29, yaw: 0.0}
+    pose: {x: 13.79, y: 1.66, z: 0.0, yaw: 0.0}
+
+  wp-c-4-2:
+    asset_id: "P-C-4-2"
+    description: "Zone C Passage Node (wp-c-4-2)"
+    user_pose: {x: 38.34, y: 7.29, yaw: 0.0}
+    pose: {x: 15.02, y: 1.66, z: 0.0, yaw: 0.0}
+
+  wp-c-4-3:
+    asset_id: "P-C-4-3"
+    description: "Zone C Passage Node (wp-c-4-3)"
+    user_pose: {x: 39.52, y: 7.27, yaw: 0.0}
+    pose: {x: 16.2, y: 1.64, z: 0.0, yaw: 0.0}
+
+  wp-c-4-5:
+    asset_id: "P-C-4-5"
+    description: "Zone C Passage Node (wp-c-4-5)"
+    user_pose: {x: 42.52, y: 7.27, yaw: 0.0}
+    pose: {x: 19.2, y: 1.64, z: 0.0, yaw: 0.0}
+
+  wp-c-4-6:
+    asset_id: "P-C-4-6"
+    description: "Zone C Passage Node (wp-c-4-6)"
+    user_pose: {x: 44.32, y: 7.27, yaw: 0.0}
+    pose: {x: 21.0, y: 1.64, z: 0.0, yaw: 0.0}
+
+  wp-c-4-7:
+    asset_id: "P-C-4-7"
+    description: "Zone C Passage Node (wp-c-4-7)"
+    user_pose: {x: 46.14, y: 7.26, yaw: 0.0}
+    pose: {x: 22.82, y: 1.63, z: 0.0, yaw: 0.0}
+
+  wp-c-5-1:
+    asset_id: "P-C-5-1"
+    description: "Zone C Passage Node (wp-c-5-1)"
+    user_pose: {x: 37.11, y: 6.36, yaw: 0.0}
+    pose: {x: 13.79, y: 0.73, z: 0.0, yaw: 0.0}
+
+  wp-c-5-2:
+    asset_id: "P-C-5-2"
+    description: "Zone C Passage Node (wp-c-5-2)"
+    user_pose: {x: 38.34, y: 6.36, yaw: 0.0}
+    pose: {x: 15.02, y: 0.73, z: 0.0, yaw: 0.0}
+
+  wp-c-6-1:
+    asset_id: "P-C-6-1"
+    description: "Zone C Passage Node (wp-c-6-1)"
+    user_pose: {x: 37.11, y: 5.49, yaw: 0.0}
+    pose: {x: 13.79, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-c-6-2:
+    asset_id: "P-C-6-2"
+    description: "Zone C Passage Node (wp-c-6-2)"
+    user_pose: {x: 38.34, y: 5.49, yaw: 0.0}
+    pose: {x: 15.02, y: -0.14, z: 0.0, yaw: 0.0}
+
+  wp-c-6-3:
+    asset_id: "P-C-6-3"
+    description: "Zone C Passage Node (wp-c-6-3)"
+    user_pose: {x: 39.52, y: 5.47, yaw: 0.0}
+    pose: {x: 16.2, y: -0.16, z: 0.0, yaw: 0.0}
+
+  wp-c-6-4:
+    asset_id: "P-C-6-4"
+    description: "Zone C Passage Node (wp-c-6-4)"
+    user_pose: {x: 41.04, y: 5.47, yaw: 0.0}
+    pose: {x: 17.72, y: -0.16, z: 0.0, yaw: 0.0}
+
+  wp-c-6-5:
+    asset_id: "P-C-6-5"
+    description: "Zone C Passage Node (wp-c-6-5)"
+    user_pose: {x: 42.53, y: 5.48, yaw: 0.0}
+    pose: {x: 19.21, y: -0.15, z: 0.0, yaw: 0.0}
+
+  wp-c-6-6:
+    asset_id: "P-C-6-6"
+    description: "Zone C Passage Node (wp-c-6-6)"
+    user_pose: {x: 44.33, y: 5.48, yaw: 0.0}
+    pose: {x: 21.01, y: -0.15, z: 0.0, yaw: 0.0}
+
+  wp-c-6-7:
+    asset_id: "P-C-6-7"
+    description: "Zone C Passage Node (wp-c-6-7)"
+    user_pose: {x: 46.15, y: 5.47, yaw: 0.0}
+    pose: {x: 22.83, y: -0.16, z: 0.0, yaw: 0.0}
+
+  wp-c-7-1:
+    asset_id: "P-C-7-1"
+    description: "Zone C Passage Node (wp-c-7-1)"
+    user_pose: {x: 37.11, y: 4.28, yaw: 0.0}
+    pose: {x: 13.79, y: -1.35, z: 0.0, yaw: 0.0}
+
+  wp-c-7-2:
+    asset_id: "P-C-7-2"
+    description: "Zone C Passage Node (wp-c-7-2)"
+    user_pose: {x: 38.34, y: 4.28, yaw: 0.0}
+    pose: {x: 15.02, y: -1.35, z: 0.0, yaw: 0.0}
+
+  wp-c-7-3:
+    asset_id: "P-C-7-3"
+    description: "Zone C Passage Node (wp-c-7-3)"
+    user_pose: {x: 39.52, y: 4.27, yaw: 0.0}
+    pose: {x: 16.2, y: -1.36, z: 0.0, yaw: 0.0}
+
+  wp-c-7-5:
+    asset_id: "P-C-7-5"
+    description: "Zone C Passage Node (wp-c-7-5)"
+    user_pose: {x: 42.53, y: 4.26, yaw: 0.0}
+    pose: {x: 19.21, y: -1.37, z: 0.0, yaw: 0.0}
+
+  wp-c-7-6:
+    asset_id: "P-C-7-6"
+    description: "Zone C Passage Node (wp-c-7-6)"
+    user_pose: {x: 44.33, y: 4.26, yaw: 0.0}
+    pose: {x: 21.01, y: -1.37, z: 0.0, yaw: 0.0}
+
+  wp-c-7-7:
+    asset_id: "P-C-7-7"
+    description: "Zone C Passage Node (wp-c-7-7)"
+    user_pose: {x: 46.15, y: 4.25, yaw: 0.0}
+    pose: {x: 22.83, y: -1.38, z: 0.0, yaw: 0.0}
+
+  wp-c-8-1:
+    asset_id: "P-C-8-1"
+    description: "Zone C Passage Node (wp-c-8-1)"
+    user_pose: {x: 37.11, y: 3.38, yaw: 0.0}
+    pose: {x: 13.79, y: -2.25, z: 0.0, yaw: 0.0}
+
+  wp-c-8-2:
+    asset_id: "P-C-8-2"
+    description: "Zone C Passage Node (wp-c-8-2)"
+    user_pose: {x: 38.34, y: 3.38, yaw: 0.0}
+    pose: {x: 15.02, y: -2.25, z: 0.0, yaw: 0.0}
+
+  wp-c-9-1:
+    asset_id: "P-C-9-1"
+    description: "Zone C Passage Node (wp-c-9-1)"
+    user_pose: {x: 37.11, y: 2.48, yaw: 0.0}
+    pose: {x: 13.79, y: -3.15, z: 0.0, yaw: 0.0}
+
+  wp-c-9-2:
+    asset_id: "P-C-9-2"
+    description: "Zone C Passage Node (wp-c-9-2)"
+    user_pose: {x: 38.34, y: 2.48, yaw: 0.0}
+    pose: {x: 15.02, y: -3.15, z: 0.0, yaw: 0.0}
+
+  wp-c-9-3:
+    asset_id: "P-C-9-3"
+    description: "Zone C Passage Node (wp-c-9-3)"
+    user_pose: {x: 39.52, y: 2.46, yaw: 0.0}
+    pose: {x: 16.2, y: -3.17, z: 0.0, yaw: 0.0}
+
+  wp-c-9-4:
+    asset_id: "P-C-9-4"
+    description: "Zone C Passage Node (wp-c-9-4)"
+    user_pose: {x: 41.04, y: 2.46, yaw: 0.0}
+    pose: {x: 17.72, y: -3.17, z: 0.0, yaw: 0.0}
+
+  wp-c-9-5:
+    asset_id: "P-C-9-5"
+    description: "Zone C Passage Node (wp-c-9-5)"
+    user_pose: {x: 42.53, y: 2.46, yaw: 0.0}
+    pose: {x: 19.21, y: -3.17, z: 0.0, yaw: 0.0}
+
+  wp-c-9-6:
+    asset_id: "P-C-9-6"
+    description: "Zone C Passage Node (wp-c-9-6)"
+    user_pose: {x: 44.33, y: 2.46, yaw: 0.0}
+    pose: {x: 21.01, y: -3.17, z: 0.0, yaw: 0.0}
+
+  wp-c-9-7:
+    asset_id: "P-C-9-7"
+    description: "Zone C Passage Node (wp-c-9-7)"
+    user_pose: {x: 46.15, y: 2.44, yaw: 0.0}
+    pose: {x: 22.83, y: -3.19, z: 0.0, yaw: 0.0}
+
+  wp-c-10-1:
+    asset_id: "P-C-10-1"
+    description: "Zone C Passage Node (wp-c-10-1)"
+    user_pose: {x: 37.11, y: 1.27, yaw: 0.0}
+    pose: {x: 13.79, y: -4.36, z: 0.0, yaw: 0.0}
+
+  wp-c-10-2:
+    asset_id: "P-C-10-2"
+    description: "Zone C Passage Node (wp-c-10-2)"
+    user_pose: {x: 38.34, y: 1.27, yaw: 0.0}
+    pose: {x: 15.02, y: -4.36, z: 0.0, yaw: 0.0}
+
+  wp-c-10-3:
+    asset_id: "P-C-10-3"
+    description: "Zone C Passage Node (wp-c-10-3)"
+    user_pose: {x: 39.52, y: 1.26, yaw: 0.0}
+    pose: {x: 16.2, y: -4.37, z: 0.0, yaw: 0.0}
+
+  wp-c-10-5:
+    asset_id: "P-C-10-5"
+    description: "Zone C Passage Node (wp-c-10-5)"
+    user_pose: {x: 42.52, y: 1.27, yaw: 0.0}
+    pose: {x: 19.2, y: -4.36, z: 0.0, yaw: 0.0}
+
+  wp-c-10-6:
+    asset_id: "P-C-10-6"
+    description: "Zone C Passage Node (wp-c-10-6)"
+    user_pose: {x: 44.32, y: 1.27, yaw: 0.0}
+    pose: {x: 21.0, y: -4.36, z: 0.0, yaw: 0.0}
+
+  wp-c-10-7:
+    asset_id: "P-C-10-7"
+    description: "Zone C Passage Node (wp-c-10-7)"
+    user_pose: {x: 46.14, y: 1.25, yaw: 0.0}
+    pose: {x: 22.82, y: -4.38, z: 0.0, yaw: 0.0}

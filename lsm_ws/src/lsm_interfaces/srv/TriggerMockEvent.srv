@@ -1,8 +1,15 @@
-string station_id
-uint8 event_type
+# [Trigger Mock Event Service Request]
+# 대시보드 -> workstation_mock_node 수동 적재/하역 완결 트리거 요청
 
-uint8 EVENT_CARGO_LOADED=2
-uint8 EVENT_CARGO_UNLOADED=3
+string station_id             # 대상 작업장 ID (예: "A-1"~"A-6", "B-1-1"~"B-4-4", "C-1"~"C-4", "CHARGE-1")
+uint8 event_type               # 적재/하역 이벤트 유형 (2: CARGO_LOADED, 3: CARGO_UNLOADED)
+
+# [Event Type Enums]
+uint8 EVENT_CARGO_LOADED=2     # 2: 수동 적재 완료 트리거
+uint8 EVENT_CARGO_UNLOADED=3   # 3: 수동 하역 완료 트리거
+
 ---
-bool success
-string message
+# [Response]
+bool success                   # 처리 성공 여부 (true / false)
+string message                 # 결과 메시지 (예: "Mock Cargo Loaded event triggered for station A-1")
+

@@ -1,21 +1,23 @@
-# [Goal]
-string task_id
-uint8 task_type
-string target_station_id
-geometry_msgs/PoseStamped target_pose
+# [Goal] FMS -> AMR 작업 할당 명령
+string task_id                         # 작업 고유 ID (예: "TASK_A1_B11_001")
+uint8 task_type                        # 작업 유형 (1: PICKUP, 2: DELIVERY, 3: RETURN_HOME)
+string target_station_id               # 목표 스테이션 ID (예: "A-1"~"A-6", "B-1-1"~"B-4-4", "C-1"~"C-4", "CHARGE-1")
+geometry_msgs/PoseStamped target_pose  # 목표 정지 위치 Pose (Map 좌표계 기준)
 
-uint8 TASK_TYPE_PICKUP=1
-uint8 TASK_TYPE_DELIVERY=2
-uint8 TASK_TYPE_RETURN_HOME=3
-
----
-# [Result]
-bool success
-string message
-float32 total_execution_time
+# [Task Type Enums]
+uint8 TASK_TYPE_PICKUP=1               # 1: PICKUP (자재/부품 픽업 이동)
+uint8 TASK_TYPE_DELIVERY=2             # 2: DELIVERY (공정 간/최종 하역지로 배송 이동)
+uint8 TASK_TYPE_RETURN_HOME=3          # 3: RETURN_HOME (충전소/복귀 정지 위치로 이동)
 
 ---
-# [Feedback]
-uint8 current_state
-float32 distance_remaining
-float32 estimated_time_remaining
+# [Result] 작업 최종 결과
+bool success                           # 작업 성공 여부 (true / false)
+string message                         # 결과 상세 메시지 (예: "Task Completed Successfully", "Navigation Failed")
+float32 total_execution_time           # 소요 총 시간 (초 단위, 예: 45.2)
+
+---
+# [Feedback] 작업 진행 중 실시간 피드백 (FMS 전달)
+uint8 current_state                    # AMR 현재 FSM 상태 코드 (0 ~ 4)
+float32 distance_remaining             # 목표 포즈까지 남은 거리 (m 단위, 예: 3.5)
+float32 estimated_time_remaining       # 목표 포즈 도착까지 예상 남은 시간 (초 단위, 예: 12.0)
+
