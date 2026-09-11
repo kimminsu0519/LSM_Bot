@@ -1,0 +1,4342 @@
+metadata:
+  map_name: 창고맵_총합_Drawio_Parsed_Strict
+  map_origin_drawio_pt:
+  - 160.0
+  - 880.0
+  scale_pt_per_meter: 100.0
+  total_waypoints: 206
+  active_waypoints: 156
+  generated_at: '2026-09-12'
+waypoints:
+  wp-ws-a-1:
+    type: workstation
+    status: active
+    user_pose:
+      x: 3.0
+      y: 5.7
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 0.543
+        y: 5.342
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-3-3
+      direction: one_way
+      distance_m: 0.88
+  wp-ws-a-2:
+    type: workstation
+    status: active
+    user_pose:
+      x: 4.6
+      y: 5.7
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 2.143
+        y: 5.342
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-4-5
+      direction: bidirectional
+      distance_m: 1.5
+  wp-ws-a-3:
+    type: workstation
+    status: active
+    user_pose:
+      x: 6.2
+      y: 5.7
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 3.743
+        y: 5.342
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-4-7
+      direction: bidirectional
+      distance_m: 1.49
+  wp-ws-a-4:
+    type: workstation
+    status: active
+    user_pose:
+      x: 3.0
+      y: 1.3
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 0.543
+        y: 0.942
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-9-3
+      direction: one_way
+      distance_m: 1.2
+  wp-ws-a-5:
+    type: workstation
+    status: active
+    user_pose:
+      x: 4.6
+      y: 1.3
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 2.143
+        y: 0.942
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-6-5
+      direction: bidirectional
+      distance_m: 1.44
+  wp-ws-a-6:
+    type: workstation
+    status: active
+    user_pose:
+      x: 6.2
+      y: 1.3
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 3.743
+        y: 0.942
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-6-7
+      direction: bidirectional
+      distance_m: 1.42
+  wp-ws-b-1-1:
+    type: workstation
+    status: active
+    user_pose:
+      x: 11.0
+      y: 6.5
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 8.543
+        y: 6.142
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-1-5
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-1-2:
+    type: workstation
+    status: active
+    user_pose:
+      x: 13.8
+      y: 6.5
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 11.343
+        y: 6.142
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-1-7
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-1-3:
+    type: workstation
+    status: active
+    user_pose:
+      x: 16.6
+      y: 6.5
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 14.143
+        y: 6.142
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-1-9
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-1-4:
+    type: workstation
+    status: active
+    user_pose:
+      x: 19.4
+      y: 6.5
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 16.943
+        y: 6.142
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-1-11
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-2-1:
+    type: workstation
+    status: active
+    user_pose:
+      x: 11.0
+      y: 4.9
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 8.543
+        y: 4.542
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-3-5
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-2-2:
+    type: workstation
+    status: active
+    user_pose:
+      x: 13.8
+      y: 4.9
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 11.343
+        y: 4.542
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-3-7
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-2-3:
+    type: workstation
+    status: active
+    user_pose:
+      x: 16.6
+      y: 4.9
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 14.143
+        y: 4.542
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-3-9
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-2-4:
+    type: workstation
+    status: active
+    user_pose:
+      x: 19.4
+      y: 4.9
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 16.943
+        y: 4.542
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-3-11
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-3-1:
+    type: workstation
+    status: active
+    user_pose:
+      x: 11.0
+      y: 3.3
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 8.543
+        y: 2.942
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-5-5
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-3-2:
+    type: workstation
+    status: active
+    user_pose:
+      x: 13.8
+      y: 3.3
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 11.343
+        y: 2.942
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-5-7
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-3-3:
+    type: workstation
+    status: active
+    user_pose:
+      x: 16.6
+      y: 3.3
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 14.143
+        y: 2.942
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-5-9
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-3-4:
+    type: workstation
+    status: active
+    user_pose:
+      x: 19.4
+      y: 3.3
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 16.943
+        y: 2.942
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-5-11
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-4-1:
+    type: workstation
+    status: active
+    user_pose:
+      x: 11.0
+      y: 1.7
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 8.543
+        y: 1.342
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-7-5
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-4-2:
+    type: workstation
+    status: active
+    user_pose:
+      x: 13.8
+      y: 1.7
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 11.343
+        y: 1.342
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-7-7
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-4-3:
+    type: workstation
+    status: active
+    user_pose:
+      x: 16.6
+      y: 1.7
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 14.143
+        y: 1.342
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-7-9
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-b-4-4:
+    type: workstation
+    status: active
+    user_pose:
+      x: 19.4
+      y: 1.7
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 16.943
+        y: 1.342
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-b-7-11
+      direction: one_way
+      distance_m: 1.41
+  wp-ws-c-4:
+    type: workstation
+    status: active
+    user_pose:
+      x: 27.4
+      y: 0.5
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 24.943
+        y: 0.142
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-c-10-5
+      direction: one_way
+      distance_m: 1.01
+  wp-ws-c-3:
+    type: workstation
+    status: active
+    user_pose:
+      x: 27.4
+      y: 2.5
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 24.943
+        y: 2.142
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-c-7-5
+      direction: one_way
+      distance_m: 1.02
+  wp-ws-c-2:
+    type: workstation
+    status: active
+    user_pose:
+      x: 27.4
+      y: 4.5
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 24.943
+        y: 4.142
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-c-4-5
+      direction: one_way
+      distance_m: 1.02
+  wp-ws-c-1:
+    type: workstation
+    status: active
+    user_pose:
+      x: 27.4
+      y: 6.5
+      yaw_deg: -90.0
+    pose:
+      position:
+        x: 24.943
+        y: 6.142
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: -0.7071
+        qw: 0.7071
+    connected_to:
+    - target: wp-c-1-5
+      direction: one_way
+      distance_m: 1.02
+  wp-charge-1:
+    type: charger
+    status: active
+    user_pose:
+      x: 1.6
+      y: 0.1
+      yaw_deg: 180.0
+    pose:
+      position:
+        x: -0.857
+        y: -0.258
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 1.0
+        qw: 0.0
+    connected_to:
+    - target: wp-a-9-1
+      direction: one_way
+      distance_m: 0.8
+  wp-a-1-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 0.805
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -1.652
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-1-2
+      direction: one_way
+      distance_m: 0.8
+  wp-a-1-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 1.6
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.857
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-1-3
+      direction: one_way
+      distance_m: 0.8
+  wp-a-2-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 0.8
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -1.657
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-1-1
+      direction: one_way
+      distance_m: 0.8
+  wp-b-1-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 7.2
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.743
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-1-2
+      direction: one_way
+      distance_m: 1.2
+  wp-b-1-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 8.4
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 5.943
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-1-3
+      direction: one_way
+      distance_m: 1.2
+  wp-c-1-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.79
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 22.333
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-2-1
+      direction: one_way
+      distance_m: 0.6
+  wp-c-1-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 25.61
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.153
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-1-3
+      direction: bidirectional
+      distance_m: 0.79
+    - target: wp-c-1-1
+      direction: one_way
+      distance_m: 0.82
+  wp-c-2-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.79
+      y: 6.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 22.333
+        y: 5.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-3-1
+      direction: one_way
+      distance_m: 0.6
+  wp-a-1-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 2.405
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.052
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-2-3
+      direction: one_way
+      distance_m: 0.8
+  wp-a-2-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 1.6
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.857
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-a-2-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 2.39
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.067
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-ws-a-1
+      direction: one_way
+      distance_m: 0.63
+    - target: wp-a-3-3
+      direction: one_way
+      distance_m: 0.8
+  wp-a-3-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 0.81
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -1.647
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-2-1
+      direction: one_way
+      distance_m: 0.8
+  wp-a-3-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 1.6
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.857
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-a-3-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 2.405
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.052
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-4-3
+      direction: one_way
+      distance_m: 0.8
+  wp-a-4-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 0.805
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -1.652
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-3-1
+      direction: one_way
+      distance_m: 0.8
+    - target: wp-a-4-2
+      direction: one_way
+      distance_m: 0.8
+  wp-a-4-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 1.6
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.857
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-4-3
+      direction: one_way
+      distance_m: 0.8
+  wp-a-4-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 2.405
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.052
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-4-4
+      direction: one_way
+      distance_m: 1.0
+    - target: wp-a-5-3
+      direction: one_way
+      distance_m: 0.8
+  wp-a-4-4:
+    type: passage
+    status: active
+    user_pose:
+      x: 3.4
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 0.943
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-4-5
+      direction: one_way
+      distance_m: 0.8
+  wp-a-4-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 4.2
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 1.743
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-4-6
+      direction: one_way
+      distance_m: 0.82
+    - target: wp-ws-a-2
+      direction: bidirectional
+      distance_m: 1.5
+    - target: wp-a-5-5
+      direction: one_way
+      distance_m: 0.8
+  wp-a-4-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 5.02
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 2.563
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-4-7
+      direction: one_way
+      distance_m: 0.82
+  wp-a-4-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 5.84
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 3.383
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-4-8
+      direction: one_way
+      distance_m: 0.76
+    - target: wp-ws-a-3
+      direction: bidirectional
+      distance_m: 1.49
+    - target: wp-a-5-7
+      direction: one_way
+      distance_m: 0.8
+  wp-a-4-8:
+    type: passage
+    status: active
+    user_pose:
+      x: 6.6
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.143
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-4-1
+      direction: one_way
+      distance_m: 0.6
+  wp-a-5-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 0.81
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -1.647
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-4-1
+      direction: one_way
+      distance_m: 0.8
+  wp-a-5-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 1.605
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.852
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-a-5-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 2.41
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.047
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-6-3
+      direction: one_way
+      distance_m: 0.77
+  wp-a-5-4:
+    type: passage
+    status: active
+    user_pose:
+      x: 3.405
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 0.948
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-5-3
+      direction: one_way
+      distance_m: 0.99
+  wp-a-5-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 4.205
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 1.748
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-5-4
+      direction: one_way
+      distance_m: 0.8
+  wp-a-5-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 5.025
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 2.568
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-5-5
+      direction: one_way
+      distance_m: 0.82
+  wp-a-5-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 5.845
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 3.388
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-5-6
+      direction: one_way
+      distance_m: 0.82
+  wp-a-5-8:
+    type: passage
+    status: active
+    user_pose:
+      x: 6.605
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.148
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-5-7
+      direction: one_way
+      distance_m: 0.76
+  wp-a-6-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 0.81
+      y: 2.68
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -1.647
+        y: 2.322
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-5-1
+      direction: one_way
+      distance_m: 0.77
+    - target: wp-a-6-2
+      direction: one_way
+      distance_m: 0.79
+  wp-a-6-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 1.605
+      y: 2.68
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.852
+        y: 2.322
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-6-3
+      direction: one_way
+      distance_m: 0.81
+  wp-a-6-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 2.41
+      y: 2.68
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.047
+        y: 2.322
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-6-4
+      direction: one_way
+      distance_m: 0.99
+    - target: wp-a-7-3
+      direction: one_way
+      distance_m: 0.83
+  wp-a-6-4:
+    type: passage
+    status: active
+    user_pose:
+      x: 3.405
+      y: 2.68
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 0.948
+        y: 2.322
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-6-5
+      direction: one_way
+      distance_m: 0.8
+  wp-a-6-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 4.205
+      y: 2.68
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 1.748
+        y: 2.322
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-6-6
+      direction: one_way
+      distance_m: 0.82
+    - target: wp-ws-a-5
+      direction: bidirectional
+      distance_m: 1.44
+    - target: wp-a-5-5
+      direction: one_way
+      distance_m: 0.77
+  wp-a-6-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 5.025
+      y: 2.68
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 2.568
+        y: 2.322
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-6-7
+      direction: one_way
+      distance_m: 0.82
+  wp-a-6-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 5.845
+      y: 2.68
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 3.388
+        y: 2.322
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-6-8
+      direction: one_way
+      distance_m: 0.76
+    - target: wp-ws-a-6
+      direction: bidirectional
+      distance_m: 1.42
+    - target: wp-a-5-7
+      direction: one_way
+      distance_m: 0.77
+  wp-a-6-8:
+    type: passage
+    status: active
+    user_pose:
+      x: 6.605
+      y: 2.68
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.148
+        y: 2.322
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-6-1
+      direction: one_way
+      distance_m: 0.6
+  wp-a-7-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 0.81
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -1.647
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-6-1
+      direction: one_way
+      distance_m: 0.83
+  wp-a-7-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 1.605
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.852
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-a-7-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 2.41
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.047
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-ws-a-4
+      direction: one_way
+      distance_m: 0.81
+    - target: wp-a-8-3
+      direction: one_way
+      distance_m: 0.8
+  wp-a-8-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 0.805
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -1.652
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-7-1
+      direction: one_way
+      distance_m: 0.8
+  wp-a-8-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 1.6
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.857
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-a-8-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 2.405
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.052
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-9-3
+      direction: one_way
+      distance_m: 0.8
+  wp-a-9-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 0.81
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -1.647
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-a-8-1
+      direction: one_way
+      distance_m: 0.8
+  wp-a-9-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 2.41
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: -0.047
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-charge-1
+      direction: one_way
+      distance_m: 0.82
+  wp-b-1-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 9.6
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 7.143
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-1-5
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-1-1
+      direction: one_way
+      distance_m: 1.41
+  wp-b-1-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 12.4
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 9.943
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-1-7
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-1-2
+      direction: one_way
+      distance_m: 1.41
+  wp-b-1-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 15.2
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 12.743
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-1-9
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-1-3
+      direction: one_way
+      distance_m: 1.41
+  wp-b-1-9:
+    type: passage
+    status: active
+    user_pose:
+      x: 18.0
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 15.543
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-1-11
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-1-4
+      direction: one_way
+      distance_m: 1.41
+  wp-b-1-11:
+    type: passage
+    status: active
+    user_pose:
+      x: 20.8
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 18.343
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-1-12
+      direction: one_way
+      distance_m: 1.2
+  wp-b-1-12:
+    type: passage
+    status: active
+    user_pose:
+      x: 22.0
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 19.543
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-2-12
+      direction: one_way
+      distance_m: 0.8
+  wp-b-1-13:
+    type: passage
+    status: active
+    user_pose:
+      x: 23.2
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 20.743
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-2-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 7.2
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.743
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-1-1
+      direction: one_way
+      distance_m: 0.8
+  wp-b-2-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 8.4
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 5.943
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-2-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 9.6
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 7.143
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-2-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 12.4
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 9.943
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-2-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 15.2
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 12.743
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-2-9:
+    type: passage
+    status: active
+    user_pose:
+      x: 18.0
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 15.543
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-2-11:
+    type: passage
+    status: active
+    user_pose:
+      x: 20.8
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 18.343
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-2-12:
+    type: passage
+    status: active
+    user_pose:
+      x: 22.0
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 19.543
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-3-12
+      direction: one_way
+      distance_m: 0.8
+  wp-b-2-13:
+    type: passage
+    status: active
+    user_pose:
+      x: 23.2
+      y: 5.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 20.743
+        y: 5.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-3-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 7.2
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.743
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-2-1
+      direction: one_way
+      distance_m: 0.8
+    - target: wp-b-3-2
+      direction: one_way
+      distance_m: 1.2
+  wp-b-3-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 8.4
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 5.943
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-3-3
+      direction: one_way
+      distance_m: 1.2
+  wp-b-3-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 9.6
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 7.143
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-3-5
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-2-1
+      direction: one_way
+      distance_m: 1.41
+  wp-b-3-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 12.4
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 9.943
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-3-7
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-2-2
+      direction: one_way
+      distance_m: 1.41
+  wp-b-3-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 15.2
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 12.743
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-3-9
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-2-3
+      direction: one_way
+      distance_m: 1.41
+  wp-b-3-9:
+    type: passage
+    status: active
+    user_pose:
+      x: 18.0
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 15.543
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-3-11
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-2-4
+      direction: one_way
+      distance_m: 1.41
+  wp-b-3-11:
+    type: passage
+    status: active
+    user_pose:
+      x: 20.8
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 18.343
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-3-12
+      direction: one_way
+      distance_m: 1.2
+  wp-b-3-12:
+    type: passage
+    status: active
+    user_pose:
+      x: 22.0
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 19.543
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-4-12
+      direction: one_way
+      distance_m: 0.8
+  wp-b-3-13:
+    type: passage
+    status: active
+    user_pose:
+      x: 23.2
+      y: 5.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 20.743
+        y: 4.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-4-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 7.2
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.743
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-3-1
+      direction: one_way
+      distance_m: 0.8
+    - target: wp-b-5-1
+      direction: bidirectional
+      distance_m: 0.8
+  wp-b-4-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 8.4
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 5.943
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-4-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 9.6
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 7.143
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-4-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 12.4
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 9.943
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-4-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 15.2
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 12.743
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-4-9:
+    type: passage
+    status: active
+    user_pose:
+      x: 18.0
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 15.543
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-4-11:
+    type: passage
+    status: active
+    user_pose:
+      x: 20.8
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 18.343
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-4-12:
+    type: passage
+    status: active
+    user_pose:
+      x: 22.0
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 19.543
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-5-12
+      direction: one_way
+      distance_m: 0.8
+  wp-b-4-13:
+    type: passage
+    status: active
+    user_pose:
+      x: 23.2
+      y: 4.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 20.743
+        y: 3.892
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-5-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 7.2
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.743
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-5-2
+      direction: bidirectional
+      distance_m: 1.2
+    - target: wp-b-6-1
+      direction: bidirectional
+      distance_m: 0.8
+    - target: wp-b-4-1
+      direction: bidirectional
+      distance_m: 0.8
+    - target: wp-a-5-8
+      direction: one_way
+      distance_m: 0.59
+  wp-b-5-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 8.4
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 5.943
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-5-3
+      direction: one_way
+      distance_m: 1.2
+    - target: wp-b-5-1
+      direction: bidirectional
+      distance_m: 1.2
+  wp-b-5-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 9.6
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 7.143
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-5-5
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-3-1
+      direction: one_way
+      distance_m: 1.41
+  wp-b-5-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 12.4
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 9.943
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-5-7
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-3-2
+      direction: one_way
+      distance_m: 1.41
+  wp-b-5-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 15.2
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 12.743
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-5-9
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-3-3
+      direction: one_way
+      distance_m: 1.41
+  wp-b-5-9:
+    type: passage
+    status: active
+    user_pose:
+      x: 18.0
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 15.543
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-5-11
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-3-4
+      direction: one_way
+      distance_m: 1.41
+  wp-b-5-11:
+    type: passage
+    status: active
+    user_pose:
+      x: 20.8
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 18.343
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-5-12
+      direction: one_way
+      distance_m: 1.2
+  wp-b-5-12:
+    type: passage
+    status: active
+    user_pose:
+      x: 22.0
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 19.543
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-6-12
+      direction: one_way
+      distance_m: 0.8
+  wp-b-5-13:
+    type: passage
+    status: active
+    user_pose:
+      x: 23.2
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 20.743
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-6-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 7.2
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.743
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-7-1
+      direction: one_way
+      distance_m: 0.8
+    - target: wp-b-5-1
+      direction: bidirectional
+      distance_m: 0.8
+  wp-b-6-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 8.4
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 5.943
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-5-2
+      direction: one_way
+      distance_m: 0.8
+  wp-b-6-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 9.6
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 7.143
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-6-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 12.4
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 9.943
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-6-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 15.2
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 12.743
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-6-9:
+    type: passage
+    status: active
+    user_pose:
+      x: 18.0
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 15.543
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-6-11:
+    type: passage
+    status: active
+    user_pose:
+      x: 20.8
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 18.343
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-6-12:
+    type: passage
+    status: active
+    user_pose:
+      x: 22.0
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 19.543
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-7-12
+      direction: one_way
+      distance_m: 0.8
+  wp-b-6-13:
+    type: passage
+    status: active
+    user_pose:
+      x: 23.2
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 20.743
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-7-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 7.2
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.743
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-7-2
+      direction: one_way
+      distance_m: 1.2
+  wp-b-7-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 8.4
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 5.943
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-7-3
+      direction: one_way
+      distance_m: 1.2
+    - target: wp-b-6-2
+      direction: one_way
+      distance_m: 0.8
+  wp-b-7-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 9.6
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 7.143
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-7-5
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-4-1
+      direction: one_way
+      distance_m: 1.41
+  wp-b-7-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 12.4
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 9.943
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-7-7
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-4-2
+      direction: one_way
+      distance_m: 1.41
+  wp-b-7-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 15.2
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 12.743
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-7-9
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-4-3
+      direction: one_way
+      distance_m: 1.41
+  wp-b-7-9:
+    type: passage
+    status: active
+    user_pose:
+      x: 18.0
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 15.543
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-7-11
+      direction: one_way
+      distance_m: 2.8
+    - target: wp-ws-b-4-4
+      direction: one_way
+      distance_m: 1.41
+  wp-b-7-11:
+    type: passage
+    status: active
+    user_pose:
+      x: 20.8
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 18.343
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-7-12
+      direction: one_way
+      distance_m: 1.2
+  wp-b-7-12:
+    type: passage
+    status: active
+    user_pose:
+      x: 22.0
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 19.543
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-8-12
+      direction: one_way
+      distance_m: 0.8
+  wp-b-7-13:
+    type: passage
+    status: active
+    user_pose:
+      x: 23.2
+      y: 1.85
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 20.743
+        y: 1.492
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-8-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 7.2
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.743
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-8-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 8.4
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 5.943
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-7-2
+      direction: one_way
+      distance_m: 0.8
+  wp-b-8-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 9.6
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 7.143
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-8-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 12.4
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 9.943
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-8-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 15.2
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 12.743
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-8-9:
+    type: passage
+    status: active
+    user_pose:
+      x: 18.0
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 15.543
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-8-11:
+    type: passage
+    status: active
+    user_pose:
+      x: 20.8
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 18.343
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-8-12:
+    type: passage
+    status: active
+    user_pose:
+      x: 22.0
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 19.543
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-12
+      direction: one_way
+      distance_m: 0.8
+    - target: wp-b-8-13
+      direction: one_way
+      distance_m: 1.2
+  wp-b-8-13:
+    type: passage
+    status: active
+    user_pose:
+      x: 23.2
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 20.743
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-13
+      direction: one_way
+      distance_m: 0.8
+    - target: wp-b-8-14
+      direction: one_way
+      distance_m: 0.8
+  wp-b-9-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 7.2
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 4.743
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-b-9-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 8.4
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 5.943
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-8-2
+      direction: one_way
+      distance_m: 0.8
+  wp-b-9-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 9.6
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 7.143
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-2
+      direction: one_way
+      distance_m: 1.2
+  wp-b-9-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 12.4
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 9.943
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-4
+      direction: one_way
+      distance_m: 1.4
+  wp-b-9-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 15.2
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 12.743
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-6
+      direction: one_way
+      distance_m: 1.39
+  wp-b-9-9:
+    type: passage
+    status: active
+    user_pose:
+      x: 18.0
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 15.543
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-8
+      direction: one_way
+      distance_m: 1.4
+  wp-b-9-11:
+    type: passage
+    status: active
+    user_pose:
+      x: 20.8
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 18.343
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-10
+      direction: one_way
+      distance_m: 1.4
+  wp-b-9-12:
+    type: passage
+    status: active
+    user_pose:
+      x: 22.0
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 19.543
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-11
+      direction: one_way
+      distance_m: 1.2
+  wp-b-9-13:
+    type: passage
+    status: active
+    user_pose:
+      x: 23.2
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 20.743
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-12
+      direction: one_way
+      distance_m: 1.2
+  wp-b-8-14:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.0
+      y: 1.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 21.543
+        y: 0.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-10-1
+      direction: one_way
+      distance_m: 0.88
+    - target: wp-c-9-1
+      direction: one_way
+      distance_m: 0.89
+  wp-b-9-14:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.0
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 21.543
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-13
+      direction: one_way
+      distance_m: 0.8
+  wp-b-9-4:
+    type: passage
+    status: active
+    user_pose:
+      x: 11.0
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 8.543
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-3
+      direction: one_way
+      distance_m: 1.4
+  wp-b-9-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 13.81
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 11.353
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-5
+      direction: one_way
+      distance_m: 1.41
+  wp-b-9-8:
+    type: passage
+    status: active
+    user_pose:
+      x: 16.6
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 14.143
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-7
+      direction: one_way
+      distance_m: 1.4
+  wp-b-9-10:
+    type: passage
+    status: active
+    user_pose:
+      x: 19.4
+      y: 0.25
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 16.943
+        y: -0.108
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-b-9-9
+      direction: one_way
+      distance_m: 1.4
+  wp-c-1-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 26.4
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.943
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-1-2
+      direction: bidirectional
+      distance_m: 0.79
+    - target: wp-ws-c-1
+      direction: one_way
+      distance_m: 1.01
+    - target: wp-c-1-5
+      direction: bidirectional
+      distance_m: 2.01
+  wp-c-1-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 28.405
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 25.948
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-1-3
+      direction: bidirectional
+      distance_m: 2.01
+  wp-c-1-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 29.605
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 27.148
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-1-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 30.805
+      y: 6.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 28.348
+        y: 6.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-3-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.79
+      y: 5.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 22.333
+        y: 5.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-4-1
+      direction: one_way
+      distance_m: 0.8
+  wp-c-3-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 25.61
+      y: 5.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.153
+        y: 5.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-2-2
+      direction: one_way
+      distance_m: 0.6
+  wp-c-3-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 26.4
+      y: 5.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.943
+        y: 5.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-3-2
+      direction: one_way
+      distance_m: 0.79
+  wp-c-3-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 28.405
+      y: 5.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 25.948
+        y: 5.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-3-4
+      direction: one_way
+      distance_m: 1.0
+  wp-c-3-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 29.605
+      y: 5.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 27.148
+        y: 5.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-3-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 30.805
+      y: 5.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 28.348
+        y: 5.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-4-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.79
+      y: 4.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 22.333
+        y: 4.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-5-1
+      direction: one_way
+      distance_m: 0.6
+  wp-c-4-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 25.61
+      y: 4.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.153
+        y: 4.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-4-3
+      direction: one_way
+      distance_m: 0.79
+    - target: wp-c-3-2
+      direction: one_way
+      distance_m: 0.8
+  wp-c-4-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 26.4
+      y: 4.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.943
+        y: 4.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-ws-c-2
+      direction: one_way
+      distance_m: 1.01
+    - target: wp-c-4-5
+      direction: one_way
+      distance_m: 2.01
+  wp-c-4-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 28.405
+      y: 4.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 25.948
+        y: 4.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-3-5
+      direction: one_way
+      distance_m: 0.8
+  wp-c-4-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 29.605
+      y: 4.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 27.148
+        y: 4.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-4-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 30.805
+      y: 4.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 28.348
+        y: 4.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-6-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.79
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 22.333
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-7-1
+      direction: one_way
+      distance_m: 0.8
+  wp-c-6-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 25.61
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.153
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-5-2
+      direction: one_way
+      distance_m: 0.6
+  wp-c-6-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 26.4
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.943
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-6-2
+      direction: one_way
+      distance_m: 0.79
+  wp-c-6-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 28.405
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 25.948
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-6-4
+      direction: one_way
+      distance_m: 1.0
+  wp-c-6-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 29.605
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 27.148
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-6-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 30.805
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 28.348
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-7-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.79
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 22.333
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-8-1
+      direction: one_way
+      distance_m: 0.59
+  wp-c-7-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 25.61
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.153
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-7-3
+      direction: one_way
+      distance_m: 0.79
+    - target: wp-c-6-2
+      direction: one_way
+      distance_m: 0.8
+  wp-c-7-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 26.4
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.943
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-ws-c-3
+      direction: one_way
+      distance_m: 1.01
+    - target: wp-c-7-5
+      direction: one_way
+      distance_m: 2.01
+  wp-c-7-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 28.405
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 25.948
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-6-5
+      direction: one_way
+      distance_m: 0.8
+  wp-c-7-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 29.605
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 27.148
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-7-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 30.805
+      y: 2.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 28.348
+        y: 2.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-9-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.79
+      y: 1.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 22.333
+        y: 1.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-10-1
+      direction: one_way
+      distance_m: 0.8
+  wp-c-9-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 25.61
+      y: 1.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.153
+        y: 1.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-9-1
+      direction: one_way
+      distance_m: 0.82
+    - target: wp-c-8-2
+      direction: one_way
+      distance_m: 0.61
+  wp-c-9-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 26.4
+      y: 1.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.943
+        y: 1.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-9-2
+      direction: one_way
+      distance_m: 0.79
+  wp-c-9-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 28.405
+      y: 1.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 25.948
+        y: 1.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-9-4
+      direction: one_way
+      distance_m: 1.0
+  wp-c-9-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 29.605
+      y: 1.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 27.148
+        y: 1.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-9-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 30.805
+      y: 1.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 28.348
+        y: 1.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-10-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.785
+      y: 0.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 22.328
+        y: 0.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-10-2
+      direction: one_way
+      distance_m: 0.82
+    - target: wp-b-9-14
+      direction: one_way
+      distance_m: 0.88
+  wp-c-10-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 25.605
+      y: 0.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.148
+        y: 0.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-10-3
+      direction: one_way
+      distance_m: 0.79
+    - target: wp-c-9-2
+      direction: one_way
+      distance_m: 0.8
+  wp-c-10-3:
+    type: passage
+    status: active
+    user_pose:
+      x: 26.395
+      y: 0.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.938
+        y: 0.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-ws-c-4
+      direction: one_way
+      distance_m: 1.02
+    - target: wp-c-10-5
+      direction: one_way
+      distance_m: 2.0
+  wp-c-10-5:
+    type: passage
+    status: active
+    user_pose:
+      x: 28.4
+      y: 0.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 25.943
+        y: 0.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-9-5
+      direction: one_way
+      distance_m: 0.8
+  wp-c-10-6:
+    type: passage
+    status: active
+    user_pose:
+      x: 29.6
+      y: 0.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 27.143
+        y: 0.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-10-7:
+    type: passage
+    status: active
+    user_pose:
+      x: 30.8
+      y: 0.65
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 28.343
+        y: 0.292
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to: []
+  wp-c-2-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 25.61
+      y: 6.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.153
+        y: 5.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-1-2
+      direction: one_way
+      distance_m: 0.6
+  wp-c-3-4:
+    type: passage
+    status: active
+    user_pose:
+      x: 27.41
+      y: 5.46
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 24.953
+        y: 5.102
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-3-3
+      direction: one_way
+      distance_m: 1.01
+  wp-c-5-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.8
+      y: 4.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 22.343
+        y: 3.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-6-1
+      direction: one_way
+      distance_m: 0.6
+  wp-c-5-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 25.62
+      y: 4.05
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.163
+        y: 3.692
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-4-2
+      direction: one_way
+      distance_m: 0.6
+  wp-c-6-4:
+    type: passage
+    status: active
+    user_pose:
+      x: 27.41
+      y: 3.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 24.953
+        y: 3.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-6-3
+      direction: one_way
+      distance_m: 1.01
+  wp-c-8-1:
+    type: passage
+    status: active
+    user_pose:
+      x: 24.8
+      y: 2.06
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 22.343
+        y: 1.702
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-9-1
+      direction: one_way
+      distance_m: 0.61
+  wp-c-8-2:
+    type: passage
+    status: active
+    user_pose:
+      x: 25.62
+      y: 2.06
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 23.163
+        y: 1.702
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-7-2
+      direction: one_way
+      distance_m: 0.59
+  wp-c-9-4:
+    type: passage
+    status: active
+    user_pose:
+      x: 27.41
+      y: 1.45
+      yaw_deg: 0.0
+    pose:
+      position:
+        x: 24.953
+        y: 1.092
+        z: 0.0
+      orientation:
+        qx: 0.0
+        qy: 0.0
+        qz: 0.0
+        qw: 1.0
+    connected_to:
+    - target: wp-c-9-3
+      direction: one_way
+      distance_m: 1.01

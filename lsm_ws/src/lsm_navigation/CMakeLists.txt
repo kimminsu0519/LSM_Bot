@@ -6,7 +6,24 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 
+# Install Python modules
+ament_python_install_package(${PROJECT_NAME})
+
+# Install Python Executables
+install(PROGRAMS
+  lsm_navigation/waypoint_navigator.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME waypoint_navigator
+)
+
+install(PROGRAMS
+  lsm_navigation/waypoint_navigator.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install Launch & Config directories
 install(DIRECTORY
   config
   launch
