@@ -1,0 +1,396 @@
+/* LSM FMS Developer Telemetry & Route Debugger Stylesheet (White Mode Only) */
+
+.developer-mode {
+  --dev-accent: #6366f1;
+  --dev-accent-light: #4f46e5;
+  --dev-bg: #f8fafc;
+}
+
+/* Navbar Enhancements */
+.dev-navbar {
+  border-bottom: 2px solid var(--dev-accent) !important;
+}
+
+.dev-logo {
+  background: linear-gradient(135deg, #6366f1, #0284c7) !important;
+  color: #ffffff !important;
+}
+
+.dev-tag {
+  background: var(--dev-accent) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.dev-robot-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #0f172a;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dev-robot-select select {
+  background: transparent;
+  border: none;
+  color: #0f172a;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Canvas HUD Overlay (Horizontal Bottom Strip - Does not obstruct map) */
+.dev-hud-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 170px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 14px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  z-index: 10;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+  pointer-events: none;
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+
+.hud-label {
+  color: var(--text-muted);
+  font-size: 10px;
+  min-width: 90px;
+}
+
+.hud-value {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Robot Status Pills */
+.robot-status-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+
+.robot-status-pill.idle {
+  background: rgba(2, 132, 199, 0.12);
+  color: var(--neon-cyan);
+}
+
+.robot-status-pill.navigating {
+  background: rgba(5, 150, 105, 0.15);
+  color: var(--neon-green);
+  animation: pulsePill 1.5s infinite;
+}
+
+@keyframes pulsePill {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* Telemetry Grid Cards */
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tel-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tel-lbl {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.tel-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.cov-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.cov-item {
+  background: #f8fafc;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-sub);
+}
+
+/* Route Dispatch Form */
+.route-dispatch-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-row label {
+  font-size: 11px;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.form-row select {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  outline: none;
+}
+
+.dispatch-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.btn-accent-green {
+  background: rgba(5, 150, 105, 0.1) !important;
+  border-color: var(--neon-green) !important;
+  color: var(--neon-green) !important;
+}
+
+.btn-accent-green:hover {
+  background: rgba(5, 150, 105, 0.25) !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2) !important;
+}
+
+/* Route Summary Box */
+.route-summary-box {
+  background: rgba(2, 132, 199, 0.05);
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.route-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+
+.route-dist {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--neon-cyan);
+}
+
+.summary-details {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Branch Decision Inspector */
+.branch-inspector-card {
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.branch-choice-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-main);
+}
+
+.branch-choice-row.chosen {
+  border-left: 3px solid var(--neon-green);
+  background: rgba(5, 150, 105, 0.08);
+}
+
+.branch-choice-row .badge-choice {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: var(--text-muted);
+}
+
+.branch-choice-row.chosen .badge-choice {
+  background: rgba(5, 150, 105, 0.15);
+  color: var(--neon-green);
+}
+
+/* Route Waypoints Queue List */
+.route-queue-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.queue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-main);
+}
+
+.queue-item.current {
+  background: rgba(2, 132, 199, 0.08);
+  border-left: 3px solid var(--neon-cyan);
+}
+
+.queue-item.passed {
+  opacity: 0.5;
+}
+
+.queue-status-tag {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.queue-status-tag.passed { background: #e2e8f0; color: var(--text-muted); }
+.queue-status-tag.current { background: rgba(2, 132, 199, 0.18); color: var(--neon-cyan); }
+.queue-status-tag.next { background: rgba(217, 119, 6, 0.18); color: var(--neon-amber); }
+.queue-status-tag.pending { background: #f1f5f9; color: var(--text-sub); }
+
+/* Nav2 Action Monitor */
+.nav2-status-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.nav2-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.nav2-row .lbl { color: var(--text-muted); }
+.nav2-row .val { font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text-main); }
+
+.badge-state {
+  background: rgba(2, 132, 199, 0.12);
+  color: var(--neon-cyan);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* WebSocket Log Console */
+.log-console-wrapper {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  height: 380px;
+  margin-top: 8px;
+  padding: 8px;
+}
+
+.log-console {
+  height: 100%;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.log-entry {
+  word-break: break-all;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.log-entry.system { color: #64748b; }
+.log-entry.in { color: #0284c7; font-weight: 600; }
+.log-entry.out { color: #059669; font-weight: 600; }
+.log-entry.err { color: #dc2626; font-weight: 600; }
+
+.log-controls {
+  display: flex;
+  gap: 4px;
+}

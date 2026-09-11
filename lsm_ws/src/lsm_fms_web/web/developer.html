@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>LSM FMS Developer Telemetry & Route Debugger</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- JS-YAML Parser (Local & Offline Capable) -->
+  <script src="js/js-yaml.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css?v=1.1.0">
+  <link rel="stylesheet" href="css/developer.css?v=1.1.0">
+</head>
+<body class="developer-mode">
+  <div class="app-container developer-app">
+    <!-- Header Navbar (Developer Mode: Indigo/Purple Accent) -->
+    <header class="navbar navbar-developer">
+      <div class="brand">
+        <div class="logo-icon"><i class="fa-solid fa-code"></i></div>
+        <div class="brand-info">
+          <h1>
+            LSM ROUTE & TELEMETRY DEBUGGER
+            <span class="mode-badge-developer"><i class="fa-solid fa-bug"></i> DEV DEBUGGER</span>
+          </h1>
+          <span class="subtitle">SINGLE AMR (lsm_bot_1) TOPOLOGICAL NAVIGATION MONITOR</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Robot Selector Dropdown -->
+        <div class="dev-robot-select">
+          <i class="fa-solid fa-robot"></i>
+          <select id="select-active-robot">
+            <option value="lsm_bot_1" selected>lsm_bot_1 (Primary AMR)</option>
+          </select>
+        </div>
+
+        <!-- WebSocket Status Indicator -->
+        <div class="status-badge disconnected" id="ws-status-badge">
+          <span class="pulse-dot" id="ws-pulse"></span> <span id="ws-status-text">WS OFFLINE</span>
+        </div>
+
+        <!-- Return to Fleet Control Button -->
+        <a href="index.html" class="icon-action-btn" title="Back to Fleet Control Center">
+          <i class="fa-solid fa-map-location-dot"></i>
+          <span>Fleet Control</span>
+        </a>
+
+        <!-- Sidebar Toggle -->
+        <button class="icon-action-btn sidebar-toggle-btn" id="btn-toggle-sidebar" title="Toggle Sidebar">
+          <i class="fa-solid fa-angles-right" id="icon-sidebar"></i>
+          <span>Close Panel</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Viewport -->
+    <main class="main-viewport">
+      <!-- Left: Graph & Telemetry Canvas -->
+      <section class="canvas-section">
+        <div class="canvas-toolbar">
+          <div class="tool-group">
+            <button id="btn-zoom-in" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+            <button id="btn-zoom-out" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+            <button id="btn-reset-view" title="Reset View"><i class="fa-solid fa-arrows-to-dot"></i> Fit View</button>
+          </div>
+          <div class="tool-group">
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-show-edges" checked>
+              <span class="switch-slider"></span>
+              <span class="toggle-label">Edges</span>
+            </label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-show-arrows" checked>
+              <span class="switch-slider"></span>
+              <span class="toggle-label">Arrows</span>
+            </label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-show-labels" checked>
+              <span class="switch-slider"></span>
+              <span class="toggle-label">Labels</span>
+            </label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-show-branches" checked>
+              <span class="switch-slider"></span>
+              <span class="toggle-label">Branch Choices</span>
+            </label>
+          </div>
+          <div class="tool-group">
+            <span class="zoom-level-badge" id="zoom-level">100%</span>
+          </div>
+        </div>
+
+        <div class="canvas-wrapper" id="canvas-container">
+          <canvas id="map-canvas"></canvas>
+          <div class="canvas-overlay-coords" id="cursor-coords">X: 0.00m | Y: 0.00m</div>
+          
+          <!-- Developer Map HUD -->
+          <div class="dev-hud-overlay">
+            <div class="hud-item">
+              <span class="hud-label">AMR POSE:</span>
+              <span class="hud-value neon-cyan" id="hud-pose">X: 0.00m | Y: 0.00m | Yaw: 0.0°</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">ACTIVE GOAL:</span>
+              <span class="hud-value neon-green" id="hud-goal">NONE</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">NEXT BRANCH:</span>
+              <span class="hud-value neon-amber" id="hud-branch">NONE</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Developer Control Sidebar -->
+      <aside class="sidebar floating-drawer" id="main-sidebar">
+        <!-- Sidebar Tabs -->
+        <div class="sidebar-tabs">
+          <button class="tab-btn active" data-tab="tab-telemetry"><i class="fa-solid fa-gauge-high"></i> Telemetry</button>
+          <button class="tab-btn" data-tab="tab-calibration"><i class="fa-solid fa-sliders"></i> Calibration</button>
+          <button class="tab-btn" data-tab="tab-planner"><i class="fa-solid fa-route"></i> Route Planner</button>
+          <button class="tab-btn" data-tab="tab-nav2"><i class="fa-solid fa-compass"></i> Nav2 BT</button>
+          <button class="tab-btn" data-tab="tab-logs"><i class="fa-solid fa-terminal"></i> WS Logs</button>
+        </div>
+
+        <!-- Tab 1: AMR Telemetry & State -->
+        <div class="tab-content active" id="tab-telemetry">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-robot"></i> lsm_bot_1 Live State</h3>
+              <span class="robot-status-pill idle" id="dev-robot-status">IDLE</span>
+            </div>
+
+            <div class="telemetry-grid">
+              <div class="tel-card">
+                <span class="tel-lbl">Position X</span>
+                <span class="tel-val" id="tel-x">0.00 m</span>
+              </div>
+              <div class="tel-card">
+                <span class="tel-lbl">Position Y</span>
+                <span class="tel-val" id="tel-y">0.00 m</span>
+              </div>
+              <div class="tel-card">
+                <span class="tel-lbl">Heading / Yaw</span>
+                <span class="tel-val" id="tel-yaw">0.0 °</span>
+              </div>
+              <div class="tel-card">
+                <span class="tel-lbl">Linear Speed</span>
+                <span class="tel-val" id="tel-v">0.00 m/s</span>
+              </div>
+              <div class="tel-card">
+                <span class="tel-lbl">Angular Speed</span>
+                <span class="tel-val" id="tel-w">0.00 rad/s</span>
+              </div>
+              <div class="tel-card">
+                <span class="tel-lbl">Battery Level</span>
+                <span class="tel-val neon-green" id="tel-battery">100%</span>
+              </div>
+            </div>
+
+            <div class="panel-header mt-12">
+              <h4><i class="fa-solid fa-chart-line"></i> AMCL Covariance (Uncertainty)</h4>
+            </div>
+            <div class="cov-grid">
+              <div class="cov-item"><span>σx:</span> <span id="cov-x">0.002 m</span></div>
+              <div class="cov-item"><span>σy:</span> <span id="cov-y">0.002 m</span></div>
+              <div class="cov-item"><span>σyaw:</span> <span id="cov-yaw">0.01 rad</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Calibration Fine Tuning -->
+        <div class="tab-content" id="tab-calibration">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-compass-drafting"></i> Map-Graph Fine Tuning</h3>
+              <button class="btn-xs btn-outline" id="btn-reset-calibration"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            </div>
+            <p class="panel-desc">창고 맵 이미지와 웨이포인트 그래프 좌표의 싱크(Offset, Scale, Yaw)를 실시간 보정합니다.</p>
+
+            <button class="btn-auto-fit" id="btn-auto-fit">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Reset Calibration (0, 0)
+            </button>
+
+            <div class="control-group">
+              <div class="control-label">
+                <span>Offset X (Offset Meter)</span>
+                <input type="number" id="num-offset-x" step="0.01" value="0">
+              </div>
+              <input type="range" id="rng-offset-x" min="-40" max="40" step="0.01" value="0">
+            </div>
+
+            <div class="control-group">
+              <div class="control-label">
+                <span>Offset Y (Offset Meter)</span>
+                <input type="number" id="num-offset-y" step="0.01" value="0">
+              </div>
+              <input type="range" id="rng-offset-y" min="-40" max="40" step="0.01" value="0">
+            </div>
+
+            <div class="control-group">
+              <div class="control-label">
+                <span>Scale Factor</span>
+                <input type="number" id="num-scale" step="0.01" value="1.0">
+              </div>
+              <input type="range" id="rng-scale" min="0.1" max="5.0" step="0.01" value="1.0">
+            </div>
+
+            <div class="control-group">
+              <div class="control-label">
+                <span>Rotation / Yaw (Deg)</span>
+                <input type="number" id="num-yaw" step="0.1" value="0">
+              </div>
+              <input type="range" id="rng-yaw" min="-180" max="180" step="0.5" value="0">
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn-primary" id="btn-save-calibration"><i class="fa-solid fa-floppy-disk"></i> Save Calibration</button>
+              <button class="btn-secondary" id="btn-export-config"><i class="fa-solid fa-download"></i> Export Config</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Topological Route Planner & Branch Inspector -->
+        <div class="tab-content" id="tab-planner">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-route"></i> Route Planner & Dispatch</h3>
+            </div>
+
+            <div class="route-dispatch-form">
+              <div class="form-row">
+                <label>Start Waypoint:</label>
+                <select id="select-start-wp"></select>
+                <button class="btn-xs btn-outline" id="btn-set-start-bot" title="Set to robot pose"><i class="fa-solid fa-location-crosshairs"></i> Bot Pose</button>
+              </div>
+
+              <div class="form-row">
+                <label>Target Waypoint:</label>
+                <select id="select-goal-wp"></select>
+              </div>
+
+              <div class="dispatch-actions">
+                <button class="btn-primary" id="btn-plan-route"><i class="fa-solid fa-calculator"></i> Calculate Path</button>
+                <button class="btn-secondary btn-accent-green" id="btn-dispatch-route"><i class="fa-solid fa-paper-plane"></i> Dispatch Goal</button>
+              </div>
+            </div>
+
+            <div class="route-summary-box mt-12" id="route-summary-box">
+              <div class="summary-header">
+                <span class="route-title">A* PATH SUMMARY</span>
+                <span class="route-dist neon-cyan" id="route-total-dist">0.00 m</span>
+              </div>
+              <div class="summary-details">
+                <span>Waypoints: <strong id="route-wp-count">0</strong></span>
+                <span>Est. Time: <strong id="route-est-time">0s</strong></span>
+              </div>
+            </div>
+
+            <!-- Decision Branch Inspector -->
+            <div class="branch-inspector-card mt-12">
+              <div class="panel-header">
+                <h4><i class="fa-solid fa-code-fork"></i> Next Branch Decision</h4>
+              </div>
+              <div id="branch-decision-box">
+                <div class="empty-state-sm">
+                  <p>No active route segment. Dispatch a route to inspect branch choices.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step-by-Step Waypoints Queue -->
+            <div class="panel-header mt-12">
+              <h4><i class="fa-solid fa-list-ol"></i> Path Waypoint Sequence</h4>
+            </div>
+            <div class="route-queue-list" id="route-queue-list"></div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Nav2 BT & Goal Handle Monitor -->
+        <div class="tab-content" id="tab-nav2">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-compass"></i> Nav2 Behavior Tree Monitor</h3>
+            </div>
+
+            <div class="nav2-status-card">
+              <div class="nav2-row">
+                <span class="lbl">Action Server State:</span>
+                <span class="val badge-state" id="nav2-action-state">IDLE</span>
+              </div>
+              <div class="nav2-row">
+                <span class="lbl">Goal Handle ID:</span>
+                <span class="val mono" id="nav2-goal-id">N/A</span>
+              </div>
+              <div class="nav2-row">
+                <span class="lbl">Active BT Node:</span>
+                <span class="val neon-cyan" id="nav2-bt-node">FollowPath (Topological)</span>
+              </div>
+              <div class="nav2-row">
+                <span class="lbl">Recovery Status:</span>
+                <span class="val neon-green" id="nav2-recovery-status">NORMAL</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Raw WebSocket Telemetry Logs -->
+        <div class="tab-content" id="tab-logs">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-terminal"></i> WebSocket Event Stream</h3>
+              <div class="log-controls">
+                <button class="btn-xs btn-outline" id="btn-pause-log"><i class="fa-solid fa-pause"></i> Pause</button>
+                <button class="btn-xs btn-outline" id="btn-clear-log"><i class="fa-solid fa-trash"></i> Clear</button>
+              </div>
+            </div>
+
+            <div class="log-console-wrapper">
+              <div class="log-console" id="ws-log-console">
+                <div class="log-entry system">[SYSTEM] Developer Telemetry Log initialized.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="js/developer.js?v=1.1.0"></script>
+</body>
+</html>

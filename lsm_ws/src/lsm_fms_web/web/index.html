@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" data-theme="dark">
+<html lang="ko" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,31 +11,34 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
   
-  <!-- JS-YAML Parser -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+  <!-- JS-YAML Parser (Local & Offline Capable) -->
+  <script src="js/js-yaml.min.js"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=1.1.0">
 </head>
-<body>
-  <div class="app-container">
-    <!-- Header Navbar -->
-    <header class="navbar">
+<body class="operator-mode">
+  <div class="app-container operator-app">
+    <!-- Header Navbar (Operator Mode: Teal Accent) -->
+    <header class="navbar navbar-operator">
       <div class="brand">
-        <div class="logo-icon">LSM</div>
+        <div class="logo-icon"><i class="fa-solid fa-truck-ramp-box"></i></div>
         <div class="brand-info">
-          <h1>LSM FLEET CONTROL CENTER <span class="version-tag">v1.0.8</span></h1>
+          <h1>
+            LSM FLEET CONTROL CENTER
+            <span class="mode-badge-operator"><i class="fa-solid fa-user-gear"></i> OPERATOR MODE</span>
+          </h1>
           <span class="subtitle">TOPOLOGICAL GRAPH & DOCKING CALIBRATION SYSTEM</span>
         </div>
       </div>
 
       <div class="header-right">
-        <!-- Theme Toggle Button -->
-        <button class="theme-toggle-btn" id="btn-theme-toggle">
-          <i class="fa-solid fa-sun" id="icon-theme"></i>
-          <span id="label-theme">Light Mode</span>
-        </button>
+        <!-- Developer View Button -->
+        <a href="developer.html" target="_blank" class="dev-mode-btn" title="Open Developer Telemetry & Route Debugger">
+          <i class="fa-solid fa-code"></i>
+          <span>Dev Debugger</span>
+        </a>
 
         <!-- Sidebar Collapse Toggle Button -->
         <button class="icon-action-btn sidebar-toggle-btn" id="btn-toggle-sidebar" title="Toggle Sidebar">
@@ -215,6 +218,6 @@
     </main>
   </div>
 
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=1.1.0"></script>
 </body>
 </html>

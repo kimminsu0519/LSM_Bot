@@ -1,29 +1,6 @@
-:root[data-theme="dark"] {
-  --bg-void: #0a0e17;
-  --bg-surface: rgba(15, 23, 42, 0.85);
-  --bg-card: rgba(22, 32, 54, 0.88);
-  --bg-card-hover: rgba(30, 43, 70, 0.95);
-  --border-color: rgba(255, 255, 255, 0.12);
-  --border-active: rgba(0, 243, 255, 0.4);
-  
-  --text-main: #f1f5f9;
-  --text-muted: #94a3b8;
-  --text-sub: #cbd5e1;
-  
-  --neon-cyan: #00f3ff;
-  --neon-green: #00ff9d;
-  --neon-amber: #ffb700;
-  --neon-red: #ff3366;
-  --neon-purple: #9d4edd;
-  
-  --shadow-glow: 0 0 25px rgba(0, 243, 255, 0.2);
-  --canvas-bg: #060911;
-  --glass-blur: blur(16px);
-}
-
-:root[data-theme="light"] {
+:root, :root[data-theme="light"], :root[data-theme="dark"] {
   --bg-void: #f8fafc;
-  --bg-surface: rgba(255, 255, 255, 0.9);
+  --bg-surface: rgba(255, 255, 255, 0.95);
   --bg-card: #ffffff;
   --bg-card-hover: #f1f5f9;
   --border-color: #cbd5e1;
@@ -39,8 +16,8 @@
   --neon-red: #dc2626;
   --neon-purple: #7c3aed;
   
-  --shadow-glow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --canvas-bg: #e2e8f0;
+  --shadow-glow: 0 4px 20px rgba(15, 23, 42, 0.08);
+  --canvas-bg: #f8fafc;
   --glass-blur: blur(16px);
 }
 
@@ -67,7 +44,22 @@ body {
   flex-direction: column;
   height: 100vh;
   width: 100vw;
-  background: radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.04) 0%, transparent 70%);
+  background: var(--bg-void);
+}
+
+/* Distinct Soft Background Color Tinting for Operator vs Developer Monitoring */
+.app-container.operator-app {
+  background: radial-gradient(circle at 50% 0%, rgba(13, 148, 136, 0.07) 0%, rgba(244, 251, 249, 0.7) 70%), #f8fafc !important;
+}
+.app-container.operator-app .canvas-section {
+  background-color: #f2f9f7 !important;
+}
+
+.app-container.developer-app {
+  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.07) 0%, rgba(245, 244, 253, 0.7) 70%), #f8fafc !important;
+}
+.app-container.developer-app .canvas-section {
+  background-color: #f3f2fb !important;
 }
 
 /* Navbar Header */
@@ -139,6 +131,51 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+/* Header Distinct Color-Coding for Operator vs Developer Monitoring */
+.navbar-operator {
+  border-bottom: 2px solid #0d9488 !important;
+  background: linear-gradient(180deg, rgba(204, 251, 241, 0.4) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+}
+.navbar-operator .logo-icon {
+  background: linear-gradient(135deg, #0d9488, #059669) !important;
+  box-shadow: 0 2px 10px rgba(13, 148, 136, 0.25) !important;
+}
+.mode-badge-operator {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: #ccfbf1;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.navbar-developer {
+  border-bottom: 2px solid #6366f1 !important;
+  background: linear-gradient(180deg, rgba(224, 231, 255, 0.45) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+}
+.navbar-developer .logo-icon {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.25) !important;
+}
+.mode-badge-developer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .theme-toggle-btn, .icon-action-btn {
@@ -870,3 +907,27 @@ button.btn-outline:hover {
   font-family: 'JetBrains Mono', monospace;
   color: var(--text-muted);
 }
+
+/* Header Dev Mode Button */
+.dev-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 243, 255, 0.1);
+  border: 1px solid rgba(0, 243, 255, 0.4);
+  color: var(--neon-cyan);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.dev-mode-btn:hover {
+  background: rgba(0, 243, 255, 0.25);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(0, 243, 255, 0.3);
+  transform: translateY(-1px);
+}
+

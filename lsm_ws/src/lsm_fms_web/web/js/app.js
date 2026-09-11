@@ -46,6 +46,23 @@ class FMSApp {
 
     this.incomingEdgesCount = {};
 
+    // Robot Telemetry State (lsm_bot_1)
+    this.robotState = {
+      id: 'lsm_bot_1',
+      x: 0.0,
+      y: 0.0,
+      yaw_deg: 0.0,
+      v: 0.0,
+      w: 0.0,
+      battery: 100,
+      status: 'IDLE',
+      covX: 0.002,
+      covY: 0.002,
+      covYaw: 0.01
+    };
+    this.ws = null;
+    this.wsConnected = false;
+
     // Elements
     this.canvas = document.getElementById('map-canvas');
     this.ctx = this.canvas.getContext('2d');
@@ -63,24 +80,15 @@ class FMSApp {
 
     await Promise.all([this.loadMapImage(), this.loadYAMLData()]);
 
-    this.centerView();
+    this.fitGraphToViewport();
+    this.initWebSocket();
     this.render();
   }
 
   applyTheme(theme) {
-    this.currentTheme = theme;
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('lsm_fms_theme', theme);
-
-    const icon = document.getElementById('icon-theme');
-    const label = document.getElementById('label-theme');
-    if (theme === 'dark') {
-      icon.className = 'fa-solid fa-sun';
-      label.textContent = 'Light Mode';
-    } else {
-      icon.className = 'fa-solid fa-moon';
-      label.textContent = 'Dark Mode';
-    }
+    this.currentTheme = 'light';
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.setItem('lsm_fms_theme', 'light');
   }
 
   toggleSidebar() {
@@ -139,46 +147,83 @@ class FMSApp {
   }
 
   updateCalibrationUI() {
-    document.getElementById('num-offset-x').value = this.calibration.offsetX;
-    document.getElementById('rng-offset-x').value = this.calibration.offsetX;
-    document.getElementById('num-offset-y').value = this.calibration.offsetY;
-    document.getElementById('rng-offset-y').value = this.calibration.offsetY;
-    document.getElementById('num-scale').value = this.calibration.scale;
-    document.getElementById('rng-scale').value = this.calibration.scale;
-    document.getElementById('num-yaw').value = this.calibration.yaw;
-    document.getElementById('rng-yaw').value = this.calibration.yaw;
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    };
+    setVal('num-offset-x', this.calibration.offsetX);
+    setVal('rng-offset-x', this.calibration.offsetX);
+    setVal('num-offset-y', this.calibration.offsetY);
+    setVal('rng-offset-y', this.calibration.offsetY);
+    setVal('num-scale', this.calibration.scale);
+    setVal('rng-scale', this.calibration.scale);
+    setVal('num-yaw', this.calibration.yaw);
+    setVal('rng-yaw', this.calibration.yaw);
   }
 
   async loadMapImage() {
     return new Promise((resolve) => {
-      this.mapImage.src = 'assets/창고맵_이미지용_점제거.png';
+      let isDone = false;
+      const done = () => {
+        if (!isDone) {
+          isDone = true;
+          resolve();
+        }
+      };
+
       this.mapImage.onload = () => {
         this.mapLoaded = true;
         console.log(`Map Image Loaded: ${this.mapImage.width}x${this.mapImage.height} pt`);
-        resolve();
+        done();
       };
       this.mapImage.onerror = () => {
         console.warn('Map Image load failed from assets/창고맵_이미지용_점제거.png');
-        resolve();
+        this.mapLoaded = false;
+        done();
       };
+      setTimeout(() => {
+        if (!isDone) {
+          console.warn('Map image load timeout fallback triggered');
+          done();
+        }
+      }, 1500);
+
+      this.mapImage.src = 'assets/창고맵_이미지용_점제거.png';
     });
   }
 
   async loadYAMLData() {
     try {
-      const res = await fetch('config/waypoints_graph2.yaml');
-      const text = await res.text();
-      this.yamlData = jsyaml.load(text);
-      
+      let data = null;
+      try {
+        const res = await fetch('config/waypoints_graph2.json');
+        if (res.ok) {
+          data = await res.json();
+        }
+      } catch (e) {
+        console.warn('JSON fetch failed, attempting YAML fallback...', e);
+      }
+
+      if (!data) {
+        const res = await fetch('config/waypoints_graph2.yaml');
+        const text = await res.text();
+        if (window.jsyaml) {
+          data = jsyaml.load(text);
+        }
+      }
+
+      this.yamlData = data || {};
       this.metadata = this.yamlData.metadata || {};
       this.waypoints = this.yamlData.waypoints || {};
 
       this.calculateEdgeDegree();
       this.updateStats();
       this.populateWaypointsList();
-      console.log(`Loaded ${Object.keys(this.waypoints).length} waypoints.`);
+      this.fitGraphToViewport();
+      this.render();
+      console.log(`Successfully loaded ${Object.keys(this.waypoints).length} waypoints.`);
     } catch (err) {
-      console.error('Error fetching waypoints_graph2.yaml:', err);
+      console.error('Error loading waypoints graph data:', err);
     }
   }
 
@@ -239,14 +284,19 @@ class FMSApp {
       else nodeCount++;
     });
 
-    document.getElementById('stat-total-wp').textContent = total;
-    document.getElementById('stat-workstations').textContent = wsCount;
-    document.getElementById('stat-chargers').textContent = chargerCount;
-    document.getElementById('stat-nodes').textContent = nodeCount;
-    document.getElementById('cnt-all').textContent = total;
-    document.getElementById('cnt-ws').textContent = wsCount;
-    document.getElementById('cnt-charger').textContent = chargerCount;
-    document.getElementById('cnt-node').textContent = nodeCount;
+    const setTxt = (id, txt) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = txt;
+    };
+
+    setTxt('stat-total-wp', total);
+    setTxt('stat-workstations', wsCount);
+    setTxt('stat-chargers', chargerCount);
+    setTxt('stat-nodes', nodeCount);
+    setTxt('cnt-all', total);
+    setTxt('cnt-ws', wsCount);
+    setTxt('cnt-charger', chargerCount);
+    setTxt('cnt-node', nodeCount);
   }
 
   resizeCanvas() {
@@ -256,18 +306,58 @@ class FMSApp {
   }
 
   centerView() {
-    if (this.mapLoaded) {
-      this.view.panX = (this.canvas.width - this.mapImage.width * this.view.zoom) / 2;
-      this.view.panY = (this.canvas.height - this.mapImage.height * this.view.zoom) / 2;
-    } else {
-      this.view.panX = this.canvas.width / 2;
-      this.view.panY = this.canvas.height / 2;
+    this.fitGraphToViewport();
+  }
+
+  fitGraphToViewport() {
+    if (!this.waypoints || Object.keys(this.waypoints).length === 0) {
+      if (this.mapLoaded) {
+        this.view.panX = (this.canvas.width - this.mapImage.width * this.view.zoom) / 2;
+        this.view.panY = (this.canvas.height - this.mapImage.height * this.view.zoom) / 2;
+      } else {
+        this.view.panX = this.canvas.width / 2;
+        this.view.panY = this.canvas.height / 2;
+      }
+      this.updateZoomBadge();
+      return;
     }
+
+    let minPxX = Infinity, maxPxX = -Infinity;
+    let minPxY = Infinity, maxPxY = -Infinity;
+
+    Object.values(this.waypoints).forEach(wp => {
+      const pos = this.getWaypointUserPose(wp);
+      const imgPos = this.worldToImagePixel(pos.x, pos.y);
+      if (imgPos.x < minPxX) minPxX = imgPos.x;
+      if (imgPos.x > maxPxX) maxPxX = imgPos.x;
+      if (imgPos.y < minPxY) minPxY = imgPos.y;
+      if (imgPos.y > maxPxY) maxPxY = imgPos.y;
+    });
+
+    const padding = 60;
+    const graphWidth = Math.max(100, maxPxX - minPxX);
+    const graphHeight = Math.max(100, maxPxY - minPxY);
+
+    const availableWidth = Math.max(200, this.canvas.width - padding * 2);
+    const availableHeight = Math.max(200, this.canvas.height - padding * 2);
+
+    const zoomX = availableWidth / graphWidth;
+    const zoomY = availableHeight / graphHeight;
+    const fitZoom = Math.min(zoomX, zoomY, 1.2);
+
+    const centerGraphPxX = (minPxX + maxPxX) / 2;
+    const centerGraphPxY = (minPxY + maxPxY) / 2;
+
+    this.view.zoom = fitZoom;
+    this.view.panX = (this.canvas.width / 2) - (centerGraphPxX * fitZoom);
+    this.view.panY = (this.canvas.height / 2) - (centerGraphPxY * fitZoom);
+
     this.updateZoomBadge();
   }
 
   updateZoomBadge() {
-    document.getElementById('zoom-level').textContent = `${Math.round(this.view.zoom * 100)}%`;
+    const badge = document.getElementById('zoom-level');
+    if (badge) badge.textContent = `${Math.round(this.view.zoom * 100)}%`;
   }
 
   getWaypointUserPose(wp) {
@@ -357,6 +447,90 @@ class FMSApp {
     }
 
     this.renderNodes();
+    this.drawRobotState();
+  }
+
+  initWebSocket() {
+    const wsUrl = `ws://${window.location.hostname || 'localhost'}:9090`;
+    try {
+      this.ws = new WebSocket(wsUrl);
+      this.ws.onopen = () => {
+        this.wsConnected = true;
+        console.log('Operator WebSocket connected:', wsUrl);
+      };
+      this.ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'telemetry' && msg.data) {
+            const data = msg.data;
+            this.robotState.x = data.x ?? this.robotState.x;
+            this.robotState.y = data.y ?? this.robotState.y;
+            this.robotState.yaw_deg = data.yaw_deg ?? this.robotState.yaw_deg;
+            this.robotState.v = data.v ?? this.robotState.v;
+            this.robotState.w = data.w ?? this.robotState.w;
+            this.robotState.battery = data.battery ?? this.robotState.battery;
+            this.robotState.status = data.status || this.robotState.status;
+            if (data.covariance) {
+              this.robotState.covX = data.covariance.x ?? 0.002;
+              this.robotState.covY = data.covariance.y ?? 0.002;
+              this.robotState.covYaw = data.covariance.yaw ?? 0.01;
+            }
+            this.render();
+          }
+        } catch (e) {
+          console.warn('Operator WS JSON error:', e);
+        }
+      };
+      this.ws.onclose = () => {
+        this.wsConnected = false;
+        setTimeout(() => this.initWebSocket(), 3000);
+      };
+    } catch (e) {
+      console.warn('WebSocket failed to initialize in Operator Mode:', e);
+    }
+  }
+
+  drawRobotState() {
+    if (!this.robotState) return;
+    const imgPos = this.worldToImagePixel(this.robotState.x, this.robotState.y);
+    const pt = this.imagePixelToScreen(imgPos.x, imgPos.y);
+    const rad = (-this.robotState.yaw_deg * Math.PI) / 180;
+
+    // 1. AMCL Covariance Ellipse
+    const scale = parseFloat(this.calibration.scale);
+    const covPxX = (this.robotState.covX * 100) * scale * this.view.zoom;
+    const covPxY = (this.robotState.covY * 100) * scale * this.view.zoom;
+
+    this.ctx.save();
+    this.ctx.translate(pt.x, pt.y);
+    this.ctx.beginPath();
+    this.ctx.ellipse(0, 0, Math.max(covPxX, 8), Math.max(covPxY, 8), 0, 0, Math.PI * 2);
+    this.ctx.fillStyle = 'rgba(13, 148, 136, 0.18)';
+    this.ctx.fill();
+    this.ctx.strokeStyle = 'rgba(13, 148, 136, 0.7)';
+    this.ctx.lineWidth = 1.5;
+    this.ctx.stroke();
+    this.ctx.restore();
+
+    // 2. Robot Directional Marker (Teal Triangle)
+    this.ctx.save();
+    this.ctx.translate(pt.x, pt.y);
+    this.ctx.rotate(-rad);
+
+    const size = 12 * this.view.zoom;
+    this.ctx.beginPath();
+    this.ctx.moveTo(size, 0);
+    this.ctx.lineTo(-size * 0.8, -size * 0.6);
+    this.ctx.lineTo(-size * 0.4, 0);
+    this.ctx.lineTo(-size * 0.8, size * 0.6);
+    this.ctx.closePath();
+
+    this.ctx.fillStyle = '#0d9488';
+    this.ctx.fill();
+    this.ctx.strokeStyle = '#ffffff';
+    this.ctx.lineWidth = 2 * this.view.zoom;
+    this.ctx.stroke();
+    this.ctx.restore();
   }
 
   renderEdges() {
@@ -576,25 +750,47 @@ class FMSApp {
 
         const labelY = screenPos.y + radius + 4;
 
-        // Draw contrast halo outline so label is 100% visible on white/dark backgrounds
-        this.ctx.lineWidth = Math.max(2.5, 3.5 * Math.sqrt(this.view.zoom));
-        this.ctx.strokeStyle = this.currentTheme === 'dark' ? 'rgba(10, 14, 23, 0.85)' : 'rgba(255, 255, 255, 0.95)';
-        this.ctx.strokeText(id, screenPos.x, labelY);
+        const textMetrics = this.ctx.measureText(id);
+        const textWidth = textMetrics.width;
+        const padX = 4;
+        const padY = 2;
+        const bgX = screenPos.x - textWidth / 2 - padX;
+        const bgY = labelY - 1;
+        const bgW = textWidth + padX * 2;
+        const bgH = fontSize + padY * 2;
 
-        // Fill text color (Selected: Neon Cyan / Accent Blue, enlarged)
-        if (isSelected) {
-          this.ctx.fillStyle = this.currentTheme === 'dark' ? '#00f3ff' : '#0284c7';
-        } else if (isHovered) {
-          this.ctx.fillStyle = this.currentTheme === 'dark' ? '#ffffff' : '#0f172a';
-        } else if (isChargerNode) {
-          this.ctx.fillStyle = this.currentTheme === 'dark' ? '#ffb700' : '#d97706';
-        } else if (isWS) {
-          this.ctx.fillStyle = this.currentTheme === 'dark' ? '#00ff9d' : '#059669';
+        // Draw crisp semi-transparent background pill to eliminate map text collision & character distortion
+        this.ctx.fillStyle = isSelected 
+          ? 'rgba(238, 242, 255, 0.96)' 
+          : (isHovered ? 'rgba(241, 245, 249, 0.96)' : 'rgba(255, 255, 255, 0.90)');
+        this.ctx.strokeStyle = isSelected 
+          ? 'rgba(99, 102, 241, 0.6)' 
+          : 'rgba(203, 213, 225, 0.8)';
+        this.ctx.lineWidth = 1;
+
+        this.ctx.beginPath();
+        if (typeof this.ctx.roundRect === 'function') {
+          this.ctx.roundRect(bgX, bgY, bgW, bgH, 3);
         } else {
-          this.ctx.fillStyle = this.currentTheme === 'dark' ? '#94a3b8' : '#64748b';
+          this.ctx.rect(bgX, bgY, bgW, bgH);
+        }
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // Fill text color
+        if (isSelected) {
+          this.ctx.fillStyle = '#4f46e5';
+        } else if (isHovered) {
+          this.ctx.fillStyle = '#0f172a';
+        } else if (isChargerNode) {
+          this.ctx.fillStyle = '#d97706';
+        } else if (isWS) {
+          this.ctx.fillStyle = '#059669';
+        } else {
+          this.ctx.fillStyle = '#334155';
         }
 
-        this.ctx.fillText(id, screenPos.x, labelY);
+        this.ctx.fillText(id, screenPos.x, labelY + 1);
         
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'alphabetic';
@@ -602,11 +798,57 @@ class FMSApp {
     });
   }
 
+  applyTheme(theme) {
+    this.currentTheme = 'light';
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.setItem('lsm_fms_theme', 'light');
+
+    const icon = document.getElementById('icon-theme');
+    const label = document.getElementById('label-theme');
+    if (icon) icon.className = 'fa-solid fa-sun';
+    if (label) label.textContent = 'Light Mode';
+  }
+
+  toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+    this.updateSidebarUI();
+  }
+
+  openSidebar() {
+    if (this.sidebarCollapsed) {
+      this.sidebarCollapsed = false;
+      this.updateSidebarUI();
+    }
+  }
+
+  updateSidebarUI() {
+    const sidebar = document.getElementById('main-sidebar');
+    const icon = document.getElementById('icon-sidebar');
+    const label = document.getElementById('label-sidebar');
+
+    if (sidebar) {
+      if (this.sidebarCollapsed) {
+        sidebar.classList.add('collapsed');
+        if (icon) icon.className = 'fa-solid fa-angles-left';
+        if (label) label.textContent = 'Open Panel';
+      } else {
+        sidebar.classList.remove('collapsed');
+        if (icon) icon.className = 'fa-solid fa-angles-right';
+        if (label) label.textContent = 'Close Panel';
+      }
+    }
+  }
+
   // Event Listeners Setup
   setupEventListeners() {
-    document.getElementById('btn-theme-toggle').onclick = () => this.toggleTheme();
-    document.getElementById('btn-toggle-sidebar').onclick = () => this.toggleSidebar();
-    document.getElementById('btn-auto-fit').onclick = () => this.autoFitGraph(true);
+    const btnTheme = document.getElementById('btn-theme-toggle');
+    if (btnTheme) btnTheme.onclick = () => this.toggleTheme();
+
+    const btnSidebar = document.getElementById('btn-toggle-sidebar');
+    if (btnSidebar) btnSidebar.onclick = () => this.toggleSidebar();
+
+    const btnAutoFit = document.getElementById('btn-auto-fit');
+    if (btnAutoFit) btnAutoFit.onclick = () => this.autoFitGraph(true);
 
     let mousedownPos = { x: 0, y: 0 };
 
@@ -643,8 +885,10 @@ class FMSApp {
       const mouseY = e.clientY - rect.top;
 
       const coords = this.screenToWorld(mouseX, mouseY);
-      document.getElementById('cursor-coords').textContent =
-        `X: ${coords.wx.toFixed(2)}m | Y: ${coords.wy.toFixed(2)}m`;
+      const coordsEl = document.getElementById('cursor-coords');
+      if (coordsEl) {
+        coordsEl.textContent = `X: ${coords.wx.toFixed(2)}m | Y: ${coords.wy.toFixed(2)}m`;
+      }
 
       if (this.view.isDragging) {
         this.view.panX = e.clientX - this.view.dragStartX;
@@ -670,43 +914,22 @@ class FMSApp {
     });
 
     // Toolbar Buttons
-    document.getElementById('btn-zoom-in').onclick = () => {
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
       this.view.zoom = Math.min(5.0, this.view.zoom * 1.2);
       this.updateZoomBadge();
       this.render();
-    };
-
-    document.getElementById('btn-zoom-out').onclick = () => {
+    });
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
       this.view.zoom = Math.max(0.2, this.view.zoom / 1.2);
       this.updateZoomBadge();
       this.render();
-    };
+    });
+    document.getElementById('btn-reset-view')?.addEventListener('click', () => this.centerView());
 
-    document.getElementById('btn-reset-view').onclick = () => {
-      this.view.zoom = 1.0;
-      this.centerView();
-      this.render();
-    };
-
-    document.getElementById('chk-show-edges').onchange = (e) => {
-      this.showEdges = e.target.checked;
-      this.render();
-    };
-
-    document.getElementById('chk-show-arrows').onchange = (e) => {
-      this.showArrows = e.target.checked;
-      this.render();
-    };
-
-    document.getElementById('chk-show-labels').onchange = (e) => {
-      this.showLabels = e.target.checked;
-      this.render();
-    };
-
-    document.getElementById('chk-show-unconnected').onchange = (e) => {
-      this.showUnconnected = e.target.checked;
-      this.render();
-    };
+    document.getElementById('chk-show-edges')?.addEventListener('change', (e) => { this.showEdges = e.target.checked; this.render(); });
+    document.getElementById('chk-show-arrows')?.addEventListener('change', (e) => { this.showArrows = e.target.checked; this.render(); });
+    document.getElementById('chk-show-labels')?.addEventListener('change', (e) => { this.showLabels = e.target.checked; this.render(); });
+    document.getElementById('chk-show-unconnected')?.addEventListener('change', (e) => { this.showUnconnected = e.target.checked; this.populateWaypointsList(); this.render(); });
 
     // Sidebar Tab Switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -716,7 +939,8 @@ class FMSApp {
 
         btn.classList.add('active');
         const tabId = btn.getAttribute('data-tab');
-        document.getElementById(tabId).classList.add('active');
+        const targetTab = document.getElementById(tabId);
+        if (targetTab) targetTab.classList.add('active');
       };
     });
 
@@ -724,6 +948,7 @@ class FMSApp {
     const bindControl = (numId, rngId, propKey, isFloat = true) => {
       const num = document.getElementById(numId);
       const rng = document.getElementById(rngId);
+      if (!num || !rng) return;
 
       const updateVal = (val) => {
         this.calibration[propKey] = isFloat ? parseFloat(val) : val;
@@ -741,20 +966,23 @@ class FMSApp {
     bindControl('num-scale', 'rng-scale', 'scale');
     bindControl('num-yaw', 'rng-yaw', 'yaw');
 
-    document.getElementById('btn-reset-calibration').onclick = () => {
-      this.autoFitGraph(true);
-    };
+    const btnResetCal = document.getElementById('btn-reset-calibration');
+    if (btnResetCal) btnResetCal.onclick = () => this.autoFitGraph(true);
 
-    document.getElementById('btn-save-calibration').onclick = () => this.saveCalibration();
+    const btnSaveCal = document.getElementById('btn-save-calibration');
+    if (btnSaveCal) btnSaveCal.onclick = () => this.saveCalibration();
 
-    document.getElementById('btn-export-config').onclick = () => {
-      const json = JSON.stringify(this.calibration, null, 2);
-      const blob = new Blob([json], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'fms_map_calibration.json';
-      a.click();
-    };
+    const btnExportCfg = document.getElementById('btn-export-config');
+    if (btnExportCfg) {
+      btnExportCfg.onclick = () => {
+        const json = JSON.stringify(this.calibration, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'fms_map_calibration.json';
+        a.click();
+      };
+    }
 
     // Inspector Filter & Search (Multi-select support!)
     document.querySelectorAll('.filter-pills .pill').forEach(pill => {
@@ -793,10 +1021,13 @@ class FMSApp {
       };
     });
 
-    document.getElementById('input-search-wp').oninput = (e) => {
-      const q = e.target.value.toLowerCase();
-      this.populateWaypointsList(q);
-    };
+    const inputSearch = document.getElementById('input-search-wp');
+    if (inputSearch) {
+      inputSearch.oninput = (e) => {
+        const q = e.target.value.toLowerCase();
+        this.populateWaypointsList(q);
+      };
+    }
   }
 
   checkHoverNode(sx, sy) {
