@@ -804,11 +804,14 @@ class DevFMSApp {
     }
 
     if (msg.type === 'telemetry') {
-      if (msg.has_pose !== false) {
+      if (msg.has_pose !== false && msg.status !== 'OFFLINE') {
         this.hasReceivedTelemetry = true;
+      } else if (msg.status === 'OFFLINE' || msg.has_pose === false) {
+        this.hasReceivedTelemetry = false;
       }
       this.robotState = { ...this.robotState, ...msg };
       this.updateTelemetryUI();
+      this.drawCanvas(); // Synchronous immediate canvas redraw on every WebSocket packet (unfocused window support)
     } else if (msg.type === 'route_progress') {
       this.currentStepIdx = msg.current_step || 0;
       this.renderRouteQueueList();

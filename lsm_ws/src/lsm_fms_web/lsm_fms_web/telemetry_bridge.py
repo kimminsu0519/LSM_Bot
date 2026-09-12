@@ -206,7 +206,21 @@ class FMSBridgeTelemetryNode:
         self.initial_pose_pub_bot = None
         self.has_pose = False
 
-        # Robot Telemetry State (lsm_bot_1) - Initially OFFLINE until live ROS2 pose is received
+        # Parse map origin from lsm_warehouse_map.yaml if available
+        self.map_origin_x = 0.0
+        self.map_origin_y = 0.0
+        map_yaml = "/home/kms/dev/LSM_repository/lsm_ws/src/lsm_navigation/maps/lsm_warehouse_map.yaml"
+        if os.path.exists(map_yaml):
+            try:
+                import yaml
+                with open(map_yaml, 'r') as f_map:
+                    mdata = yaml.safe_load(f_map)
+                    if mdata and "origin" in mdata and len(mdata["origin"]) >= 2:
+                        self.map_origin_x = float(mdata["origin"][0])
+                        self.map_origin_y = float(mdata["origin"][1])
+                        print(f"[TelemetryBridge] Loaded Map Origin from YAML: [{self.map_origin_x}, {self.map_origin_y}]")
+            except Exception as e:
+                print(f"[TelemetryBridge] Map origin read note: {e}")
         self.robot_state = {
             "type": "telemetry",
             "robot_id": "lsm_bot_1",
@@ -461,6 +475,15 @@ class FMSBridgeTelemetryNode:
 
     def _broadcast_loop(self):
         while True:
+            # Pose watchdog: If no ROS2 pose/odom message received within 2.0 seconds, set OFFLINE & hide pose
+            if hasattr(self, 'last_msg_time'):
+                if time.time() - self.last_msg_time > 2.0:
+                    self.has_pose = False
+                    self.robot_state["has_pose"] = False
+                    self.robot_state["status"] = "OFFLINE"
+                    self.robot_state["v"] = 0.0
+                    self.robot_state["w"] = 0.0
+
             # Broadcast telemetry message
             self.ws_server.broadcast(self.robot_state)
             # When offline (no ROS2 pose), broadcast 0.5Hz ping to prevent log spam
@@ -470,25 +493,29 @@ class FMSBridgeTelemetryNode:
                 time.sleep(0.1)
 
     def update_amcl_pose(self, ros_x, ros_y, yaw_deg, cov_x=0.002, cov_y=0.002, cov_yaw=0.01):
+        self.last_msg_time = time.time()
         self.has_pose = True
         self.robot_state["has_pose"] = True
         if self.robot_state["status"] == "OFFLINE":
             self.robot_state["status"] = "IDLE"
         
-        # Store raw ROS2 Gazebo map coordinates
+        # Store AMCL pose specifically as ros_x / ros_y for debugging panel
         self.robot_state["ros_x"] = round(ros_x, 3)
         self.robot_state["ros_y"] = round(ros_y, 3)
-
-        # Map ROS2 Gazebo pose to Metric Canvas coordinates
-        self.robot_state["x"] = round(ros_x, 3)
-        self.robot_state["y"] = round(ros_y, 3)
-        self.robot_state["yaw_deg"] = round(yaw_deg, 1)
         self.robot_state["covX"] = round(cov_x, 4)
         self.robot_state["covY"] = round(cov_y, 4)
         self.robot_state["covYaw"] = round(cov_yaw, 4)
 
+        # Fallback for main x and y if odom is not active
+        if not getattr(self, 'has_odom', False):
+            self.robot_state["x"] = round(ros_x, 3)
+            self.robot_state["y"] = round(ros_y, 3)
+            self.robot_state["yaw_deg"] = round(yaw_deg, 1)
+
     def update_odom(self, v, w, gz_x=None, gz_y=None, gz_yaw=None):
+        self.last_msg_time = time.time()
         self.has_pose = True
+        self.has_odom = True
         self.robot_state["has_pose"] = True
         if self.robot_state["status"] == "OFFLINE":
             self.robot_state["status"] = "IDLE"
@@ -498,6 +525,10 @@ class FMSBridgeTelemetryNode:
             self.robot_state["gz_x"] = round(gz_x, 3)
             self.robot_state["gz_y"] = round(gz_y, 3)
             self.robot_state["gz_yaw"] = round(gz_yaw, 1)
+            # Primary live pose source for FMS Canvas (100% direct Gazebo/Odom pose)
+            self.robot_state["x"] = round(gz_x, 3)
+            self.robot_state["y"] = round(gz_y, 3)
+            self.robot_state["yaw_deg"] = round(gz_yaw, 1)
 
 def main():
     if "ROS_DOMAIN_ID" not in os.environ:
@@ -573,19 +604,27 @@ def main():
 
             def tf_timer_cb():
                 try:
+                    t = None
                     if tf_buffer.can_transform('map', 'base_footprint', rclpy.time.Time()):
                         t = tf_buffer.lookup_transform('map', 'base_footprint', rclpy.time.Time())
-                        rx = t.transform.translation.x
-                        ry = t.transform.translation.y
-                        ori = t.transform.rotation
-                        siny_cosp = 2 * (ori.w * ori.z + ori.x * ori.y)
-                        cosy_cosp = 1 - 2 * (ori.y * ori.y + ori.z * ori.z)
-                        yaw_deg = math.degrees(math.atan2(siny_cosp, cosy_cosp))
-                        bridge.update_amcl_pose(rx, ry, yaw_deg)
                     elif tf_buffer.can_transform('odom', 'base_footprint', rclpy.time.Time()):
                         t = tf_buffer.lookup_transform('odom', 'base_footprint', rclpy.time.Time())
-                        rx = 2.4 + t.transform.translation.x
-                        ry = 0.3 + t.transform.translation.y
+
+                    if t is not None:
+                        t_stamp = t.header.stamp.sec + t.header.stamp.nanosec * 1e-9
+                        last_stamp = getattr(bridge, 'last_tf_stamp_sec', None)
+                        now_wall = time.time()
+                        
+                        if t_stamp == last_stamp:
+                            # Stale cached TF transform (no new TF published by Gazebo/Nav2)
+                            if now_wall - getattr(bridge, 'last_tf_walltime', now_wall) > 1.5:
+                                return
+                        else:
+                            bridge.last_tf_stamp_sec = t_stamp
+                            bridge.last_tf_walltime = now_wall
+
+                        rx = t.transform.translation.x
+                        ry = t.transform.translation.y
                         ori = t.transform.rotation
                         siny_cosp = 2 * (ori.w * ori.z + ori.x * ori.y)
                         cosy_cosp = 1 - 2 * (ori.y * ori.y + ori.z * ori.z)
@@ -622,9 +661,8 @@ def main():
             gz_x = 2.4 + pos.x
             gz_y = 0.3 + pos.y
             bridge.update_odom(v, w, gz_x, gz_y, yaw_deg)
-            # If TF/AMCL hasn't set pose yet, use raw odom pose shifted by spawn location
-            if not bridge.has_pose:
-                bridge.update_amcl_pose(gz_x, gz_y, yaw_deg)
+            # Always sync live Gazebo/Odom position directly to FMS Web UI
+            bridge.update_amcl_pose(gz_x, gz_y, yaw_deg)
 
         def auto_init_pose():
             if not bridge.has_pose:
