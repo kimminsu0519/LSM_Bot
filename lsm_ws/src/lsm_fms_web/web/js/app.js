@@ -1300,14 +1300,28 @@ class FMSApp {
     };
     requestAnimationFrame(renderLoop);
 
-    // Continuous background render fallback (20Hz) when browser tab/window is unfocused or in background
-    setInterval(() => {
-      const now = performance.now();
-      if (now - lastRenderTime > 45) {
-        this.render();
-        lastRenderTime = now;
-      }
-    }, 50);
+    // Web Worker timer (20Hz) - bypasses browser tab throttling when window/tab is in background
+    try {
+      const workerBlob = new Blob([`
+        setInterval(() => { self.postMessage('tick'); }, 50);
+      `], { type: 'application/javascript' });
+      const worker = new Worker(URL.createObjectURL(workerBlob));
+      worker.onmessage = () => {
+        const now = performance.now();
+        if (now - lastRenderTime > 40) {
+          this.render();
+          lastRenderTime = now;
+        }
+      };
+    } catch (e) {
+      setInterval(() => {
+        const now = performance.now();
+        if (now - lastRenderTime > 45) {
+          this.render();
+          lastRenderTime = now;
+        }
+      }, 50);
+    }
   }
 }
 
