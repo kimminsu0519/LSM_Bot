@@ -414,15 +414,15 @@ class FMSApp {
   }
 
   getWaypointUserPose(wp) {
-    if (wp.user_pose && typeof wp.user_pose.x === 'number') {
-      return { x: wp.user_pose.x, y: wp.user_pose.y, yaw: wp.user_pose.yaw_deg || 0.0 };
-    }
-    if (wp.pose && wp.pose.position) {
+    if (wp.pose && wp.pose.position && typeof wp.pose.position.x === 'number') {
       return {
         x: wp.pose.position.x,
         y: wp.pose.position.y,
-        yaw: 0.0
+        yaw: (wp.user_pose ? wp.user_pose.yaw_deg : 0.0)
       };
+    }
+    if (wp.user_pose && typeof wp.user_pose.x === 'number') {
+      return { x: wp.user_pose.x, y: wp.user_pose.y, yaw: wp.user_pose.yaw_deg || 0.0 };
     }
     return { x: 0, y: 0, yaw: 0.0 };
   }

@@ -171,47 +171,6 @@ class DevFMSApp {
     document.getElementById('chk-show-branches')?.addEventListener('change', (e) => { this.showBranches = e.target.checked; this.saveViewOptions(); });
     document.getElementById('chk-use-gz-truth')?.addEventListener('change', () => this.saveViewOptions());
 
-  saveViewOptions() {
-    const options = {
-      showEdges: this.showEdges,
-      showArrows: this.showArrows,
-      showLabels: this.showLabels,
-      showBranches: this.showBranches,
-      useGzTruth: document.getElementById('chk-use-gz-truth')?.checked || false
-    };
-    localStorage.setItem('lsm_fms_dev_view_options', JSON.stringify(options));
-  }
-
-  loadSavedViewOptions() {
-    try {
-      const saved = localStorage.getItem('lsm_fms_dev_view_options');
-      if (saved) {
-        const opts = JSON.parse(saved);
-        if (typeof opts.showEdges === 'boolean') this.showEdges = opts.showEdges;
-        if (typeof opts.showArrows === 'boolean') this.showArrows = opts.showArrows;
-        if (typeof opts.showLabels === 'boolean') this.showLabels = opts.showLabels;
-        if (typeof opts.showBranches === 'boolean') this.showBranches = opts.showBranches;
-        const gzChk = document.getElementById('chk-use-gz-truth');
-        if (gzChk && typeof opts.useGzTruth === 'boolean') gzChk.checked = opts.useGzTruth;
-      }
-    } catch (e) {
-      console.warn('Failed to load saved dev view options:', e);
-    }
-    this.updateToggleUI();
-  }
-
-  updateToggleUI() {
-    const chkEdges = document.getElementById('chk-show-edges');
-    const chkArrows = document.getElementById('chk-show-arrows');
-    const chkLabels = document.getElementById('chk-show-labels');
-    const chkBranches = document.getElementById('chk-show-branches');
-
-    if (chkEdges) chkEdges.checked = this.showEdges;
-    if (chkArrows) chkArrows.checked = this.showArrows;
-    if (chkLabels) chkLabels.checked = this.showLabels;
-    if (chkBranches) chkBranches.checked = this.showBranches;
-  }
-
     // Calibration Controls Mapping
     const bindControl = (numId, rngId, propKey, isFloat = true) => {
       const num = document.getElementById(numId);
@@ -374,6 +333,47 @@ class DevFMSApp {
     document.getElementById('btn-export-snapshots')?.addEventListener('click', () => this.exportSnapshotsJSON());
   }
 
+  saveViewOptions() {
+    const options = {
+      showEdges: this.showEdges,
+      showArrows: this.showArrows,
+      showLabels: this.showLabels,
+      showBranches: this.showBranches,
+      useGzTruth: document.getElementById('chk-use-gz-truth')?.checked || false
+    };
+    localStorage.setItem('lsm_fms_dev_view_options', JSON.stringify(options));
+  }
+
+  loadSavedViewOptions() {
+    try {
+      const saved = localStorage.getItem('lsm_fms_dev_view_options');
+      if (saved) {
+        const opts = JSON.parse(saved);
+        if (typeof opts.showEdges === 'boolean') this.showEdges = opts.showEdges;
+        if (typeof opts.showArrows === 'boolean') this.showArrows = opts.showArrows;
+        if (typeof opts.showLabels === 'boolean') this.showLabels = opts.showLabels;
+        if (typeof opts.showBranches === 'boolean') this.showBranches = opts.showBranches;
+        const gzChk = document.getElementById('chk-use-gz-truth');
+        if (gzChk && typeof opts.useGzTruth === 'boolean') gzChk.checked = opts.useGzTruth;
+      }
+    } catch (e) {
+      console.warn('Failed to load saved dev view options:', e);
+    }
+    this.updateToggleUI();
+  }
+
+  updateToggleUI() {
+    const chkEdges = document.getElementById('chk-show-edges');
+    const chkArrows = document.getElementById('chk-show-arrows');
+    const chkLabels = document.getElementById('chk-show-labels');
+    const chkBranches = document.getElementById('chk-show-branches');
+
+    if (chkEdges) chkEdges.checked = this.showEdges;
+    if (chkArrows) chkArrows.checked = this.showArrows;
+    if (chkLabels) chkLabels.checked = this.showLabels;
+    if (chkBranches) chkBranches.checked = this.showBranches;
+  }
+
   adjustZoom(factor) {
     const center = { x: this.canvas.width / 2, y: this.canvas.height / 2 };
     const newZoom = Math.min(Math.max(this.view.zoom * factor, 0.1), 10.0);
@@ -451,10 +451,16 @@ class DevFMSApp {
     this.adjGraph = {};
     for (const [wpId, wp] of Object.entries(this.waypoints)) {
       this.adjGraph[wpId] = [];
-      const pos = wp.user_pose || {};
-      wp.x = pos.x || 0.0;
-      wp.y = pos.y || 0.0;
-      wp.yaw_deg = pos.yaw_deg || 0.0;
+      const posePos = wp.pose ? wp.pose.position : null;
+      if (posePos && typeof posePos.x === 'number') {
+        wp.x = posePos.x;
+        wp.y = posePos.y;
+      } else {
+        const pos = wp.user_pose || {};
+        wp.x = pos.x || 0.0;
+        wp.y = pos.y || 0.0;
+      }
+      wp.yaw_deg = (wp.user_pose ? wp.user_pose.yaw_deg : 0.0);
     }
 
     for (const [srcId, wp] of Object.entries(this.waypoints)) {
