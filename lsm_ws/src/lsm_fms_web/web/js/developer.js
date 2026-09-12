@@ -52,10 +52,10 @@ class DevFMSApp {
       pxPerMeter: 100.0
     };
 
-    // Toggles
+    // Toggles (Default showLabels = false)
     this.showEdges = true;
     this.showArrows = true;
-    this.showLabels = true;
+    this.showLabels = false;
     this.showBranches = true;
 
     // WebSocket State
@@ -79,6 +79,7 @@ class DevFMSApp {
   async init() {
     this.loadSavedCalibration();
     this.loadSavedSnapshots();
+    this.loadSavedViewOptions();
     this.setupEventListeners();
     this.resizeCanvas();
     window.addEventListener('resize', () => this.resizeCanvas());
@@ -164,10 +165,52 @@ class DevFMSApp {
     document.getElementById('btn-zoom-out')?.addEventListener('click', () => this.adjustZoom(0.8));
     document.getElementById('btn-reset-view')?.addEventListener('click', () => this.centerView());
 
-    document.getElementById('chk-show-edges')?.addEventListener('change', (e) => this.showEdges = e.target.checked);
-    document.getElementById('chk-show-arrows')?.addEventListener('change', (e) => this.showArrows = e.target.checked);
-    document.getElementById('chk-show-labels')?.addEventListener('change', (e) => this.showLabels = e.target.checked);
-    document.getElementById('chk-show-branches')?.addEventListener('change', (e) => this.showBranches = e.target.checked);
+    document.getElementById('chk-show-edges')?.addEventListener('change', (e) => { this.showEdges = e.target.checked; this.saveViewOptions(); });
+    document.getElementById('chk-show-arrows')?.addEventListener('change', (e) => { this.showArrows = e.target.checked; this.saveViewOptions(); });
+    document.getElementById('chk-show-labels')?.addEventListener('change', (e) => { this.showLabels = e.target.checked; this.saveViewOptions(); });
+    document.getElementById('chk-show-branches')?.addEventListener('change', (e) => { this.showBranches = e.target.checked; this.saveViewOptions(); });
+    document.getElementById('chk-use-gz-truth')?.addEventListener('change', () => this.saveViewOptions());
+
+  saveViewOptions() {
+    const options = {
+      showEdges: this.showEdges,
+      showArrows: this.showArrows,
+      showLabels: this.showLabels,
+      showBranches: this.showBranches,
+      useGzTruth: document.getElementById('chk-use-gz-truth')?.checked || false
+    };
+    localStorage.setItem('lsm_fms_dev_view_options', JSON.stringify(options));
+  }
+
+  loadSavedViewOptions() {
+    try {
+      const saved = localStorage.getItem('lsm_fms_dev_view_options');
+      if (saved) {
+        const opts = JSON.parse(saved);
+        if (typeof opts.showEdges === 'boolean') this.showEdges = opts.showEdges;
+        if (typeof opts.showArrows === 'boolean') this.showArrows = opts.showArrows;
+        if (typeof opts.showLabels === 'boolean') this.showLabels = opts.showLabels;
+        if (typeof opts.showBranches === 'boolean') this.showBranches = opts.showBranches;
+        const gzChk = document.getElementById('chk-use-gz-truth');
+        if (gzChk && typeof opts.useGzTruth === 'boolean') gzChk.checked = opts.useGzTruth;
+      }
+    } catch (e) {
+      console.warn('Failed to load saved dev view options:', e);
+    }
+    this.updateToggleUI();
+  }
+
+  updateToggleUI() {
+    const chkEdges = document.getElementById('chk-show-edges');
+    const chkArrows = document.getElementById('chk-show-arrows');
+    const chkLabels = document.getElementById('chk-show-labels');
+    const chkBranches = document.getElementById('chk-show-branches');
+
+    if (chkEdges) chkEdges.checked = this.showEdges;
+    if (chkArrows) chkArrows.checked = this.showArrows;
+    if (chkLabels) chkLabels.checked = this.showLabels;
+    if (chkBranches) chkBranches.checked = this.showBranches;
+  }
 
     // Calibration Controls Mapping
     const bindControl = (numId, rngId, propKey, isFloat = true) => {

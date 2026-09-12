@@ -479,9 +479,9 @@ class FMSBridgeTelemetryNode:
         self.robot_state["ros_x"] = round(ros_x, 3)
         self.robot_state["ros_y"] = round(ros_y, 3)
 
-        # Map ROS2 Gazebo pose to Metric Canvas coordinates (+2.457m, +0.358m offset)
-        self.robot_state["x"] = round(ros_x + 2.457, 3)
-        self.robot_state["y"] = round(ros_y + 0.358, 3)
+        # Map ROS2 Gazebo pose to Metric Canvas coordinates
+        self.robot_state["x"] = round(ros_x, 3)
+        self.robot_state["y"] = round(ros_y, 3)
         self.robot_state["yaw_deg"] = round(yaw_deg, 1)
         self.robot_state["covX"] = round(cov_x, 4)
         self.robot_state["covY"] = round(cov_y, 4)
@@ -573,14 +573,19 @@ def main():
 
             def tf_timer_cb():
                 try:
-                    target_frame = 'map'
-                    if not tf_buffer.can_transform('map', 'base_footprint', rclpy.time.Time()):
-                        target_frame = 'odom'
-                    
-                    if tf_buffer.can_transform(target_frame, 'base_footprint', rclpy.time.Time()):
-                        t = tf_buffer.lookup_transform(target_frame, 'base_footprint', rclpy.time.Time())
+                    if tf_buffer.can_transform('map', 'base_footprint', rclpy.time.Time()):
+                        t = tf_buffer.lookup_transform('map', 'base_footprint', rclpy.time.Time())
                         rx = t.transform.translation.x
                         ry = t.transform.translation.y
+                        ori = t.transform.rotation
+                        siny_cosp = 2 * (ori.w * ori.z + ori.x * ori.y)
+                        cosy_cosp = 1 - 2 * (ori.y * ori.y + ori.z * ori.z)
+                        yaw_deg = math.degrees(math.atan2(siny_cosp, cosy_cosp))
+                        bridge.update_amcl_pose(rx, ry, yaw_deg)
+                    elif tf_buffer.can_transform('odom', 'base_footprint', rclpy.time.Time()):
+                        t = tf_buffer.lookup_transform('odom', 'base_footprint', rclpy.time.Time())
+                        rx = -21.0 + t.transform.translation.x
+                        ry = -5.1 + t.transform.translation.y
                         ori = t.transform.rotation
                         siny_cosp = 2 * (ori.w * ori.z + ori.x * ori.y)
                         cosy_cosp = 1 - 2 * (ori.y * ori.y + ori.z * ori.z)
@@ -614,10 +619,27 @@ def main():
             cosy_cosp = 1 - 2 * (ori.y * ori.y + ori.z * ori.z)
             yaw_deg = math.degrees(math.atan2(siny_cosp, cosy_cosp))
             
-            bridge.update_odom(v, w, pos.x, pos.y, yaw_deg)
-            # If TF hasn't set pose yet, use raw odom pose as fallback
+            gz_x = -21.0 + pos.x
+            gz_y = -5.1 + pos.y
+            bridge.update_odom(v, w, gz_x, gz_y, yaw_deg)
+            # If TF/AMCL hasn't set pose yet, use raw odom pose shifted by spawn location
             if not bridge.has_pose:
-                bridge.update_amcl_pose(pos.x, pos.y, yaw_deg)
+                bridge.update_amcl_pose(gz_x, gz_y, yaw_deg)
+
+        def auto_init_pose():
+            if not bridge.has_pose:
+                p = PoseWithCovarianceStamped()
+                p.header.frame_id = 'map'
+                p.header.stamp = node.get_clock().now().to_msg()
+                p.pose.pose.position.x = -21.0
+                p.pose.pose.position.y = -5.1
+                p.pose.pose.orientation.w = 1.0
+                if bridge.initial_pose_pub:
+                    bridge.initial_pose_pub.publish(p)
+                if bridge.initial_pose_pub_bot:
+                    bridge.initial_pose_pub_bot.publish(p)
+
+        node.create_timer(2.0, auto_init_pose)
 
         node.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', amcl_cb, amcl_qos)
         node.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', amcl_cb, 10)
