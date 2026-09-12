@@ -76,14 +76,17 @@ class WaypointNavigator(Node):
             desc = info.get('description', '')
             upose = info.get('user_pose', {})
             pose = info.get('pose', {})
-            print(f"  • [{wp_id}] ({asset_id}): User({upose.get('x')}, {upose.get('y')})m => ROS2 Pose({pose.get('x')}, {pose.get('y')})m, yaw={pose.get('yaw')} rad | {desc}")
+            x = info.get('x', upose.get('x', pose.get('x', 0.0)))
+            y = info.get('y', upose.get('y', pose.get('y', 0.0)))
+            yaw_deg = info.get('yaw_deg', upose.get('yaw_deg', 0.0))
+            print(f"  • [{wp_id}] ({asset_id}): Pose(X={x}, Y={y})m, yaw={yaw_deg}° | {desc}")
         print("")
 
-    def yaw_to_quaternion(self, yaw):
+    def yaw_to_quaternion(self, yaw_rad):
         qx = 0.0
         qy = 0.0
-        qz = math.sin(yaw / 2.0)
-        qw = math.cos(yaw / 2.0)
+        qz = math.sin(yaw_rad / 2.0)
+        qw = math.cos(yaw_rad / 2.0)
         return qx, qy, qz, qw
 
     def send_waypoint_goal(self, wp_id, dry_run=False, set_initial_pose=False):
@@ -95,18 +98,18 @@ class WaypointNavigator(Node):
         pose_info = wp_data.get('pose', {})
         upose_info = wp_data.get('user_pose', {})
         
-        rx = float(pose_info.get('x', 0.0))
-        ry = float(pose_info.get('y', 0.0))
-        rz = float(pose_info.get('z', 0.0))
-        yaw = float(pose_info.get('yaw', 0.0))
+        rx = float(wp_data.get('x', pose_info.get('x', upose_info.get('x', 0.0))))
+        ry = float(wp_data.get('y', pose_info.get('y', upose_info.get('y', 0.0))))
+        rz = 0.0
+        yaw_deg = float(wp_data.get('yaw_deg', upose_info.get('yaw_deg', 0.0)))
+        yaw_rad = math.radians(yaw_deg)
         
-        qx, qy, qz, qw = self.yaw_to_quaternion(yaw)
+        qx, qy, qz, qw = self.yaw_to_quaternion(yaw_rad)
 
         print("\n==============================================================================")
         print(f"🚀 TARGET WAYPOINT: {wp_id} ({wp_data.get('asset_id', wp_id)})")
         print(f"   Description: {wp_data.get('description', '')}")
-        print(f"   User Pose (Bottom-Left 0,0): X={upose_info.get('x')}m, Y={upose_info.get('y')}m, Yaw={yaw} rad")
-        print(f"   ROS2 Map Frame Pose: X={rx}m, Y={ry}m, Z={rz}m")
+        print(f"   ROS2 Map Frame Pose (Bottom-Left 0,0): X={rx}m, Y={ry}m, Yaw={yaw_deg}° ({yaw_rad:.4f} rad)")
         print(f"   Quaternion Orientation: [qx={qx:.4f}, qy={qy:.4f}, qz={qz:.4f}, qw={qw:.4f}]")
         print("==============================================================================")
 

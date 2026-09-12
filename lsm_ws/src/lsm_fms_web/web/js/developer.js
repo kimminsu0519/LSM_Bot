@@ -45,11 +45,11 @@ class DevFMSApp {
 
     // Calibration (Synced with default app.js)
     this.calibration = {
-      offsetX: 22.8,
-      offsetY: 12.65,
+      offsetX: 0.3,
+      offsetY: 0.3,
       scale: 1.0,
       yaw: 0.0,
-      pxPerMeter: 100.0
+      pxPerMeter: 66.66666666666667
     };
 
     // Toggles (Default showLabels = false)
@@ -97,7 +97,12 @@ class DevFMSApp {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        this.calibration = { ...this.calibration, ...parsed };
+        if (parsed.offsetX > 5 || parsed.offsetY > 5 || parsed.pxPerMeter === 100) {
+          console.warn('Purging stale legacy calibration from LocalStorage...');
+          localStorage.removeItem('lsm_fms_calibration');
+        } else {
+          this.calibration = { ...this.calibration, ...parsed };
+        }
         this.updateCalibrationUI();
       } catch (e) {
         console.error('Error loading calibration:', e);
@@ -107,14 +112,15 @@ class DevFMSApp {
 
   saveCalibration() {
     localStorage.setItem('lsm_fms_calibration', JSON.stringify(this.calibration));
-    alert('Developer Calibration saved to LocalStorage!');
+    alert('Calibration saved to LocalStorage');
   }
 
   updateCalibrationUI() {
     const setVal = (id, val) => {
-      const el = document.getElementById(id);
-      if (el) el.value = val;
+      const num = document.getElementById(id);
+      if (num) num.value = val;
     };
+
     setVal('num-offset-x', this.calibration.offsetX);
     setVal('rng-offset-x', this.calibration.offsetX);
     setVal('num-offset-y', this.calibration.offsetY);
@@ -127,44 +133,35 @@ class DevFMSApp {
 
   setupEventListeners() {
     // Canvas Pan & Zoom
-    this.container.addEventListener('mousedown', (e) => {
+    this.canvas.onmousedown = (e) => {
       this.view.isDragging = true;
       this.view.dragStartX = e.clientX - this.view.panX;
       this.view.dragStartY = e.clientY - this.view.panY;
-    });
+    };
 
-    window.addEventListener('mousemove', (e) => {
+    this.canvas.onmousemove = (e) => {
       if (this.view.isDragging) {
         this.view.panX = e.clientX - this.view.dragStartX;
         this.view.panY = e.clientY - this.view.dragStartY;
       }
-      this.updateCursorCoords(e);
-    });
+      this.updateHoverCoords(e);
+    };
 
-    window.addEventListener('mouseup', () => {
-      this.view.isDragging = false;
-    });
+    this.canvas.onmouseup = () => (this.view.isDragging = false);
+    this.canvas.onmouseleave = () => (this.view.isDragging = false);
 
-    this.container.addEventListener('wheel', (e) => {
+    this.canvas.onwheel = (e) => {
       e.preventDefault();
-      const zoomFactor = e.deltaY < 0 ? 1.15 : 0.87;
-      const mouseX = e.clientX - this.container.getBoundingClientRect().left;
-      const mouseY = e.clientY - this.container.getBoundingClientRect().top;
+      const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+      this.adjustZoom(zoomFactor);
+    };
 
-      const newZoom = Math.min(Math.max(this.view.zoom * zoomFactor, 0.1), 10.0);
-      this.view.panX = mouseX - (mouseX - this.view.panX) * (newZoom / this.view.zoom);
-      this.view.panY = mouseY - (mouseY - this.view.panY) * (newZoom / this.view.zoom);
-      this.view.zoom = newZoom;
-
-      const zoomBadge = document.getElementById('zoom-level');
-      if (zoomBadge) zoomBadge.textContent = `${Math.round(this.view.zoom * 100)}%`;
-    }, { passive: false });
-
-    // Toolbar Controls
+    // Zoom Buttons
     document.getElementById('btn-zoom-in')?.addEventListener('click', () => this.adjustZoom(1.2));
     document.getElementById('btn-zoom-out')?.addEventListener('click', () => this.adjustZoom(0.8));
-    document.getElementById('btn-reset-view')?.addEventListener('click', () => this.centerView());
+    document.getElementById('btn-zoom-reset')?.addEventListener('click', () => this.fitGraphToViewport());
 
+    // Toggles mapping
     document.getElementById('chk-show-edges')?.addEventListener('change', (e) => { this.showEdges = e.target.checked; this.saveViewOptions(); });
     document.getElementById('chk-show-arrows')?.addEventListener('change', (e) => { this.showArrows = e.target.checked; this.saveViewOptions(); });
     document.getElementById('chk-show-labels')?.addEventListener('change', (e) => { this.showLabels = e.target.checked; this.saveViewOptions(); });
@@ -193,18 +190,20 @@ class DevFMSApp {
     bindControl('num-yaw', 'rng-yaw', 'yaw');
 
     document.getElementById('btn-reset-calibration')?.addEventListener('click', () => {
-      this.calibration.offsetX = 22.8;
-      this.calibration.offsetY = 12.65;
+      this.calibration.offsetX = 0.3;
+      this.calibration.offsetY = 0.3;
       this.calibration.scale = 1.0;
       this.calibration.yaw = 0.0;
+      this.calibration.pxPerMeter = 66.66666666666667;
       this.updateCalibrationUI();
     });
 
     document.getElementById('btn-auto-fit')?.addEventListener('click', () => {
-      this.calibration.offsetX = 22.8;
-      this.calibration.offsetY = 12.65;
+      this.calibration.offsetX = 0.3;
+      this.calibration.offsetY = 0.3;
       this.calibration.scale = 1.0;
       this.calibration.yaw = 0.0;
+      this.calibration.pxPerMeter = 66.66666666666667;
       this.updateCalibrationUI();
     });
 
@@ -423,7 +422,7 @@ class DevFMSApp {
     try {
       let data = null;
       try {
-        const res = await fetch('config/waypoints_graph2.json');
+        const res = await fetch('config/waypoints_graph.json');
         if (res.ok) {
           data = await res.json();
         }
@@ -432,7 +431,7 @@ class DevFMSApp {
       }
 
       if (!data) {
-        const res = await fetch('config/waypoints_graph2.yaml');
+        const res = await fetch('config/waypoints_graph.yaml');
         const text = await res.text();
         if (window.jsyaml) {
           data = jsyaml.load(text);
@@ -451,16 +450,14 @@ class DevFMSApp {
     this.adjGraph = {};
     for (const [wpId, wp] of Object.entries(this.waypoints)) {
       this.adjGraph[wpId] = [];
-      const posePos = wp.pose ? wp.pose.position : null;
-      if (posePos && typeof posePos.x === 'number') {
-        wp.x = posePos.x;
-        wp.y = posePos.y;
+      if (typeof wp.x === 'number' && typeof wp.y === 'number') {
+        wp.yaw_deg = typeof wp.yaw_deg === 'number' ? wp.yaw_deg : 0.0;
       } else {
-        const pos = wp.user_pose || {};
-        wp.x = pos.x || 0.0;
-        wp.y = pos.y || 0.0;
+        const pos = wp.user_pose || (wp.pose ? wp.pose.position : {}) || {};
+        wp.x = typeof pos.x === 'number' ? pos.x : 0.0;
+        wp.y = typeof pos.y === 'number' ? pos.y : 0.0;
+        wp.yaw_deg = wp.yaw_deg || (wp.user_pose ? wp.user_pose.yaw_deg : 0.0);
       }
-      wp.yaw_deg = (wp.user_pose ? wp.user_pose.yaw_deg : 0.0);
     }
 
     for (const [srcId, wp] of Object.entries(this.waypoints)) {
@@ -1101,7 +1098,9 @@ class DevFMSApp {
   }
 
   updateCursorCoords(e) {
-    const rect = this.container.getBoundingClientRect();
+    const canvas = this.canvas || document.getElementById('map-canvas');
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
     const canvasX = e.clientX - rect.left;
     const canvasY = e.clientY - rect.top;
 
@@ -1110,6 +1109,10 @@ class DevFMSApp {
     if (coordsEl) {
       coordsEl.textContent = `X: ${world.x.toFixed(2)}m | Y: ${world.y.toFixed(2)}m`;
     }
+  }
+
+  updateHoverCoords(e) {
+    this.updateCursorCoords(e);
   }
 
   worldToCanvas(worldX, worldY) {
@@ -1126,7 +1129,7 @@ class DevFMSApp {
 
     const scale = parseFloat(this.calibration.scale);
     const pkm = this.calibration.pxPerMeter * scale;
-    const imgHeight = this.mapLoaded ? this.mapImage.height : 760;
+    const imgHeight = 760;
 
     const px = calX * pkm;
     const py = imgHeight - calY * pkm;
@@ -1141,7 +1144,7 @@ class DevFMSApp {
     const px = (canvasX - this.view.panX) / this.view.zoom;
     const py = (canvasY - this.view.panY) / this.view.zoom;
 
-    const imgHeight = this.mapLoaded ? this.mapImage.height : 760;
+    const imgHeight = 760;
     const scale = parseFloat(this.calibration.scale);
     const pkm = this.calibration.pxPerMeter * scale;
 
@@ -1167,12 +1170,16 @@ class DevFMSApp {
 
     // 1. Draw Map Image (Fixed position)
     if (this.mapLoaded) {
+      const mapWidthMeters = 47.4; // 3160pt * 0.015m/pt = 47.4m (전체 외벽 포함 가로 길이)
+      const mapHeightMeters = 11.4; // 760pt * 0.015m/pt = 11.4m (전체 외벽 포함 세로 길이)
+      const renderW = mapWidthMeters * this.calibration.pxPerMeter;
+      const renderH = mapHeightMeters * this.calibration.pxPerMeter;
       this.ctx.drawImage(
         this.mapImage,
         this.view.panX,
         this.view.panY,
-        this.mapImage.width * this.view.zoom,
-        this.mapImage.height * this.view.zoom
+        renderW * this.view.zoom,
+        renderH * this.view.zoom
       );
     }
 

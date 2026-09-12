@@ -35,9 +35,9 @@ class TopologicalGraph:
         for wp_id, wp in self.waypoints.items():
             self.adj[wp_id] = []
             pos = wp.get('user_pose', {})
-            wp['x'] = pos.get('x', 0.0)
-            wp['y'] = pos.get('y', 0.0)
-            wp['yaw_deg'] = pos.get('yaw_deg', 0.0)
+            wp['x'] = float(wp.get('x', pos.get('x', 0.0)))
+            wp['y'] = float(wp.get('y', pos.get('y', 0.0)))
+            wp['yaw_deg'] = float(wp.get('yaw_deg', pos.get('yaw_deg', 0.0)))
 
         # Build adjacency graph
         for src_id, wp in self.waypoints.items():
@@ -141,15 +141,15 @@ def main():
     parser = argparse.ArgumentParser(description="LSM FMS Topological Route Server")
     parser.add_argument('--start', type=str, default='wp-charge-1', help="Start Waypoint ID")
     parser.add_argument('--goal', type=str, default='wp-ws-a-1', help="Goal Waypoint ID")
-    parser.add_argument('--yaml', type=str, default='', help="Path to waypoints_graph2.yaml")
+    parser.add_argument('--yaml', type=str, default='', help="Path to waypoints_graph.yaml")
 
     args = parser.parse_args()
 
     # Default YAML path if not specified
     if not args.yaml:
-        default_yaml = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../lsm_navigation/config/waypoints_graph2.yaml'))
+        default_yaml = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../lsm_navigation/config/waypoints_graph.yaml'))
         if not os.path.exists(default_yaml):
-            default_yaml = os.path.abspath(os.path.join(os.path.dirname(__file__), '../web/config/waypoints_graph2.yaml'))
+            default_yaml = os.path.abspath(os.path.join(os.path.dirname(__file__), '../web/config/waypoints_graph.yaml'))
         args.yaml = default_yaml
 
     print(f"=== LSM FMS Topological Route Server ===")

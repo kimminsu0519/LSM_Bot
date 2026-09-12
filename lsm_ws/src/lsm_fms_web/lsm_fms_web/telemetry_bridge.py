@@ -507,14 +507,14 @@ def main():
         print(f"[ROS2 Environment] Using ROS_DOMAIN_ID={os.environ['ROS_DOMAIN_ID']}")
 
     search_paths = [
-        "/home/kms/dev/LSM_repository/lsm_ws/src/lsm_navigation/config/waypoints_graph2.yaml",
-        "/home/kms/dev/LSM_repository/lsm_ws/src/lsm_fms_web/web/config/waypoints_graph2.yaml",
+        "/home/kms/dev/LSM_repository/lsm_ws/src/lsm_navigation/config/waypoints_graph.yaml",
+        "/home/kms/dev/LSM_repository/lsm_ws/src/lsm_fms_web/web/config/waypoints_graph.yaml",
     ]
     if HAS_ROS2:
         try:
             from ament_index_python.packages import get_package_share_directory
-            search_paths.insert(0, os.path.join(get_package_share_directory('lsm_navigation'), 'config', 'waypoints_graph2.yaml'))
-            search_paths.insert(1, os.path.join(get_package_share_directory('lsm_fms_web'), 'web', 'config', 'waypoints_graph2.yaml'))
+            search_paths.insert(0, os.path.join(get_package_share_directory('lsm_navigation'), 'config', 'waypoints_graph.yaml'))
+            search_paths.insert(1, os.path.join(get_package_share_directory('lsm_fms_web'), 'web', 'config', 'waypoints_graph.yaml'))
         except Exception:
             pass
 
@@ -584,8 +584,8 @@ def main():
                         bridge.update_amcl_pose(rx, ry, yaw_deg)
                     elif tf_buffer.can_transform('odom', 'base_footprint', rclpy.time.Time()):
                         t = tf_buffer.lookup_transform('odom', 'base_footprint', rclpy.time.Time())
-                        rx = -21.0 + t.transform.translation.x
-                        ry = -5.1 + t.transform.translation.y
+                        rx = 2.4 + t.transform.translation.x
+                        ry = 0.3 + t.transform.translation.y
                         ori = t.transform.rotation
                         siny_cosp = 2 * (ori.w * ori.z + ori.x * ori.y)
                         cosy_cosp = 1 - 2 * (ori.y * ori.y + ori.z * ori.z)
@@ -619,8 +619,8 @@ def main():
             cosy_cosp = 1 - 2 * (ori.y * ori.y + ori.z * ori.z)
             yaw_deg = math.degrees(math.atan2(siny_cosp, cosy_cosp))
             
-            gz_x = -21.0 + pos.x
-            gz_y = -5.1 + pos.y
+            gz_x = 2.4 + pos.x
+            gz_y = 0.3 + pos.y
             bridge.update_odom(v, w, gz_x, gz_y, yaw_deg)
             # If TF/AMCL hasn't set pose yet, use raw odom pose shifted by spawn location
             if not bridge.has_pose:
@@ -631,8 +631,8 @@ def main():
                 p = PoseWithCovarianceStamped()
                 p.header.frame_id = 'map'
                 p.header.stamp = node.get_clock().now().to_msg()
-                p.pose.pose.position.x = -21.0
-                p.pose.pose.position.y = -5.1
+                p.pose.pose.position.x = 2.4
+                p.pose.pose.position.y = 0.3
                 p.pose.pose.orientation.w = 1.0
                 if bridge.initial_pose_pub:
                     bridge.initial_pose_pub.publish(p)

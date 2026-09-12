@@ -28,13 +28,14 @@ class FMSApp {
     };
 
     // Calibration Parameters
-    // World Origin (0,0) = Drawio Canvas (160pt, 880pt)
+    // World Origin (0,0) = Drawio Inner Bottom-Left Corner (160pt, 880pt)
+    // Image Origin = (-20pt, -20pt) relative to outer border -> offsetX = 0.3m, offsetY = 0.3m
     this.calibration = {
-      offsetX: 22.8,
-      offsetY: 12.65,
+      offsetX: 0.3,
+      offsetY: 0.3,
       scale: 1.0,
       yaw: 0.0,
-      pxPerMeter: 100.0 // 1m = 100pt Uniform Scale
+      pxPerMeter: 66.66666666666667 // 40pt = 0.6m -> 66.66666666666667 px/m
     };
 
     // Display Toggles (Default showUnconnected = false, showLabels = false by user request)
@@ -172,7 +173,12 @@ class FMSApp {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        this.calibration = { ...this.calibration, ...parsed };
+        if (parsed.offsetX > 5 || parsed.offsetY > 5 || parsed.pxPerMeter === 100) {
+          console.warn('Purging stale legacy calibration from LocalStorage...');
+          localStorage.removeItem('lsm_fms_calibration');
+        } else {
+          this.calibration = { ...this.calibration, ...parsed };
+        }
         this.updateCalibrationUI();
       } catch (e) {
         console.error('Failed to parse saved calibration:', e);
@@ -235,7 +241,7 @@ class FMSApp {
     try {
       let data = null;
       try {
-        const res = await fetch('config/waypoints_graph2.json');
+        const res = await fetch('config/waypoints_graph.json');
         if (res.ok) {
           data = await res.json();
         }
@@ -244,7 +250,7 @@ class FMSApp {
       }
 
       if (!data) {
-        const res = await fetch('config/waypoints_graph2.yaml');
+        const res = await fetch('config/waypoints_graph.yaml');
         const text = await res.text();
         if (window.jsyaml) {
           data = jsyaml.load(text);
@@ -299,10 +305,11 @@ class FMSApp {
   }
 
   autoFitGraph(shouldRender = true) {
-    this.calibration.offsetX = 22.8;
-    this.calibration.offsetY = 12.65;
+    this.calibration.offsetX = 0.3;
+    this.calibration.offsetY = 0.3;
     this.calibration.scale = 1.0;
     this.calibration.yaw = 0.0;
+    this.calibration.pxPerMeter = 66.66666666666667;
 
     this.updateCalibrationUI();
     if (shouldRender) {
@@ -414,15 +421,18 @@ class FMSApp {
   }
 
   getWaypointUserPose(wp) {
+    if (typeof wp.x === 'number' && typeof wp.y === 'number') {
+      return { x: wp.x, y: wp.y, yaw: wp.yaw_deg || 0.0 };
+    }
+    if (wp.user_pose && typeof wp.user_pose.x === 'number') {
+      return { x: wp.user_pose.x, y: wp.user_pose.y, yaw: wp.user_pose.yaw_deg || 0.0 };
+    }
     if (wp.pose && wp.pose.position && typeof wp.pose.position.x === 'number') {
       return {
         x: wp.pose.position.x,
         y: wp.pose.position.y,
         yaw: (wp.user_pose ? wp.user_pose.yaw_deg : 0.0)
       };
-    }
-    if (wp.user_pose && typeof wp.user_pose.x === 'number') {
-      return { x: wp.user_pose.x, y: wp.user_pose.y, yaw: wp.user_pose.yaw_deg || 0.0 };
     }
     return { x: 0, y: 0, yaw: 0.0 };
   }
@@ -442,7 +452,7 @@ class FMSApp {
     const scale = parseFloat(this.calibration.scale);
     const pkm = this.calibration.pxPerMeter * scale;
 
-    const imgHeight = this.mapLoaded ? this.mapImage.height : 760;
+    const imgHeight = 760;
 
     const px = calX * pkm;
     const py = imgHeight - calY * pkm;
@@ -461,7 +471,7 @@ class FMSApp {
     const px = (sx - this.view.panX) / this.view.zoom;
     const py = (sy - this.view.panY) / this.view.zoom;
 
-    const imgHeight = this.mapLoaded ? this.mapImage.height : 760;
+    const imgHeight = 760;
     const scale = parseFloat(this.calibration.scale);
     const pkm = this.calibration.pxPerMeter * scale;
 
@@ -486,12 +496,16 @@ class FMSApp {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     if (this.mapLoaded) {
+      const mapWidthMeters = 47.4; // 3160pt * 0.015m/pt = 47.4m (전체 외벽 포함 가로 길이)
+      const mapHeightMeters = 11.4; // 760pt * 0.015m/pt = 11.4m (전체 외벽 포함 세로 길이)
+      const renderW = mapWidthMeters * this.calibration.pxPerMeter;
+      const renderH = mapHeightMeters * this.calibration.pxPerMeter;
       this.ctx.drawImage(
         this.mapImage,
         this.view.panX,
         this.view.panY,
-        this.mapImage.width * this.view.zoom,
-        this.mapImage.height * this.view.zoom
+        renderW * this.view.zoom,
+        renderH * this.view.zoom
       );
     }
 
