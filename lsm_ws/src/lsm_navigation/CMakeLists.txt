@@ -23,10 +23,11 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Install Launch & Config directories
+# Install Launch & Config & Maps directories
 install(DIRECTORY
   config
   launch
+  maps
   DESTINATION share/${PROJECT_NAME}
 )
 

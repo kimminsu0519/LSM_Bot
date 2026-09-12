@@ -15,7 +15,7 @@ def generate_launch_description():
     pkg_nav2_bringup = get_package_share_directory('nav2_bringup')
 
     # Default Paths
-    default_map_path = os.path.join(pkg_lsm_bot_description, 'maps', 'lsm_warehouse_map.yaml')
+    default_map_path = os.path.join(pkg_lsm_navigation, 'maps', 'lsm_warehouse_map.yaml')
     default_params_path = os.path.join(pkg_lsm_navigation, 'config', 'nav2_params.yaml')
 
     # Launch Configurations
