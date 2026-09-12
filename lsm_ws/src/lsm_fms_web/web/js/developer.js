@@ -45,8 +45,8 @@ class DevFMSApp {
 
     // Calibration (Synced with default app.js)
     this.calibration = {
-      offsetX: 0.0,
-      offsetY: 0.0,
+      offsetX: 22.8,
+      offsetY: 12.65,
       scale: 1.0,
       yaw: 0.0,
       pxPerMeter: 100.0
@@ -191,16 +191,16 @@ class DevFMSApp {
     bindControl('num-yaw', 'rng-yaw', 'yaw');
 
     document.getElementById('btn-reset-calibration')?.addEventListener('click', () => {
-      this.calibration.offsetX = 0.0;
-      this.calibration.offsetY = 0.0;
+      this.calibration.offsetX = 22.8;
+      this.calibration.offsetY = 12.65;
       this.calibration.scale = 1.0;
       this.calibration.yaw = 0.0;
       this.updateCalibrationUI();
     });
 
     document.getElementById('btn-auto-fit')?.addEventListener('click', () => {
-      this.calibration.offsetX = 0.0;
-      this.calibration.offsetY = 0.0;
+      this.calibration.offsetX = 22.8;
+      this.calibration.offsetY = 12.65;
       this.calibration.scale = 1.0;
       this.calibration.yaw = 0.0;
       this.updateCalibrationUI();
@@ -1392,8 +1392,8 @@ class DevFMSApp {
 
     const useGzTruth = document.getElementById('chk-use-gz-truth')?.checked;
     if (useGzTruth && typeof this.robotState.gz_x === 'number') {
-      posX = this.robotState.gz_x + 2.457;
-      posY = this.robotState.gz_y + 0.358;
+      posX = this.robotState.gz_x;
+      posY = this.robotState.gz_y;
       yawDeg = this.robotState.gz_yaw || yawDeg;
     }
 

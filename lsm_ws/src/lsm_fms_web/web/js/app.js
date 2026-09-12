@@ -30,8 +30,8 @@ class FMSApp {
     // Calibration Parameters
     // World Origin (0,0) = Drawio Canvas (160pt, 880pt)
     this.calibration = {
-      offsetX: 0.0,
-      offsetY: 0.0,
+      offsetX: 22.8,
+      offsetY: 12.65,
       scale: 1.0,
       yaw: 0.0,
       pxPerMeter: 100.0 // 1m = 100pt Uniform Scale
@@ -299,8 +299,8 @@ class FMSApp {
   }
 
   autoFitGraph(shouldRender = true) {
-    this.calibration.offsetX = 0.0;
-    this.calibration.offsetY = 0.0;
+    this.calibration.offsetX = 22.8;
+    this.calibration.offsetY = 12.65;
     this.calibration.scale = 1.0;
     this.calibration.yaw = 0.0;
 
