@@ -29,6 +29,7 @@ setup(
             'web_server = lsm_fms_web.web_server:main',
             'route_server = lsm_fms_web.lsm_fms_route_server:main',
             'telemetry_bridge = lsm_fms_web.telemetry_bridge:main',
+            'pose_logger = lsm_fms_web.pose_logger:main',
         ],
     },
 )

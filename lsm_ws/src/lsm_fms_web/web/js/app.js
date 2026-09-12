@@ -15,7 +15,7 @@ class FMSApp {
     this.selectedWpId = null;
     this.hoveredWpId = null;
     this.currentTheme = localStorage.getItem('lsm_fms_theme') || 'dark';
-    this.sidebarCollapsed = false;
+    this.sidebarCollapsed = true;
 
     // View Transforms (Pan & Zoom)
     this.view = {
@@ -37,10 +37,10 @@ class FMSApp {
       pxPerMeter: 100.0 // 1m = 100pt Uniform Scale
     };
 
-    // Display Toggles (Default showUnconnected = false)
+    // Display Toggles (Default showUnconnected = false, showLabels = false by user request)
     this.showEdges = true;
     this.showArrows = true;
-    this.showLabels = true;
+    this.showLabels = false; // 기본 설정: 웨이포인트 이형 명칭 숨김
     this.showUnconnected = false; // 기본: 고립 노드 숨김
     this.activeFilters = new Set(['workstation', 'charger', 'node']); // 다중 선택 필터 (기본: 모두 선택)
 
@@ -62,6 +62,7 @@ class FMSApp {
     };
     this.ws = null;
     this.wsConnected = false;
+    this.hasReceivedTelemetry = false;
 
     // Elements
     this.canvas = document.getElementById('map-canvas');
@@ -74,6 +75,7 @@ class FMSApp {
   async init() {
     this.applyTheme(this.currentTheme);
     this.loadSavedCalibration();
+    this.loadSavedViewOptions();
     this.setupEventListeners();
     this.resizeCanvas();
     window.addEventListener('resize', () => this.resizeCanvas());
@@ -82,7 +84,44 @@ class FMSApp {
 
     this.fitGraphToViewport();
     this.initWebSocket();
+    this.startRenderLoop();
     this.render();
+  }
+
+  loadSavedViewOptions() {
+    const saved = localStorage.getItem('lsm_fms_view_options');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.showEdges === 'boolean') this.showEdges = parsed.showEdges;
+        if (typeof parsed.showArrows === 'boolean') this.showArrows = parsed.showArrows;
+        if (typeof parsed.showLabels === 'boolean') this.showLabels = parsed.showLabels;
+        if (typeof parsed.showUnconnected === 'boolean') this.showUnconnected = parsed.showUnconnected;
+      } catch (e) {}
+    }
+    this.updateToggleUI();
+  }
+
+  saveViewOptions() {
+    const options = {
+      showEdges: this.showEdges,
+      showArrows: this.showArrows,
+      showLabels: this.showLabels,
+      showUnconnected: this.showUnconnected
+    };
+    localStorage.setItem('lsm_fms_view_options', JSON.stringify(options));
+  }
+
+  updateToggleUI() {
+    const chkEdges = document.getElementById('chk-show-edges');
+    const chkArrows = document.getElementById('chk-show-arrows');
+    const chkLabels = document.getElementById('chk-show-labels');
+    const chkUnconnected = document.getElementById('chk-show-unconnected');
+
+    if (chkEdges) chkEdges.checked = this.showEdges;
+    if (chkArrows) chkArrows.checked = this.showArrows;
+    if (chkLabels) chkLabels.checked = this.showLabels;
+    if (chkUnconnected) chkUnconnected.checked = this.showUnconnected;
   }
 
   applyTheme(theme) {
@@ -306,53 +345,67 @@ class FMSApp {
   }
 
   centerView() {
-    this.fitGraphToViewport();
+    this.fitGraphToViewport(true);
   }
 
-  fitGraphToViewport() {
-    if (!this.waypoints || Object.keys(this.waypoints).length === 0) {
-      if (this.mapLoaded) {
-        this.view.panX = (this.canvas.width - this.mapImage.width * this.view.zoom) / 2;
-        this.view.panY = (this.canvas.height - this.mapImage.height * this.view.zoom) / 2;
-      } else {
-        this.view.panX = this.canvas.width / 2;
-        this.view.panY = this.canvas.height / 2;
+  saveViewState() {
+    try {
+      localStorage.setItem('lsm_fms_view_state', JSON.stringify({
+        zoom: this.view.zoom,
+        panX: this.view.panX,
+        panY: this.view.panY
+      }));
+    } catch (e) {}
+  }
+
+  loadSavedViewState() {
+    try {
+      const saved = localStorage.getItem('lsm_fms_view_state');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed.zoom === 'number') {
+          this.view.zoom = parsed.zoom;
+          this.view.panX = parsed.panX;
+          this.view.panY = parsed.panY;
+          this.updateZoomBadge();
+          return true;
+        }
       }
-      this.updateZoomBadge();
+    } catch (e) {}
+    return false;
+  }
+
+  fitGraphToViewport(forceReset = false) {
+    if (!forceReset && this.loadSavedViewState()) {
       return;
     }
+
+    // Default Zoomed-In View (~87% zoom, centered around active warehouse aisles & charging pad)
+    const targetZoom = 0.87;
+    this.view.zoom = targetZoom;
 
     let minPxX = Infinity, maxPxX = -Infinity;
     let minPxY = Infinity, maxPxY = -Infinity;
 
-    Object.values(this.waypoints).forEach(wp => {
-      const pos = this.getWaypointUserPose(wp);
-      const imgPos = this.worldToImagePixel(pos.x, pos.y);
-      if (imgPos.x < minPxX) minPxX = imgPos.x;
-      if (imgPos.x > maxPxX) maxPxX = imgPos.x;
-      if (imgPos.y < minPxY) minPxY = imgPos.y;
-      if (imgPos.y > maxPxY) maxPxY = imgPos.y;
-    });
+    if (this.waypoints && Object.keys(this.waypoints).length > 0) {
+      Object.values(this.waypoints).forEach(wp => {
+        const pos = this.getWaypointUserPose(wp);
+        const imgPos = this.worldToImagePixel(pos.x, pos.y);
+        if (imgPos.x < minPxX) minPxX = imgPos.x;
+        if (imgPos.x > maxPxX) maxPxX = imgPos.x;
+        if (imgPos.y < minPxY) minPxY = imgPos.y;
+        if (imgPos.y > maxPxY) maxPxY = imgPos.y;
+      });
+    }
 
-    const padding = 60;
-    const graphWidth = Math.max(100, maxPxX - minPxX);
-    const graphHeight = Math.max(100, maxPxY - minPxY);
+    const centerGraphPxX = (minPxX !== Infinity) ? (minPxX + maxPxX) / 2 : 550.0;
+    const centerGraphPxY = (minPxY !== Infinity) ? (minPxY + maxPxY) / 2 : 550.0;
 
-    const availableWidth = Math.max(200, this.canvas.width - padding * 2);
-    const availableHeight = Math.max(200, this.canvas.height - padding * 2);
-
-    const zoomX = availableWidth / graphWidth;
-    const zoomY = availableHeight / graphHeight;
-    const fitZoom = Math.min(zoomX, zoomY, 1.2);
-
-    const centerGraphPxX = (minPxX + maxPxX) / 2;
-    const centerGraphPxY = (minPxY + maxPxY) / 2;
-
-    this.view.zoom = fitZoom;
-    this.view.panX = (this.canvas.width / 2) - (centerGraphPxX * fitZoom);
-    this.view.panY = (this.canvas.height / 2) - (centerGraphPxY * fitZoom);
+    this.view.panX = (this.canvas.width / 2) - (centerGraphPxX * targetZoom);
+    this.view.panY = (this.canvas.height / 2) - (centerGraphPxY * targetZoom);
 
     this.updateZoomBadge();
+    this.saveViewState();
   }
 
   updateZoomBadge() {
@@ -461,19 +514,28 @@ class FMSApp {
       this.ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
-          if (msg.type === 'telemetry' && msg.data) {
-            const data = msg.data;
+          if (msg.type === 'telemetry') {
+            const data = msg.data || msg;
+            if (data.has_pose !== false) {
+              this.hasReceivedTelemetry = true;
+            }
+            this.robotState.has_pose = data.has_pose ?? this.robotState.has_pose;
             this.robotState.x = data.x ?? this.robotState.x;
             this.robotState.y = data.y ?? this.robotState.y;
+            this.robotState.ros_x = data.ros_x ?? this.robotState.ros_x;
+            this.robotState.ros_y = data.ros_y ?? this.robotState.ros_y;
             this.robotState.yaw_deg = data.yaw_deg ?? this.robotState.yaw_deg;
             this.robotState.v = data.v ?? this.robotState.v;
             this.robotState.w = data.w ?? this.robotState.w;
             this.robotState.battery = data.battery ?? this.robotState.battery;
             this.robotState.status = data.status || this.robotState.status;
+            if (data.covX !== undefined) this.robotState.covX = data.covX;
+            if (data.covY !== undefined) this.robotState.covY = data.covY;
+            if (data.covYaw !== undefined) this.robotState.covYaw = data.covYaw;
             if (data.covariance) {
-              this.robotState.covX = data.covariance.x ?? 0.002;
-              this.robotState.covY = data.covariance.y ?? 0.002;
-              this.robotState.covYaw = data.covariance.yaw ?? 0.01;
+              this.robotState.covX = data.covariance.x ?? this.robotState.covX;
+              this.robotState.covY = data.covariance.y ?? this.robotState.covY;
+              this.robotState.covYaw = data.covariance.yaw ?? this.robotState.covYaw;
             }
             this.render();
           }
@@ -491,7 +553,7 @@ class FMSApp {
   }
 
   drawRobotState() {
-    if (!this.robotState) return;
+    if (!this.robotState || !this.hasReceivedTelemetry || this.robotState.has_pose === false) return;
     const imgPos = this.worldToImagePixel(this.robotState.x, this.robotState.y);
     const pt = this.imagePixelToScreen(imgPos.x, imgPos.y);
     const rad = (-this.robotState.yaw_deg * Math.PI) / 180;
@@ -515,7 +577,7 @@ class FMSApp {
     // 2. Robot Directional Marker (Teal Triangle)
     this.ctx.save();
     this.ctx.translate(pt.x, pt.y);
-    this.ctx.rotate(-rad);
+    this.ctx.rotate(rad);
 
     const size = 12 * this.view.zoom;
     this.ctx.beginPath();
@@ -823,29 +885,56 @@ class FMSApp {
 
   updateSidebarUI() {
     const sidebar = document.getElementById('main-sidebar');
+    const toggleBtn = document.getElementById('btn-toggle-sidebar');
     const icon = document.getElementById('icon-sidebar');
     const label = document.getElementById('label-sidebar');
 
     if (sidebar) {
       if (this.sidebarCollapsed) {
         sidebar.classList.add('collapsed');
+        if (toggleBtn) toggleBtn.classList.remove('hidden');
         if (icon) icon.className = 'fa-solid fa-angles-left';
         if (label) label.textContent = 'Open Panel';
       } else {
         sidebar.classList.remove('collapsed');
+        if (toggleBtn) toggleBtn.classList.add('hidden');
         if (icon) icon.className = 'fa-solid fa-angles-right';
         if (label) label.textContent = 'Close Panel';
       }
     }
   }
 
-  // Event Listeners Setup
   setupEventListeners() {
     const btnTheme = document.getElementById('btn-theme-toggle');
     if (btnTheme) btnTheme.onclick = () => this.toggleTheme();
 
     const btnSidebar = document.getElementById('btn-toggle-sidebar');
     if (btnSidebar) btnSidebar.onclick = () => this.toggleSidebar();
+
+    const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+    if (btnCloseSidebar) btnCloseSidebar.onclick = () => {
+      this.sidebarCollapsed = true;
+      this.updateSidebarUI();
+    };
+
+    const btnToggleOpt = document.getElementById('btn-toggle-options');
+    const collOpt = document.getElementById('collapsible-options');
+    const optChevron = document.getElementById('opt-chevron');
+    if (btnToggleOpt && collOpt) {
+      btnToggleOpt.onclick = () => {
+        collOpt.classList.toggle('collapsed');
+        if (optChevron) {
+          optChevron.className = collOpt.classList.contains('collapsed') 
+            ? 'fa-solid fa-chevron-down' 
+            : 'fa-solid fa-chevron-up';
+        }
+      };
+    }
+
+    document.getElementById('chk-show-edges')?.addEventListener('change', (e) => { this.showEdges = e.target.checked; this.saveViewOptions(); this.render(); });
+    document.getElementById('chk-show-arrows')?.addEventListener('change', (e) => { this.showArrows = e.target.checked; this.saveViewOptions(); this.render(); });
+    document.getElementById('chk-show-labels')?.addEventListener('change', (e) => { this.showLabels = e.target.checked; this.saveViewOptions(); this.render(); });
+    document.getElementById('chk-show-unconnected')?.addEventListener('change', (e) => { this.showUnconnected = e.target.checked; this.saveViewOptions(); this.render(); });
 
     const btnAutoFit = document.getElementById('btn-auto-fit');
     if (btnAutoFit) btnAutoFit.onclick = () => this.autoFitGraph(true);
@@ -1186,6 +1275,25 @@ class FMSApp {
       row.onclick = () => this.selectNode(id);
       listEl.appendChild(row);
     });
+  }
+
+  startRenderLoop() {
+    let lastRenderTime = performance.now();
+    const renderLoop = (now) => {
+      lastRenderTime = now;
+      this.render();
+      requestAnimationFrame(renderLoop);
+    };
+    requestAnimationFrame(renderLoop);
+
+    // Continuous background render fallback (20Hz) when browser tab/window is unfocused or in background
+    setInterval(() => {
+      const now = performance.now();
+      if (now - lastRenderTime > 45) {
+        this.render();
+        lastRenderTime = now;
+      }
+    }, 50);
   }
 }
 

@@ -1,13 +1,13 @@
 :root, :root[data-theme="light"], :root[data-theme="dark"] {
-  --bg-void: #f8fafc;
-  --bg-surface: rgba(255, 255, 255, 0.95);
+  --bg-void: #cbd5e1;
+  --bg-surface: rgba(255, 255, 255, 0.96);
   --bg-card: #ffffff;
   --bg-card-hover: #f1f5f9;
-  --border-color: #cbd5e1;
+  --border-color: #94a3b8;
   --border-active: #0284c7;
   
   --text-main: #0f172a;
-  --text-muted: #64748b;
+  --text-muted: #475569;
   --text-sub: #334155;
   
   --neon-cyan: #0284c7;
@@ -16,8 +16,8 @@
   --neon-red: #dc2626;
   --neon-purple: #7c3aed;
   
-  --shadow-glow: 0 4px 20px rgba(15, 23, 42, 0.08);
-  --canvas-bg: #f8fafc;
+  --shadow-glow: 0 4px 20px rgba(15, 23, 42, 0.16);
+  --canvas-bg: #cbd5e1;
   --glass-blur: blur(16px);
 }
 
@@ -49,70 +49,73 @@ body {
 
 /* Distinct Soft Background Color Tinting for Operator vs Developer Monitoring */
 .app-container.operator-app {
-  background: radial-gradient(circle at 50% 0%, rgba(13, 148, 136, 0.07) 0%, rgba(244, 251, 249, 0.7) 70%), #f8fafc !important;
+  background: radial-gradient(circle at 50% 0%, rgba(13, 148, 136, 0.15) 0%, rgba(204, 235, 230, 0.8) 70%), #cbd5e1 !important;
 }
 .app-container.operator-app .canvas-section {
-  background-color: #f2f9f7 !important;
+  background-color: #d8eae5 !important;
 }
 
 .app-container.developer-app {
-  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.07) 0%, rgba(245, 244, 253, 0.7) 70%), #f8fafc !important;
+  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, rgba(216, 218, 245, 0.8) 70%), #cbd5e1 !important;
 }
 .app-container.developer-app .canvas-section {
-  background-color: #f3f2fb !important;
+  background-color: #dad8f2 !important;
 }
 
 /* Navbar Header */
 .navbar {
-  height: 64px;
+  height: 52px;
   background: var(--bg-surface);
   backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 14px;
   z-index: 100;
   transition: background 0.3s ease, border-color 0.3s ease;
+  white-space: nowrap;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
+  white-space: nowrap;
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Outfit', sans-serif;
   font-weight: 900;
-  font-size: 16px;
+  font-size: 14px;
   color: #fff;
-  box-shadow: 0 0 16px rgba(0, 243, 255, 0.3);
+  box-shadow: 0 0 12px rgba(0, 243, 255, 0.3);
 }
 
 .brand-info h1 {
   font-family: 'Outfit', sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.5px;
   color: var(--text-main);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .version-tag {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 6px;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 5px;
   background: rgba(0, 243, 255, 0.15);
   color: var(--neon-cyan);
   border: 1px solid rgba(0, 243, 255, 0.3);
@@ -121,22 +124,24 @@ body {
 .brand-info .subtitle {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  color: var(--neon-cyan);
-  letter-spacing: 1px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
   display: block;
+  white-space: nowrap;
 }
 
 /* Header Telemetry & Actions */
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
+  white-space: nowrap;
 }
 
 /* Header Distinct Color-Coding for Operator vs Developer Monitoring */
 .navbar-operator {
   border-bottom: 2px solid #0d9488 !important;
-  background: linear-gradient(180deg, rgba(204, 251, 241, 0.4) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+  background: linear-gradient(180deg, rgba(204, 251, 241, 0.6) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
 }
 .navbar-operator .logo-icon {
   background: linear-gradient(135deg, #0d9488, #059669) !important;
@@ -347,6 +352,41 @@ body {
   color: var(--neon-cyan);
 }
 
+.btn-toggle-options {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-toggle-options:hover {
+  background: rgba(2, 132, 199, 0.15);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+
+.collapsible-options {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border-color);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapsible-options.collapsed {
+  display: none;
+}
+
 /* Toggle Switches */
 .toggle-switch {
   display: flex;
@@ -459,34 +499,93 @@ body {
   pointer-events: none;
 }
 
+.sidebar-toggle-btn {
+  position: fixed !important;
+  right: 16px !important;
+  top: 68px !important;
+  z-index: 120 !important;
+  background: #ffffff !important;
+  border: 1.5px solid var(--border-color) !important;
+  color: var(--text-main) !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18) !important;
+  font-weight: 700 !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+.sidebar-toggle-btn.hidden {
+  display: none !important;
+}
+
+.sidebar-toggle-btn:hover {
+  border-color: var(--neon-cyan) !important;
+  color: var(--neon-cyan) !important;
+  transform: scale(1.04) !important;
+}
+
+.sidebar-close-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 15px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+}
+
+.sidebar-close-btn:hover {
+  background: #cbd5e1;
+  color: #0f172a;
+}
+
 .sidebar-tabs {
   display: flex;
+  align-items: center;
   border-bottom: 1px solid var(--border-color);
-  background: rgba(0, 0, 0, 0.05);
+  background: #e2e8f0;
+  padding: 4px;
+  gap: 3px;
 }
 
 .tab-btn {
   flex: 1;
-  padding: 14px 0;
-  background: none;
+  padding: 8px 2px;
+  background: transparent;
   border: none;
+  border-radius: 6px;
   color: var(--text-muted);
   font-family: 'Inter', sans-serif;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
+  border-bottom: none;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.tab-btn i {
+  font-size: 11px;
 }
 
 .tab-btn.active {
-  color: var(--neon-cyan);
-  border-bottom-color: var(--neon-cyan);
-  background: rgba(0, 243, 255, 0.08);
+  color: #0f172a;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+  font-weight: 700;
 }
 
 .tab-content {

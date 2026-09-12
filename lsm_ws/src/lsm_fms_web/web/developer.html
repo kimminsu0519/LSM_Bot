@@ -27,10 +27,10 @@
         <div class="logo-icon"><i class="fa-solid fa-code"></i></div>
         <div class="brand-info">
           <h1>
-            LSM ROUTE & TELEMETRY DEBUGGER
-            <span class="mode-badge-developer"><i class="fa-solid fa-bug"></i> DEV DEBUGGER</span>
+            LSM DEV
+            <span class="mode-badge-developer"><i class="fa-solid fa-bug"></i> DEV</span>
           </h1>
-          <span class="subtitle">SINGLE AMR (lsm_bot_1) TOPOLOGICAL NAVIGATION MONITOR</span>
+          <span class="subtitle">Telemetry & Debugger</span>
         </div>
       </div>
 
@@ -39,7 +39,7 @@
         <div class="dev-robot-select">
           <i class="fa-solid fa-robot"></i>
           <select id="select-active-robot">
-            <option value="lsm_bot_1" selected>lsm_bot_1 (Primary AMR)</option>
+            <option value="lsm_bot_1" selected>lsm_bot_1</option>
           </select>
         </div>
 
@@ -56,8 +56,8 @@
 
         <!-- Sidebar Toggle -->
         <button class="icon-action-btn sidebar-toggle-btn" id="btn-toggle-sidebar" title="Toggle Sidebar">
-          <i class="fa-solid fa-angles-right" id="icon-sidebar"></i>
-          <span>Close Panel</span>
+          <i class="fa-solid fa-angles-left" id="icon-sidebar"></i>
+          <span id="label-sidebar">Open Panel</span>
         </button>
       </div>
     </header>
@@ -73,6 +73,22 @@
             <button id="btn-reset-view" title="Reset View"><i class="fa-solid fa-arrows-to-dot"></i> Fit View</button>
           </div>
           <div class="tool-group">
+            <span class="zoom-level-badge" id="zoom-level">100%</span>
+          </div>
+          <div class="tool-group">
+            <button id="btn-quick-record-snap" class="btn-record-snap" title="Record Pose & Capture Canvas Snapshot">
+              <i class="fa-solid fa-camera"></i>
+              <span>위치 기록 & 캡처</span>
+            </button>
+          </div>
+          <div class="tool-group">
+            <button id="btn-toggle-options" class="btn-toggle-options" title="Toggle View Options">
+              <i class="fa-solid fa-sliders"></i>
+              <span>View Toggles</span>
+              <i class="fa-solid fa-chevron-down" id="opt-chevron"></i>
+            </button>
+          </div>
+          <div class="collapsible-options collapsed" id="collapsible-options">
             <label class="toggle-switch">
               <input type="checkbox" id="chk-show-edges" checked>
               <span class="switch-slider"></span>
@@ -91,11 +107,8 @@
             <label class="toggle-switch">
               <input type="checkbox" id="chk-show-branches" checked>
               <span class="switch-slider"></span>
-              <span class="toggle-label">Branch Choices</span>
+              <span class="toggle-label">Branches</span>
             </label>
-          </div>
-          <div class="tool-group">
-            <span class="zoom-level-badge" id="zoom-level">100%</span>
           </div>
         </div>
 
@@ -122,14 +135,16 @@
       </section>
 
       <!-- Right: Developer Control Sidebar -->
-      <aside class="sidebar floating-drawer" id="main-sidebar">
+      <aside class="sidebar floating-drawer collapsed" id="main-sidebar">
         <!-- Sidebar Tabs -->
         <div class="sidebar-tabs">
-          <button class="tab-btn active" data-tab="tab-telemetry"><i class="fa-solid fa-gauge-high"></i> Telemetry</button>
-          <button class="tab-btn" data-tab="tab-calibration"><i class="fa-solid fa-sliders"></i> Calibration</button>
-          <button class="tab-btn" data-tab="tab-planner"><i class="fa-solid fa-route"></i> Route Planner</button>
-          <button class="tab-btn" data-tab="tab-nav2"><i class="fa-solid fa-compass"></i> Nav2 BT</button>
-          <button class="tab-btn" data-tab="tab-logs"><i class="fa-solid fa-terminal"></i> WS Logs</button>
+          <button class="tab-btn active" data-tab="tab-telemetry" title="Telemetry"><i class="fa-solid fa-gauge-high"></i> Telemetry</button>
+          <button class="tab-btn" data-tab="tab-recorder" title="Position Recorder & Debugger"><i class="fa-solid fa-camera"></i> Record</button>
+          <button class="tab-btn" data-tab="tab-calibration" title="Calibration"><i class="fa-solid fa-sliders"></i> Calib</button>
+          <button class="tab-btn" data-tab="tab-planner" title="Route Planner"><i class="fa-solid fa-route"></i> Route</button>
+          <button class="tab-btn" data-tab="tab-nav2" title="Nav2 BT Navigator"><i class="fa-solid fa-compass"></i> Nav2</button>
+          <button class="tab-btn" data-tab="tab-logs" title="WebSocket Live Logs"><i class="fa-solid fa-terminal"></i> Logs</button>
+          <button class="sidebar-close-btn" id="btn-close-sidebar" title="Close Panel"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <!-- Tab 1: AMR Telemetry & State -->
@@ -174,6 +189,66 @@
               <div class="cov-item"><span>σx:</span> <span id="cov-x">0.002 m</span></div>
               <div class="cov-item"><span>σy:</span> <span id="cov-y">0.002 m</span></div>
               <div class="cov-item"><span>σyaw:</span> <span id="cov-yaw">0.01 rad</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Position Recorder & Debugger -->
+        <div class="tab-content" id="tab-recorder">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-camera"></i> 위치 기록 & 디버깅 Snapshots</h3>
+              <button class="btn-xs btn-outline" id="btn-clear-snapshots"><i class="fa-solid fa-trash"></i> Clear</button>
+            </div>
+            <p class="panel-desc">현재 모니터링 로봇 좌표, Gazebo 좌표, 맵 캔버스 화면 캡처를 기록하여 오차(Offset)를 비교 및 보정합니다.</p>
+
+            <button class="btn-primary btn-record-action mt-8" id="btn-trigger-record-snap">
+              <i class="fa-solid fa-camera"></i> 📸 위치 기록 & 캔버스 캡처 저장
+            </button>
+
+            <!-- Active Pose & Delta Summary Card -->
+            <div class="pose-delta-box mt-12">
+              <div class="delta-row">
+                <span class="lbl">ROS Map Pose:</span>
+                <span class="val neon-cyan" id="rec-ros-pose">X: 0.00m | Y: 0.00m | Yaw: 0.0°</span>
+              </div>
+              <div class="delta-row">
+                <span class="lbl">Gazebo Sim Pose:</span>
+                <span class="val neon-amber" id="rec-gz-pose">X: 0.00m | Y: 0.00m | Yaw: 0.0°</span>
+              </div>
+              <div class="delta-row">
+                <span class="lbl">GZ ↔ ROS Offset (Δ):</span>
+                <span class="val neon-green" id="rec-delta-offset">ΔX: 0.000m | ΔY: 0.000m</span>
+              </div>
+              <label class="toggle-switch mt-8">
+                <input type="checkbox" id="chk-use-gz-truth">
+                <span class="switch-slider"></span>
+                <span class="toggle-label">🎯 Gazebo Ground-Truth (트루값) 위치 우선 맵핑</span>
+              </label>
+              <label class="toggle-switch mt-4">
+                <input type="checkbox" id="chk-invert-heading">
+                <span class="switch-slider"></span>
+                <span class="toggle-label">🔄 로봇 앞/뒤 진행 방향 180° 반전</span>
+              </label>
+              <div class="action-buttons mt-8">
+                <button class="btn-secondary btn-apply-delta" id="btn-apply-delta-to-calib">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> 오프셋 보정 반영
+                </button>
+                <button class="btn-secondary btn-accent-amber" id="btn-reset-to-charger" title="AMCL 초기 위치를 wp-charge-1로 설정">
+                  <i class="fa-solid fa-bolt"></i> wp-charge-1로 초기화
+                </button>
+              </div>
+            </div>
+
+            <!-- Recorded Snapshots List -->
+            <div class="panel-header mt-12">
+              <h4><i class="fa-solid fa-list-check"></i> 저장된 디버깅 캡처 목록 (<span id="snap-count">0</span>)</h4>
+              <button class="btn-xs btn-outline" id="btn-export-snapshots"><i class="fa-solid fa-download"></i> 내보내기</button>
+            </div>
+            <div class="snapshots-list mt-8" id="snapshots-list">
+              <div class="empty-state-sm">
+                <p>기록된 캡처가 없습니다. 위 [위치 기록 & 캔버스 캡처 저장] 버튼을 클릭하세요.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -275,6 +350,25 @@
                 <div class="empty-state-sm">
                   <p>No active route segment. Dispatch a route to inspect branch choices.</p>
                 </div>
+              </div>
+            </div>
+
+            <!-- Workstation Call Scenario Quick Trigger -->
+            <div class="scenario-trigger-card mt-12">
+              <div class="panel-header">
+                <h4><i class="fa-solid fa-bell"></i> WS Work Complete (Call AMR Scenario)</h4>
+              </div>
+              <p class="panel-desc-sm">충전소/대기 장소의 lsm_bot_1을 호출하여 해당 WS로 최단 경로 Gazebo 주행 명령을 하달합니다.</p>
+              <div class="scenario-buttons-grid">
+                <button class="btn-scenario btn-ws-a1" id="btn-call-ws-a1">
+                  <i class="fa-solid fa-industry"></i> Call from WS A-1 (wp-ws-a-1)
+                </button>
+                <button class="btn-scenario btn-ws-a2" id="btn-call-ws-a2">
+                  <i class="fa-solid fa-industry"></i> Call from WS A-2 (wp-ws-a-2)
+                </button>
+                <button class="btn-scenario btn-charger" id="btn-call-charger">
+                  <i class="fa-solid fa-bolt"></i> Return to Charger (wp-charge-1)
+                </button>
               </div>
             </div>
 

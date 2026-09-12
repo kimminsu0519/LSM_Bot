@@ -61,6 +61,7 @@ class DevFMSApp {
     // WebSocket State
     this.ws = null;
     this.wsConnected = false;
+    this.hasReceivedTelemetry = false;
     this.logPaused = false;
     this.wsUrl = `ws://${window.location.hostname || 'localhost'}:9090`;
 
@@ -69,11 +70,15 @@ class DevFMSApp {
     this.ctx = this.canvas.getContext('2d');
     this.container = document.getElementById('canvas-container');
 
+    // Debug Position Snapshots State
+    this.snapshots = [];
+
     this.init();
   }
 
   async init() {
     this.loadSavedCalibration();
+    this.loadSavedSnapshots();
     this.setupEventListeners();
     this.resizeCanvas();
     window.addEventListener('resize', () => this.resizeCanvas());
@@ -224,16 +229,65 @@ class DevFMSApp {
       });
     });
 
-    // Sidebar Collapse
+    // Sidebar Collapse & Close
+    const updateSidebarUI = () => {
+      const sidebar = document.getElementById('main-sidebar');
+      const toggleBtn = document.getElementById('btn-toggle-sidebar');
+      const icon = document.getElementById('icon-sidebar');
+      const label = document.getElementById('label-sidebar');
+      if (sidebar) {
+        const isCollapsed = sidebar.classList.contains('collapsed');
+        if (toggleBtn) {
+          if (isCollapsed) toggleBtn.classList.remove('hidden');
+          else toggleBtn.classList.add('hidden');
+        }
+        if (icon) icon.className = isCollapsed ? 'fa-solid fa-angles-left' : 'fa-solid fa-angles-right';
+        if (label) label.textContent = isCollapsed ? 'Open Panel' : 'Close Panel';
+      }
+    };
+
+    // Set initial sidebar toggle UI
+    updateSidebarUI();
+
     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => {
       const sidebar = document.getElementById('main-sidebar');
-      if (sidebar) sidebar.classList.toggle('collapsed');
+      if (sidebar) {
+        sidebar.classList.toggle('collapsed');
+        updateSidebarUI();
+      }
     });
 
-    // Route Planner Actions
+    document.getElementById('btn-close-sidebar')?.addEventListener('click', () => {
+      const sidebar = document.getElementById('main-sidebar');
+      if (sidebar) {
+        sidebar.classList.add('collapsed');
+        updateSidebarUI();
+      }
+    });
+
+    // View Options Toggle
+    const btnToggleOpt = document.getElementById('btn-toggle-options');
+    const collOpt = document.getElementById('collapsible-options');
+    const optChevron = document.getElementById('opt-chevron');
+    if (btnToggleOpt && collOpt) {
+      btnToggleOpt.addEventListener('click', () => {
+        collOpt.classList.toggle('collapsed');
+        if (optChevron) {
+          optChevron.className = collOpt.classList.contains('collapsed') 
+            ? 'fa-solid fa-chevron-down' 
+            : 'fa-solid fa-chevron-up';
+        }
+      });
+    }
+
+    // Route Planner & WS Call Scenario Actions
     document.getElementById('btn-set-start-bot')?.addEventListener('click', () => this.setStartToBotPose());
     document.getElementById('btn-plan-route')?.addEventListener('click', () => this.calculateAndPreviewRoute());
     document.getElementById('btn-dispatch-route')?.addEventListener('click', () => this.dispatchRouteGoal());
+
+    document.getElementById('btn-call-ws-a1')?.addEventListener('click', () => this.dispatchWorkstationCall('wp-ws-a-1'));
+    document.getElementById('btn-call-ws-a2')?.addEventListener('click', () => this.dispatchWorkstationCall('wp-ws-a-2'));
+    document.getElementById('btn-call-charger')?.addEventListener('click', () => this.dispatchWorkstationCall('wp-charge-1'));
 
     // WS Log Controls
     document.getElementById('btn-pause-log')?.addEventListener('click', (e) => {
@@ -245,6 +299,36 @@ class DevFMSApp {
       const consoleEl = document.getElementById('ws-log-console');
       if (consoleEl) consoleEl.innerHTML = '<div class="log-entry system">[SYSTEM] Log cleared.</div>';
     });
+
+    // Position Recorder & Offset Debugger Actions
+    const recordHandler = () => this.recordPoseSnapshot();
+    document.getElementById('btn-quick-record-snap')?.addEventListener('click', () => {
+      const tabBtn = document.querySelector('.sidebar-tabs .tab-btn[data-tab="tab-recorder"]');
+      if (tabBtn) tabBtn.click();
+      const sidebar = document.getElementById('main-sidebar');
+      if (sidebar && sidebar.classList.contains('collapsed')) {
+        document.getElementById('btn-toggle-sidebar')?.click();
+      }
+      recordHandler();
+    });
+    document.getElementById('btn-trigger-record-snap')?.addEventListener('click', recordHandler);
+    document.getElementById('btn-apply-delta-to-calib')?.addEventListener('click', () => this.applyDeltaToCalibration());
+    document.getElementById('btn-reset-to-charger')?.addEventListener('click', () => {
+      if (this.wsConnected && this.ws) {
+        this.sendWSMessage({ type: 'reset_initial_pose', wp_id: 'wp-charge-1' });
+        alert('⚡ 로봇 초기 위치(AMCL initialpose)를 wp-charge-1로 설정했습니다!');
+      } else {
+        alert('WebSocket 연결을 확인해주세요.');
+      }
+    });
+    document.getElementById('btn-clear-snapshots')?.addEventListener('click', () => {
+      if (confirm('모든 디버깅 캡처 기록을 삭제하시겠습니까?')) {
+        this.snapshots = [];
+        localStorage.removeItem('lsm_pose_snapshots');
+        this.renderSnapshotsList();
+      }
+    });
+    document.getElementById('btn-export-snapshots')?.addEventListener('click', () => this.exportSnapshotsJSON());
   }
 
   adjustZoom(factor) {
@@ -490,7 +574,7 @@ class DevFMSApp {
       const nextWp = path[i + 1] || null;
       const branches = (this.adjGraph[wpId] || []).map(e => e.target);
 
-      details.append({
+      details.push({
         step: i,
         wpId,
         type: wp.type,
@@ -502,6 +586,26 @@ class DevFMSApp {
       });
     }
     return details;
+  }
+
+  dispatchWorkstationCall(wsId) {
+    this.setStartToBotPose();
+    const startWp = document.getElementById('select-start-wp')?.value || 'wp-charge-1';
+    const goalSelect = document.getElementById('select-goal-wp');
+    if (goalSelect && this.waypoints[wsId]) goalSelect.value = wsId;
+
+    this.calculateAndPreviewRoute();
+
+    if (this.wsConnected && this.ws) {
+      const payload = {
+        type: 'ws_call_request',
+        robot_id: this.robotState.id,
+        ws_id: wsId,
+        start_wp: startWp
+      };
+      this.sendWSMessage(payload);
+    }
+    this.dispatchRouteGoal();
   }
 
   renderRouteQueueList() {
@@ -643,10 +747,20 @@ class DevFMSApp {
 
   handleWSMessage(msg) {
     if (!this.logPaused) {
-      this.logToConsole(`[WS IN] ${JSON.stringify(msg)}`, 'in');
+      if (msg.type === 'telemetry') {
+        if (this.lastLoggedStatus !== msg.status) {
+          this.lastLoggedStatus = msg.status;
+          this.logToConsole(`[WS IN] Telemetry Status: ${msg.status}`, 'in');
+        }
+      } else {
+        this.logToConsole(`[WS IN] ${JSON.stringify(msg)}`, 'in');
+      }
     }
 
     if (msg.type === 'telemetry') {
+      if (msg.has_pose !== false) {
+        this.hasReceivedTelemetry = true;
+      }
       this.robotState = { ...this.robotState, ...msg };
       this.updateTelemetryUI();
     } else if (msg.type === 'route_progress') {
@@ -657,8 +771,18 @@ class DevFMSApp {
   }
 
   updateTelemetryUI() {
-    document.getElementById('tel-x').textContent = `${this.robotState.x.toFixed(2)} m`;
-    document.getElementById('tel-y').textContent = `${this.robotState.y.toFixed(2)} m`;
+    const rx = this.robotState.ros_x ?? (this.robotState.x - 2.457);
+    const ry = this.robotState.ros_y ?? (this.robotState.y - 0.358);
+    const cx = this.robotState.x;
+    const cy = this.robotState.y;
+    const gzx = this.robotState.gz_x || 0;
+    const gzy = this.robotState.gz_y || 0;
+    const gzyaw = this.robotState.gz_yaw || 0;
+    const dx = gzx - rx;
+    const dy = gzy - ry;
+
+    document.getElementById('tel-x').textContent = `${rx.toFixed(2)} m`;
+    document.getElementById('tel-y').textContent = `${ry.toFixed(2)} m`;
     document.getElementById('tel-yaw').textContent = `${this.robotState.yaw_deg.toFixed(1)} °`;
     document.getElementById('tel-v').textContent = `${(this.robotState.v || 0.0).toFixed(2)} m/s`;
     document.getElementById('tel-w').textContent = `${(this.robotState.w || 0.0).toFixed(2)} rad/s`;
@@ -668,7 +792,161 @@ class DevFMSApp {
     document.getElementById('cov-y').textContent = `${(this.robotState.covY || 0.002).toFixed(3)}m`;
     document.getElementById('cov-yaw').textContent = `${(this.robotState.covYaw || 0.01).toFixed(2)}rad`;
 
-    document.getElementById('hud-pose').textContent = `X: ${this.robotState.x.toFixed(2)}m | Y: ${this.robotState.y.toFixed(2)}m | Yaw: ${this.robotState.yaw_deg.toFixed(1)}°`;
+    // Update Active Recorder Card
+    const recRos = document.getElementById('rec-ros-pose');
+    const recGz = document.getElementById('rec-gz-pose');
+    const recDelta = document.getElementById('rec-delta-offset');
+    if (recRos) recRos.textContent = `X: ${rx.toFixed(3)}m | Y: ${ry.toFixed(3)}m | Yaw: ${this.robotState.yaw_deg.toFixed(1)}°`;
+    if (recGz) recGz.textContent = `X: ${gzx.toFixed(3)}m | Y: ${gzy.toFixed(3)}m | Yaw: ${gzyaw.toFixed(1)}°`;
+    if (recDelta) recDelta.textContent = `ΔX: ${dx.toFixed(3)}m | ΔY: ${dy.toFixed(3)}m`;
+
+    document.getElementById('hud-pose').textContent = `Map: X ${cx.toFixed(2)}m, Y ${cy.toFixed(2)}m (ROS2: X ${rx.toFixed(2)}m, Y ${ry.toFixed(2)}m) | Yaw: ${this.robotState.yaw_deg.toFixed(1)}°`;
+  }
+
+  /* --- Position Recorder & Debugger Methods --- */
+  loadSavedSnapshots() {
+    const saved = localStorage.getItem('lsm_pose_snapshots');
+    if (saved) {
+      try {
+        this.snapshots = JSON.parse(saved);
+        this.renderSnapshotsList();
+      } catch (e) {
+        console.error('Error loading snapshots:', e);
+      }
+    }
+  }
+
+  recordPoseSnapshot() {
+    const ros_x = this.robotState.ros_x ?? (this.robotState.x - 2.457);
+    const ros_y = this.robotState.ros_y ?? (this.robotState.y - 0.358);
+    const canvas_x = this.robotState.x;
+    const canvas_y = this.robotState.y;
+    const yaw_deg = this.robotState.yaw_deg || 0;
+    const gz_x = this.robotState.gz_x || 0;
+    const gz_y = this.robotState.gz_y || 0;
+    const gz_yaw = this.robotState.gz_yaw || 0;
+    const delta_x = gz_x - ros_x;
+    const delta_y = gz_y - ros_y;
+
+    // Capture Map Canvas screenshot
+    let image_b64 = '';
+    try {
+      image_b64 = this.canvas.toDataURL('image/png');
+    } catch (e) {
+      console.warn('Canvas export warning:', e);
+    }
+
+    const now = new Date();
+    const tsStr = now.toLocaleTimeString() + `.${now.getMilliseconds()}`;
+
+    const snap = {
+      id: 'snap_' + Date.now(),
+      timestamp: now.toISOString(),
+      tsStr: tsStr,
+      ros_map: { x: ros_x, y: ros_y, yaw_deg },
+      fms_canvas: { x: canvas_x, y: canvas_y },
+      gazebo_odom: { x: gz_x, y: gz_y, yaw_deg: gz_yaw },
+      offset_delta: { delta_x, delta_y },
+      image_b64: image_b64
+    };
+
+    this.snapshots.unshift(snap);
+    if (this.snapshots.length > 50) this.snapshots.pop();
+
+    try {
+      localStorage.setItem('lsm_pose_snapshots', JSON.stringify(this.snapshots));
+    } catch (e) {
+      console.warn('LocalStorage snapshot save warning:', e);
+    }
+
+    if (this.wsConnected && this.ws) {
+      this.sendWSMessage({
+        type: 'save_pose_snapshot',
+        ros_x, ros_y, yaw_deg,
+        canvas_x, canvas_y,
+        gz_x, gz_y, gz_yaw,
+        image_b64,
+        note: `Manual debug capture @ ${tsStr}`
+      });
+    }
+
+    this.renderSnapshotsList();
+    this.logToConsole(`[RECORDER] Saved Pose Snapshot: ROS(${ros_x.toFixed(2)}, ${ros_y.toFixed(2)}) | GZ(${gz_x.toFixed(2)}, ${gz_y.toFixed(2)}) | Δ(${delta_x.toFixed(2)}, ${delta_y.toFixed(2)})`);
+  }
+
+  renderSnapshotsList() {
+    const container = document.getElementById('snapshots-list');
+    const countEl = document.getElementById('snap-count');
+    if (!container) return;
+
+    if (countEl) countEl.textContent = this.snapshots.length;
+
+    if (this.snapshots.length === 0) {
+      container.innerHTML = `<div class="empty-state-sm"><p>기록된 캡처가 없습니다. 위 [위치 기록 & 캔버스 캡처 저장] 버튼을 클릭하세요.</p></div>`;
+      return;
+    }
+
+    let html = '';
+    this.snapshots.forEach((snap, idx) => {
+      const rx = snap.ros_map.x.toFixed(3);
+      const ry = snap.ros_map.y.toFixed(3);
+      const gzx = snap.gazebo_odom.x.toFixed(3);
+      const gzy = snap.gazebo_odom.y.toFixed(3);
+      const dx = snap.offset_delta.delta_x.toFixed(3);
+      const dy = snap.offset_delta.delta_y.toFixed(3);
+      const timeTag = new Date(snap.timestamp).toLocaleTimeString();
+
+      html += `
+        <div class="snapshot-item-card">
+          <div class="snapshot-header">
+            <span>📸 #${this.snapshots.length - idx} [${timeTag}]</span>
+            <span class="neon-green">ΔX: ${dx}m | ΔY: ${dy}m</span>
+          </div>
+          <div class="snapshot-body">
+            ${snap.image_b64 ? `<img src="${snap.image_b64}" class="snapshot-thumb" onclick="const w=window.open('');w.document.write('<img src=\\'${snap.image_b64}\\' style=\\'max-width:100%\\'>')" title="Click to view full screenshot">` : ''}
+            <div class="snapshot-details">
+              <div><strong>ROS Map:</strong> (${rx}, ${ry}) | Yaw: ${snap.ros_map.yaw_deg.toFixed(1)}°</div>
+              <div><strong>Gazebo:</strong> (${gzx}, ${gzy}) | Yaw: ${snap.gazebo_odom.yaw_deg.toFixed(1)}°</div>
+              <div><strong>Canvas:</strong> (${snap.fms_canvas.x.toFixed(3)}, ${snap.fms_canvas.y.toFixed(3)})</div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  applyDeltaToCalibration() {
+    const rx = this.robotState.ros_x ?? (this.robotState.x - 2.457);
+    const ry = this.robotState.ros_y ?? (this.robotState.y - 0.358);
+    const gz_x = this.robotState.gz_x || 0;
+    const gz_y = this.robotState.gz_y || 0;
+    const delta_x = gz_x - rx;
+    const delta_y = gz_y - ry;
+
+    this.calibration.offsetX = parseFloat(delta_x.toFixed(3));
+    this.calibration.offsetY = parseFloat(delta_y.toFixed(3));
+    this.updateCalibrationUI();
+    this.saveCalibration();
+
+    alert(`⚡ GZ ↔ ROS Offset Delta가 Calibration에 즉시 반영되었습니다!\nOffset X: ${this.calibration.offsetX}m, Offset Y: ${this.calibration.offsetY}m`);
+  }
+
+  exportSnapshotsJSON() {
+    if (this.snapshots.length === 0) {
+      alert('내보낼 캡처 데이터가 없습니다.');
+      return;
+    }
+    const cleanSnaps = this.snapshots.map(s => {
+      const { image_b64, ...rest } = s;
+      return rest;
+    });
+    const json = JSON.stringify(cleanSnaps, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `lsm_position_debug_report_${Date.now()}.json`;
+    a.click();
   }
 
   logToConsole(text, type = 'system') {
@@ -686,57 +964,91 @@ class DevFMSApp {
 
   /* --- Main Canvas Render Loop --- */
   startRenderLoop() {
-    const render = () => {
+    let lastRenderTime = performance.now();
+    const render = (now) => {
+      lastRenderTime = now;
       this.drawCanvas();
       requestAnimationFrame(render);
     };
     requestAnimationFrame(render);
+
+    // Continuous background render fallback (20Hz) when browser tab/window is unfocused or in background
+    setInterval(() => {
+      const now = performance.now();
+      if (now - lastRenderTime > 45) {
+        this.drawCanvas();
+        lastRenderTime = now;
+      }
+    }, 50);
+  }
+
+  saveViewState() {
+    try {
+      localStorage.setItem('lsm_fms_dev_view_state', JSON.stringify({
+        zoom: this.view.zoom,
+        panX: this.view.panX,
+        panY: this.view.panY
+      }));
+    } catch (e) {}
+  }
+
+  loadSavedViewState() {
+    try {
+      const saved = localStorage.getItem('lsm_fms_dev_view_state');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed.zoom === 'number') {
+          this.view.zoom = parsed.zoom;
+          this.view.panX = parsed.panX;
+          this.view.panY = parsed.panY;
+          this.updateZoomBadge();
+          return true;
+        }
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  updateZoomBadge() {
+    const badge = document.getElementById('zoom-level');
+    if (badge) badge.textContent = `${Math.round(this.view.zoom * 100)}%`;
   }
 
   centerView() {
-    this.fitGraphToViewport();
+    this.fitGraphToViewport(true);
   }
 
-  fitGraphToViewport() {
-    if (!this.waypoints || Object.keys(this.waypoints).length === 0) {
-      this.view.panX = this.canvas.width / 2;
-      this.view.panY = this.canvas.height / 2;
-      this.view.zoom = 1.0;
+  fitGraphToViewport(forceReset = false) {
+    if (!forceReset && this.loadSavedViewState()) {
       return;
     }
+
+    // Default Zoomed-In View (~87% zoom, centered around active warehouse aisles & charging pad)
+    const targetZoom = 0.87;
+    this.view.zoom = targetZoom;
 
     let minX = Infinity, maxX = -Infinity;
     let minY = Infinity, maxY = -Infinity;
 
-    Object.values(this.waypoints).forEach(wp => {
-      const pxX = 160.0 + wp.x * 100.0;
-      const pxY = 880.0 - wp.y * 100.0;
-      if (pxX < minX) minX = pxX;
-      if (pxX > maxX) maxX = pxX;
-      if (pxY < minY) minY = pxY;
-      if (pxY > maxY) maxY = pxY;
-    });
+    if (this.waypoints && Object.keys(this.waypoints).length > 0) {
+      Object.values(this.waypoints).forEach(wp => {
+        const pxX = 160.0 + wp.x * 100.0;
+        const pxY = 880.0 - wp.y * 100.0;
+        if (pxX < minX) minX = pxX;
+        if (pxX > maxX) maxX = pxX;
+        if (pxY < minY) minY = pxY;
+        if (pxY > maxY) maxY = pxY;
+      });
+    }
 
-    const padding = 60;
-    const graphWidth = Math.max(100, maxX - minX);
-    const graphHeight = Math.max(100, maxY - minY);
+    const centerX = (minX !== Infinity) ? (minX + maxX) / 2 : 550.0;
+    const centerY = (minY !== Infinity) ? (minY + maxY) / 2 : 550.0;
 
-    const availableWidth = Math.max(200, this.canvas.width - padding * 2);
-    const availableHeight = Math.max(200, this.canvas.height - padding * 2);
+    this.view.panX = (this.canvas.width / 2) - (centerX * targetZoom);
+    this.view.panY = (this.canvas.height / 2) - (centerY * targetZoom);
 
-    const zoomX = availableWidth / graphWidth;
-    const zoomY = availableHeight / graphHeight;
-    const fitZoom = Math.min(zoomX, zoomY, 1.2);
-
-    const centerX = (minX + maxX) / 2;
-    const centerY = (minY + maxY) / 2;
-
-    this.view.zoom = fitZoom;
-    this.view.panX = (this.canvas.width / 2) - (centerX * fitZoom);
-    this.view.panY = (this.canvas.height / 2) - (centerY * fitZoom);
-
-    const badge = document.getElementById('zoom-level');
-    if (badge) badge.textContent = `${Math.round(this.view.zoom * 100)}%`;
+    this.updateZoomBadge();
+    this.saveViewState();
   }
 
   updateCursorCoords(e) {
@@ -1072,8 +1384,21 @@ class DevFMSApp {
   }
 
   drawRobotState() {
-    const pt = this.worldToCanvas(this.robotState.x, this.robotState.y);
-    const rad = (-this.robotState.yaw_deg * Math.PI) / 180;
+    if (!this.hasReceivedTelemetry || this.robotState.has_pose === false) return;
+    
+    let posX = this.robotState.x;
+    let posY = this.robotState.y;
+    let yawDeg = this.robotState.yaw_deg || 0;
+
+    const useGzTruth = document.getElementById('chk-use-gz-truth')?.checked;
+    if (useGzTruth && typeof this.robotState.gz_x === 'number') {
+      posX = this.robotState.gz_x + 2.457;
+      posY = this.robotState.gz_y + 0.358;
+      yawDeg = this.robotState.gz_yaw || yawDeg;
+    }
+
+    const pt = this.worldToCanvas(posX, posY);
+    const rad = (-yawDeg * Math.PI) / 180;
 
     // 1. AMCL Covariance Ellipse
     const covPxX = (this.robotState.covX * 100) * this.calibration.scale * this.view.zoom;
@@ -1083,9 +1408,9 @@ class DevFMSApp {
     this.ctx.translate(pt.x, pt.y);
     this.ctx.beginPath();
     this.ctx.ellipse(0, 0, Math.max(covPxX, 8), Math.max(covPxY, 8), 0, 0, Math.PI * 2);
-    this.ctx.fillStyle = 'rgba(99, 102, 241, 0.18)';
+    this.ctx.fillStyle = useGzTruth ? 'rgba(234, 179, 8, 0.22)' : 'rgba(99, 102, 241, 0.18)';
     this.ctx.fill();
-    this.ctx.strokeStyle = 'rgba(99, 102, 241, 0.7)';
+    this.ctx.strokeStyle = useGzTruth ? '#eab308' : 'rgba(99, 102, 241, 0.7)';
     this.ctx.lineWidth = 1.5;
     this.ctx.stroke();
     this.ctx.restore();
@@ -1093,7 +1418,7 @@ class DevFMSApp {
     // 2. Robot Directional Marker (Triangle)
     this.ctx.save();
     this.ctx.translate(pt.x, pt.y);
-    this.ctx.rotate(-rad);
+    this.ctx.rotate(rad);
 
     const size = 12 * this.view.zoom;
     this.ctx.beginPath();
@@ -1103,7 +1428,7 @@ class DevFMSApp {
     this.ctx.lineTo(-size * 0.8, size * 0.6);
     this.ctx.closePath();
 
-    this.ctx.fillStyle = '#6366f1';
+    this.ctx.fillStyle = useGzTruth ? '#eab308' : '#6366f1';
     this.ctx.fill();
     this.ctx.strokeStyle = '#ffffff';
     this.ctx.lineWidth = 2 * this.view.zoom;

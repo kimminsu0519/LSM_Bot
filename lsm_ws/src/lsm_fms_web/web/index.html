@@ -26,10 +26,10 @@
         <div class="logo-icon"><i class="fa-solid fa-truck-ramp-box"></i></div>
         <div class="brand-info">
           <h1>
-            LSM FLEET CONTROL CENTER
-            <span class="mode-badge-operator"><i class="fa-solid fa-user-gear"></i> OPERATOR MODE</span>
+            LSM FMS
+            <span class="mode-badge-operator"><i class="fa-solid fa-user-gear"></i> OPERATOR</span>
           </h1>
-          <span class="subtitle">TOPOLOGICAL GRAPH & DOCKING CALIBRATION SYSTEM</span>
+          <span class="subtitle">Fleet Control System</span>
         </div>
       </div>
 
@@ -42,25 +42,13 @@
 
         <!-- Sidebar Collapse Toggle Button -->
         <button class="icon-action-btn sidebar-toggle-btn" id="btn-toggle-sidebar" title="Toggle Sidebar">
-          <i class="fa-solid fa-angles-right" id="icon-sidebar"></i>
-          <span id="label-sidebar">Close Panel</span>
+          <i class="fa-solid fa-angles-left" id="icon-sidebar"></i>
+          <span id="label-sidebar">Open Panel</span>
         </button>
 
         <div class="header-status">
           <div class="status-badge live">
             <span class="pulse-dot"></span> FMS ACTIVE
-          </div>
-          <div class="telemetry">
-            <span class="label">WAYPOINTS</span>
-            <span class="value" id="stat-total-wp">0</span>
-          </div>
-          <div class="telemetry">
-            <span class="label">WORKSTATIONS</span>
-            <span class="value cyan" id="stat-workstations">0</span>
-          </div>
-          <div class="telemetry">
-            <span class="label">CHARGERS</span>
-            <span class="value amber" id="stat-chargers">0</span>
           </div>
         </div>
       </div>
@@ -77,6 +65,16 @@
             <button id="btn-reset-view" title="Reset View"><i class="fa-solid fa-arrows-to-dot"></i> Fit View</button>
           </div>
           <div class="tool-group">
+            <span class="zoom-level-badge" id="zoom-level">100%</span>
+          </div>
+          <div class="tool-group">
+            <button id="btn-toggle-options" class="btn-toggle-options" title="Toggle View Options">
+              <i class="fa-solid fa-sliders"></i>
+              <span>View Toggles</span>
+              <i class="fa-solid fa-chevron-down" id="opt-chevron"></i>
+            </button>
+          </div>
+          <div class="collapsible-options collapsed" id="collapsible-options">
             <label class="toggle-switch">
               <input type="checkbox" id="chk-show-edges" checked>
               <span class="switch-slider"></span>
@@ -95,11 +93,8 @@
             <label class="toggle-switch">
               <input type="checkbox" id="chk-show-unconnected">
               <span class="switch-slider"></span>
-              <span class="toggle-label">Show Unconnected</span>
+              <span class="toggle-label">Unconnected</span>
             </label>
-          </div>
-          <div class="tool-group">
-            <span class="zoom-level-badge" id="zoom-level">100%</span>
           </div>
         </div>
 
@@ -110,11 +105,12 @@
       </section>
 
       <!-- Right Side: Floating Overlay Control Panel & Inspector -->
-      <aside class="sidebar floating-drawer" id="main-sidebar">
+      <aside class="sidebar floating-drawer collapsed" id="main-sidebar">
         <!-- Tab Controls -->
         <div class="sidebar-tabs">
           <button class="tab-btn active" data-tab="tab-calibration"><i class="fa-solid fa-sliders"></i> Calibration</button>
           <button class="tab-btn" data-tab="tab-inspector"><i class="fa-solid fa-list-check"></i> Inspector</button>
+          <button class="sidebar-close-btn" id="btn-close-sidebar" title="Close Panel"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="tab-content active" id="tab-calibration">

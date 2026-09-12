@@ -62,7 +62,7 @@ def generate_launch_description():
         launch_arguments={'gz_args': ['-r --gui-config ', gui_config_path, ' ', world]}.items()
     )
 
-    # Spawn Waffle on Charging Pad (-21.0, -5.1, 0.2)
+    # Spawn Waffle on Charging Pad (-21.0, -5.1, 0.1, yaw=0.0)
     spawn_robot_node = Node(
         package='ros_gz_sim',
         executable='create',
@@ -71,7 +71,8 @@ def generate_launch_description():
             '-topic', 'robot_description',
             '-x', '-21.0',
             '-y', '-5.1',
-            '-z', '0.2'
+            '-z', '0.1',
+            '-Y', '0.0'
         ],
         output='screen'
     )

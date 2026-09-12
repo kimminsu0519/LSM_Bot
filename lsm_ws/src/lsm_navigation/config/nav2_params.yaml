@@ -43,12 +43,12 @@ amcl:
     scan_topic: scan
     set_initial_pose: true
     initial_pose:
-      x: -21.0
-      y: -5.25
+      x: -0.052
+      y: -0.258
       z: 0.0
       yaw: 0.0
-    initial_pose_x: -21.0
-    initial_pose_y: -5.25
+    initial_pose_x: -0.052
+    initial_pose_y: -0.258
     initial_pose_z: 0.0
     initial_pose_yaw: 0.0
 

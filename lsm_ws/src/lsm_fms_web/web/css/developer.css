@@ -358,6 +358,134 @@
   border-radius: 10px;
 }
 
+/* WebSocket Log Console Scrollbar */
+.log-console::-webkit-scrollbar {
+  width: 6px;
+}
+
+.log-console::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+/* Position Recorder & Debugger Styles */
+.btn-record-snap {
+  background: linear-gradient(135deg, #0284c7, #6366f1) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-record-snap:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.45) !important;
+}
+
+.pose-delta-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.delta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+
+.delta-row .lbl {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.delta-row .val {
+  font-weight: 700;
+}
+
+.btn-apply-delta {
+  width: 100%;
+  background: #f1f5f9;
+  border: 1px dashed #6366f1;
+  color: #4f46e5;
+  font-weight: 700;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.2s ease;
+}
+
+.btn-apply-delta:hover {
+  background: #e0e7ff;
+  border-style: solid;
+}
+
+.snapshot-item-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.snapshot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.snapshot-body {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.snapshot-thumb {
+  width: 70px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+}
+
+.snapshot-details {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.snap-action-btns {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
 /* WebSocket Log Console */
 .log-console-wrapper {
   background: #f8fafc;
@@ -393,4 +521,49 @@
 .log-controls {
   display: flex;
   gap: 4px;
+}
+
+/* Scenario Quick Trigger Buttons */
+.panel-desc-sm {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.scenario-buttons-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.btn-scenario {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 9px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.btn-scenario:hover {
+  background: #f8fafc;
+  border-color: #6366f1;
+  color: #4f46e5;
+  transform: translateY(-1px);
+}
+.btn-scenario.btn-ws-a1 {
+  border-left: 4px solid #059669;
+}
+.btn-scenario.btn-ws-a2 {
+  border-left: 4px solid #0284c7;
+}
+.btn-scenario.btn-charger {
+  border-left: 4px solid #d97706;
 }

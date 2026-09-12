@@ -12,3 +12,7 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
+
+# Temporary logs & snapshots
+lsm_ws/pose_comparison_log.csv
+lsm_ws/pose_snapshots/
