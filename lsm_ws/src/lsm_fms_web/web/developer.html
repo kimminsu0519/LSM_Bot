@@ -305,78 +305,179 @@
           </div>
         </div>
 
-        <!-- Tab 3: Topological Route Planner & Branch Inspector -->
+        <!-- Tab 3: Topological Route Planner & Scenario Control -->
         <div class="tab-content" id="tab-planner">
-          <div class="panel-card">
+          <!-- Section 1: Quick Scenario Dispatch -->
+          <div class="panel-card scenario-dispatch-card">
             <div class="panel-header">
-              <h3><i class="fa-solid fa-route"></i> Route Planner & Dispatch</h3>
+              <h3><i class="fa-solid fa-bolt-lightning"></i> 시나리오 주행 (Scenario Call)</h3>
+              <span class="badge-scenario-mode">AUTO FMS</span>
+            </div>
+            <p class="panel-desc">작업대(WS) 호출 시 AMR이 현재 위치에서 A* 최단 경로로 순차 웨이포인트 주행합니다.</p>
+
+            <div class="scenario-input-group mt-8">
+              <label class="input-lbl"><i class="fa-solid fa-location-dot"></i> 목표 스테이션 선택:</label>
+              <div class="select-dispatch-row">
+                <select id="select-scenario-target-wp" class="scenario-select"></select>
+                <button class="btn-scenario-dispatch" id="btn-dispatch-custom-scenario">
+                  <i class="fa-solid fa-paper-plane"></i> 주행 시작
+                </button>
+              </div>
             </div>
 
-            <div class="route-dispatch-form">
+            <div class="scenario-quick-grid mt-12">
+              <span class="quick-grid-title"><i class="fa-solid fa-list-check"></i> Quick Shortcut Buttons:</span>
+              <div class="grid-buttons-wrap mt-4">
+                <button class="btn-shortcut ws-a" id="btn-call-ws-a1"><i class="fa-solid fa-industry"></i> WS A-1</button>
+                <button class="btn-shortcut ws-a" id="btn-call-ws-a2"><i class="fa-solid fa-industry"></i> WS A-2</button>
+                <button class="btn-shortcut ws-a" id="btn-call-ws-a3"><i class="fa-solid fa-industry"></i> WS A-3</button>
+                <button class="btn-shortcut ws-a" id="btn-call-ws-a4"><i class="fa-solid fa-industry"></i> WS A-4</button>
+                <button class="btn-shortcut ws-a" id="btn-call-ws-a5"><i class="fa-solid fa-industry"></i> WS A-5</button>
+                <button class="btn-shortcut ws-a" id="btn-call-ws-a6"><i class="fa-solid fa-industry"></i> WS A-6</button>
+                <button class="btn-shortcut charger-btn" id="btn-call-charger"><i class="fa-solid fa-bolt"></i> ⚡ 충전소 복귀 (wp-charge-1)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1-2: Real-Time Scenario Telemetry & Verification Debugger Card -->
+          <div class="panel-card scenario-debug-card mt-12">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-microscope"></i> 시나리오 실시간 디버거 & 정밀도 검증</h3>
+              <span id="badge-debug-status" class="badge-debug-status idle">IDLE</span>
+            </div>
+            <p class="panel-desc">Quick Shortcut 주행 시 목표 웨이포인트와 로봇 실시간 좌표의 오차(Δ) 및 도달 정밀도를 실시간 검증합니다.</p>
+
+            <!-- Real-Time Delta Metrics Table -->
+            <div class="debug-table-wrap mt-8">
+              <table class="debug-metrics-table">
+                <thead>
+                  <tr>
+                    <th>파라미터</th>
+                    <th>목표 (Target)</th>
+                    <th>로봇 (Live)</th>
+                    <th>오차 (Delta Error)</th>
+                    <th>판정 (Status)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><i class="fa-solid fa-arrows-left-right"></i> Target Waypoint</td>
+                    <td id="dbg-target-id" class="val-bold">-</td>
+                    <td id="dbg-current-id" class="val-bold">-</td>
+                    <td id="dbg-step-progress">Step 0 / 0</td>
+                    <td><span id="dbg-step-badge" class="pass-tag warn">READY</span></td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa-solid fa-ruler-horizontal"></i> X Position</td>
+                    <td id="dbg-target-x">0.00 m</td>
+                    <td id="dbg-robot-x">0.00 m</td>
+                    <td id="dbg-delta-x">0.00 m</td>
+                    <td><span id="dbg-pass-x" class="pass-tag pass">PASS</span></td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa-solid fa-ruler-vertical"></i> Y Position</td>
+                    <td id="dbg-target-y">0.00 m</td>
+                    <td id="dbg-robot-y">0.00 m</td>
+                    <td id="dbg-delta-y">0.00 m</td>
+                    <td><span id="dbg-pass-y" class="pass-tag pass">PASS</span></td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa-solid fa-bullseye"></i> Distance Error</td>
+                    <td>0.00 m</td>
+                    <td id="dbg-robot-dist-live">0.00 m</td>
+                    <td id="dbg-dist-error" class="val-highlight">0.00 m</td>
+                    <td><span id="dbg-pass-dist" class="pass-tag pass">PASS (&lt;0.45m)</span></td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa-solid fa-compass"></i> Heading Angle (Yaw)</td>
+                    <td id="dbg-target-yaw">0.0 °</td>
+                    <td id="dbg-robot-yaw">0.0 °</td>
+                    <td id="dbg-delta-yaw">0.0 °</td>
+                    <td><span id="dbg-pass-yaw" class="pass-tag pass">PASS (&lt;5.0°)</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Real-Time Verification Console Terminal -->
+            <div class="debug-terminal-wrap mt-8">
+              <div class="terminal-bar">
+                <span><i class="fa-solid fa-terminal"></i> Live Verification Log Terminal</span>
+                <button id="btn-clear-debug-log" class="btn-xs btn-outline"><i class="fa-solid fa-trash"></i> Clear</button>
+              </div>
+              <div id="debug-log-console" class="terminal-console-body">
+                <div class="log-entry system">[SYSTEM] Scenario Telemetry Debugger & Verification Node Ready.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Manual A* Route Builder -->
+          <div class="panel-card mt-12">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-route"></i> 수동 경로 계산 (A* Route Builder)</h3>
+            </div>
+
+            <div class="route-dispatch-form mt-8">
               <div class="form-row">
-                <label>Start Waypoint:</label>
+                <div class="row-label-wrap">
+                  <label><i class="fa-solid fa-play"></i> 출발점 (Start Waypoint):</label>
+                  <button class="btn-xs btn-outline" id="btn-set-start-bot" title="Set to robot pose"><i class="fa-solid fa-location-crosshairs"></i> 로봇 위치</button>
+                </div>
                 <select id="select-start-wp"></select>
-                <button class="btn-xs btn-outline" id="btn-set-start-bot" title="Set to robot pose"><i class="fa-solid fa-location-crosshairs"></i> Bot Pose</button>
               </div>
 
-              <div class="form-row">
-                <label>Target Waypoint:</label>
+              <div class="form-row mt-8">
+                <label><i class="fa-solid fa-flag-checkered"></i> 도착점 (Target Waypoint):</label>
                 <select id="select-goal-wp"></select>
               </div>
 
-              <div class="dispatch-actions">
-                <button class="btn-primary" id="btn-plan-route"><i class="fa-solid fa-calculator"></i> Calculate Path</button>
-                <button class="btn-secondary btn-accent-green" id="btn-dispatch-route"><i class="fa-solid fa-paper-plane"></i> Dispatch Goal</button>
+              <div class="dispatch-actions mt-12">
+                <button class="btn-primary" id="btn-plan-route"><i class="fa-solid fa-calculator"></i> A* 경로 연산</button>
+                <button class="btn-secondary btn-accent-green" id="btn-dispatch-route"><i class="fa-solid fa-paper-plane"></i> 주행 명령 하달</button>
               </div>
             </div>
+          </div>
 
-            <div class="route-summary-box mt-12" id="route-summary-box">
+          <!-- Section 3: Route Summary & Branch Decision Inspector -->
+          <div class="panel-card mt-12">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-chart-pie"></i> A* 경로 분석 & 분기점 인스펙터</h3>
+            </div>
+
+            <div class="route-summary-box mt-8" id="route-summary-box">
               <div class="summary-header">
-                <span class="route-title">A* PATH SUMMARY</span>
+                <span class="route-title">A* PATH DISTANCE</span>
                 <span class="route-dist neon-cyan" id="route-total-dist">0.00 m</span>
               </div>
               <div class="summary-details">
-                <span>Waypoints: <strong id="route-wp-count">0</strong></span>
-                <span>Est. Time: <strong id="route-est-time">0s</strong></span>
+                <span>총 노드 수: <strong id="route-wp-count">0개</strong></span>
+                <span>예상 시간: <strong id="route-est-time">0초</strong></span>
               </div>
             </div>
 
             <!-- Decision Branch Inspector -->
-            <div class="branch-inspector-card mt-12">
-              <div class="panel-header">
-                <h4><i class="fa-solid fa-code-fork"></i> Next Branch Decision</h4>
+            <div class="branch-inspector-card mt-8">
+              <div class="panel-header-sm">
+                <span class="lbl-sm"><i class="fa-solid fa-code-fork"></i> 다음 분기점 판단 (Next Branch Choice):</span>
               </div>
-              <div id="branch-decision-box">
+              <div id="branch-decision-box" class="mt-4">
                 <div class="empty-state-sm">
-                  <p>No active route segment. Dispatch a route to inspect branch choices.</p>
+                  <p>활성화된 경로가 없습니다. 시나리오 주행을 시작하세요.</p>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Workstation Call Scenario Quick Trigger -->
-            <div class="scenario-trigger-card mt-12">
-              <div class="panel-header">
-                <h4><i class="fa-solid fa-bell"></i> WS Work Complete (Call AMR Scenario)</h4>
-              </div>
-              <p class="panel-desc-sm">충전소/대기 장소의 lsm_bot_1을 호출하여 해당 WS로 최단 경로 Gazebo 주행 명령을 하달합니다.</p>
-              <div class="scenario-buttons-grid">
-                <button class="btn-scenario btn-ws-a1" id="btn-call-ws-a1">
-                  <i class="fa-solid fa-industry"></i> Call from WS A-1 (wp-ws-a-1)
-                </button>
-                <button class="btn-scenario btn-ws-a2" id="btn-call-ws-a2">
-                  <i class="fa-solid fa-industry"></i> Call from WS A-2 (wp-ws-a-2)
-                </button>
-                <button class="btn-scenario btn-charger" id="btn-call-charger">
-                  <i class="fa-solid fa-bolt"></i> Return to Charger (wp-charge-1)
-                </button>
+          <!-- Section 4: Waypoint Step Queue -->
+          <div class="panel-card mt-12">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-list-ol"></i> 순차 주행 웨이포인트 큐 Sequence</h3>
+            </div>
+            <div class="route-queue-list mt-8" id="route-queue-list">
+              <div class="empty-state-sm">
+                <p>대기 중인 경로 순서가 없습니다.</p>
               </div>
             </div>
-
-            <!-- Step-by-Step Waypoints Queue -->
-            <div class="panel-header mt-12">
-              <h4><i class="fa-solid fa-list-ol"></i> Path Waypoint Sequence</h4>
-            </div>
-            <div class="route-queue-list" id="route-queue-list"></div>
           </div>
         </div>
 

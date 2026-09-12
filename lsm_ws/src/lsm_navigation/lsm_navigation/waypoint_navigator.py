@@ -33,10 +33,11 @@ class WaypointNavigator(Node):
         msg = PoseWithCovarianceStamped()
         msg.header.frame_id = 'map'
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.pose.pose.position.x = -0.052
-        msg.pose.pose.position.y = -0.258
+        msg.pose.pose.position.x = 2.4
+        msg.pose.pose.position.y = 0.3
         msg.pose.pose.position.z = 0.0
-        msg.pose.pose.orientation.w = 1.0
+        msg.pose.pose.orientation.z = 1.0
+        msg.pose.pose.orientation.w = 0.0
         msg.pose.covariance[0] = 0.25
         msg.pose.covariance[7] = 0.25
         msg.pose.covariance[35] = 0.0685

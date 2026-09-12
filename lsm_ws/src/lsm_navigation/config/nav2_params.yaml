@@ -46,11 +46,11 @@ amcl:
       x: 2.4
       y: 0.3
       z: 0.0
-      yaw: 0.0
+      yaw: 3.14159
     initial_pose_x: 2.4
     initial_pose_y: 0.3
     initial_pose_z: 0.0
-    initial_pose_yaw: 0.0
+    initial_pose_yaw: 3.14159
 
 bt_navigator:
   ros__parameters:

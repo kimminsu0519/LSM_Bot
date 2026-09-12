@@ -23,7 +23,7 @@
         {
           "target": "wp-a-3-3",
           "direction": "one_way",
-          "distance_m": 0.88
+          "distance_m": 1.29
         }
       ]
     },
@@ -33,7 +33,13 @@
       "x": 6.9,
       "y": 8.7,
       "yaw_deg": 0.0,
-      "connected_to": []
+      "connected_to": [
+        {
+          "target": "wp-a-4-5",
+          "direction": "bidirectional",
+          "distance_m": 2.18
+        }
+      ]
     },
     "wp-ws-a-3": {
       "type": "workstation",
@@ -41,7 +47,13 @@
       "x": 9.3,
       "y": 8.7,
       "yaw_deg": 0.0,
-      "connected_to": []
+      "connected_to": [
+        {
+          "target": "wp-a-4-7",
+          "direction": "bidirectional",
+          "distance_m": 2.16
+        }
+      ]
     },
     "wp-ws-a-4": {
       "type": "workstation",
@@ -53,7 +65,7 @@
         {
           "target": "wp-a-9-3",
           "direction": "one_way",
-          "distance_m": 1.2
+          "distance_m": 2.02
         }
       ]
     },
@@ -67,7 +79,7 @@
         {
           "target": "wp-a-6-5",
           "direction": "bidirectional",
-          "distance_m": 1.44
+          "distance_m": 2.18
         }
       ]
     },
@@ -81,7 +93,7 @@
         {
           "target": "wp-a-6-7",
           "direction": "bidirectional",
-          "distance_m": 1.42
+          "distance_m": 2.16
         }
       ]
     },
@@ -90,7 +102,7 @@
       "status": "active",
       "x": 16.5,
       "y": 9.9,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-1-5",
@@ -104,7 +116,7 @@
       "status": "active",
       "x": 20.7,
       "y": 9.9,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-1-7",
@@ -118,7 +130,7 @@
       "status": "active",
       "x": 24.9,
       "y": 9.9,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-1-9",
@@ -132,7 +144,7 @@
       "status": "active",
       "x": 29.1,
       "y": 9.9,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-1-11",
@@ -146,7 +158,7 @@
       "status": "active",
       "x": 16.5,
       "y": 7.5,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-3-5",
@@ -160,7 +172,7 @@
       "status": "active",
       "x": 20.7,
       "y": 7.5,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-3-7",
@@ -174,7 +186,7 @@
       "status": "active",
       "x": 24.9,
       "y": 7.5,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-3-9",
@@ -188,7 +200,7 @@
       "status": "active",
       "x": 29.1,
       "y": 7.5,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-3-11",
@@ -202,7 +214,7 @@
       "status": "active",
       "x": 16.5,
       "y": 5.1,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-5-5",
@@ -216,7 +228,7 @@
       "status": "active",
       "x": 20.7,
       "y": 5.1,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-5-7",
@@ -230,7 +242,7 @@
       "status": "active",
       "x": 24.9,
       "y": 5.1,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-5-9",
@@ -244,7 +256,7 @@
       "status": "active",
       "x": 29.1,
       "y": 5.1,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-5-11",
@@ -258,7 +270,7 @@
       "status": "active",
       "x": 16.5,
       "y": 2.7,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-7-5",
@@ -272,7 +284,7 @@
       "status": "active",
       "x": 20.7,
       "y": 2.7,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-7-7",
@@ -286,7 +298,7 @@
       "status": "active",
       "x": 24.9,
       "y": 2.7,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-7-9",
@@ -300,7 +312,7 @@
       "status": "active",
       "x": 29.1,
       "y": 2.7,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-b-7-11",
@@ -314,7 +326,7 @@
       "status": "active",
       "x": 41.1,
       "y": 0.9,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-c-10-5",
@@ -328,7 +340,7 @@
       "status": "active",
       "x": 41.1,
       "y": 3.9,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-c-7-5",
@@ -342,7 +354,7 @@
       "status": "active",
       "x": 41.1,
       "y": 6.9,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-c-4-5",
@@ -356,7 +368,7 @@
       "status": "active",
       "x": 41.1,
       "y": 9.9,
-      "yaw_deg": 90.0,
+      "yaw_deg": -90.0,
       "connected_to": [
         {
           "target": "wp-c-1-5",
@@ -506,7 +518,7 @@
         {
           "target": "wp-a-2-3",
           "direction": "one_way",
-          "distance_m": 0.8
+          "distance_m": 1.19
         }
       ]
     },
@@ -528,12 +540,12 @@
         {
           "target": "wp-ws-a-1",
           "direction": "one_way",
-          "distance_m": 0.63
+          "distance_m": 0.96
         },
         {
           "target": "wp-a-3-3",
           "direction": "one_way",
-          "distance_m": 0.8
+          "distance_m": 1.21
         }
       ]
     },
@@ -569,7 +581,7 @@
         {
           "target": "wp-a-4-3",
           "direction": "one_way",
-          "distance_m": 0.8
+          "distance_m": 1.18
         }
       ]
     },
@@ -654,7 +666,7 @@
         {
           "target": "wp-ws-a-2",
           "direction": "bidirectional",
-          "distance_m": 1.5
+          "distance_m": 2.18
         },
         {
           "target": "wp-a-5-5",
@@ -685,14 +697,14 @@
       "yaw_deg": 0.0,
       "connected_to": [
         {
-          "target": "wp-a-4-8",
+          "target": "wp-b-4-1",
           "direction": "one_way",
           "distance_m": 0.76
         },
         {
           "target": "wp-ws-a-3",
           "direction": "bidirectional",
-          "distance_m": 1.49
+          "distance_m": 2.16
         },
         {
           "target": "wp-a-5-7",
@@ -903,6 +915,11 @@
           "target": "wp-a-5-5",
           "direction": "one_way",
           "distance_m": 0.77
+        },
+        {
+          "target": "wp-ws-a-5",
+          "direction": "bidirectional",
+          "distance_m": 2.18
         }
       ]
     },
@@ -928,7 +945,7 @@
       "yaw_deg": 0.0,
       "connected_to": [
         {
-          "target": "wp-a-6-8",
+          "target": "wp-b-6-1",
           "direction": "one_way",
           "distance_m": 0.76
         },
@@ -936,6 +953,11 @@
           "target": "wp-a-5-7",
           "direction": "one_way",
           "distance_m": 0.77
+        },
+        {
+          "target": "wp-ws-a-6",
+          "direction": "bidirectional",
+          "distance_m": 2.16
         }
       ]
     },
@@ -985,12 +1007,12 @@
         {
           "target": "wp-ws-a-4",
           "direction": "one_way",
-          "distance_m": 0.81
+          "distance_m": 1.27
         },
         {
           "target": "wp-a-8-3",
           "direction": "one_way",
-          "distance_m": 0.8
+          "distance_m": 1.2
         }
       ]
     },
@@ -1026,7 +1048,7 @@
         {
           "target": "wp-a-9-3",
           "direction": "one_way",
-          "distance_m": 0.8
+          "distance_m": 1.19
         }
       ]
     },
@@ -1501,7 +1523,7 @@
           "distance_m": 0.8
         },
         {
-          "target": "wp-a-5-8",
+          "target": "wp-a-5-7",
           "direction": "one_way",
           "distance_m": 0.59
         }

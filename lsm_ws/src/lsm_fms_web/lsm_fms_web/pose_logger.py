@@ -138,8 +138,8 @@ class PoseLoggerNode(Node):
         gz_yaw = self.odom_pose["yaw"]
 
         if map_x is not None and map_y is not None:
-            canvas_x = round(map_x + OFFSET_X, 3)
-            canvas_y = round(map_y + OFFSET_Y, 3)
+            canvas_x = round(map_x, 3)
+            canvas_y = round(map_y, 3)
         else:
             canvas_x = None
             canvas_y = None

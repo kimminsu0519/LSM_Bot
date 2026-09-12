@@ -551,6 +551,7 @@ class FMSApp {
               this.robotState.covY = data.covariance.y ?? this.robotState.covY;
               this.robotState.covYaw = data.covariance.yaw ?? this.robotState.covYaw;
             }
+            this.updateTelemetryUI();
             this.render();
           }
         } catch (e) {
@@ -563,6 +564,30 @@ class FMSApp {
       };
     } catch (e) {
       console.warn('WebSocket failed to initialize in Operator Mode:', e);
+    }
+  }
+
+  updateTelemetryUI() {
+    const setTxt = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+    const rx = this.robotState.ros_x ?? this.robotState.x;
+    const ry = this.robotState.ros_y ?? this.robotState.y;
+    setTxt('tel-x', `${rx.toFixed(2)} m`);
+    setTxt('tel-y', `${ry.toFixed(2)} m`);
+    setTxt('tel-yaw', `${this.robotState.yaw_deg.toFixed(1)} °`);
+    setTxt('tel-v', `${(this.robotState.v || 0.0).toFixed(2)} m/s`);
+    setTxt('tel-w', `${(this.robotState.w || 0.0).toFixed(2)} rad/s`);
+    setTxt('tel-battery', `${this.robotState.battery || 100}%`);
+    setTxt('cov-x', `${(this.robotState.covX || 0.002).toFixed(3)} m`);
+    setTxt('cov-y', `${(this.robotState.covY || 0.002).toFixed(3)} m`);
+    setTxt('cov-yaw', `${(this.robotState.covYaw || 0.01).toFixed(2)} rad`);
+
+    const statusEl = document.getElementById('op-robot-status');
+    if (statusEl) {
+      statusEl.textContent = this.robotState.status || 'IDLE';
+      statusEl.className = `robot-status-pill ${(this.robotState.status || 'idle').toLowerCase()}`;
     }
   }
 
@@ -609,6 +634,23 @@ class FMSApp {
     this.ctx.restore();
   }
 
+  isEdgeBidirectional(id1, id2) {
+    const wp1 = this.waypoints[id1];
+    const wp2 = this.waypoints[id2];
+    if (!wp1 || !wp2) return false;
+
+    const edge1 = (wp1.connected_to || []).find(e => e.target === id2);
+    const edge2 = (wp2.connected_to || []).find(e => e.target === id1);
+
+    const dir1 = edge1 ? (edge1.direction || '').toLowerCase() : '';
+    const dir2 = edge2 ? (edge2.direction || '').toLowerCase() : '';
+
+    const isBidi1 = dir1 === 'bidirectional' || dir1 === 'two_way' || dir1 === 'both' || dir1 === 'bi';
+    const isBidi2 = dir2 === 'bidirectional' || dir2 === 'two_way' || dir2 === 'both' || dir2 === 'bi';
+
+    return isBidi1 || isBidi2 || (Boolean(edge1) && Boolean(edge2));
+  }
+
   renderEdges() {
     this.ctx.lineWidth = Math.max(1, 1.2 * this.view.zoom);
     this.ctx.strokeStyle = this.currentTheme === 'dark' 
@@ -618,7 +660,8 @@ class FMSApp {
       ? 'rgba(0, 243, 255, 0.45)' 
       : 'rgba(2, 132, 199, 0.5)';
 
-    const renderedEdgeKeys = new Set();
+    const renderedLineKeys = new Set();
+    const renderedArrowKeys = new Set();
 
     Object.entries(this.waypoints).forEach(([id, wp]) => {
       if (!this.matchesFilter(id, wp)) return;
@@ -638,29 +681,43 @@ class FMSApp {
           if (!this.showUnconnected && this.isUnconnected(targetId, targetWp)) return;
 
           const edgeKey = id < targetId ? `${id}__${targetId}` : `${targetId}__${id}`;
-          const dirStr = (edge.direction || '').toLowerCase();
-          const isTwoWay = dirStr === 'bidirectional' || dirStr === 'two_way' || dirStr === 'both' || dirStr === 'bi';
+          const isTwoWay = this.isEdgeBidirectional(id, targetId);
 
           const tPos = this.getWaypointUserPose(targetWp);
           const tgtImg = this.worldToImagePixel(tPos.x, tPos.y);
           const tgtScreen = this.imagePixelToScreen(tgtImg.x, tgtImg.y);
           const isTgtWS = targetWp.type === 'workstation' || this.isCharger(targetId, targetWp);
 
-          // Draw Line
-          this.ctx.beginPath();
-          this.ctx.moveTo(srcScreen.x, srcScreen.y);
-          this.ctx.lineTo(tgtScreen.x, tgtScreen.y);
-          this.ctx.stroke();
+          // Draw Line Once per pair
+          if (!renderedLineKeys.has(edgeKey)) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(srcScreen.x, srcScreen.y);
+            this.ctx.lineTo(tgtScreen.x, tgtScreen.y);
+            this.ctx.stroke();
+            renderedLineKeys.add(edgeKey);
+          }
 
           // Draw Arrowhead at Edge Endpoints
           if (this.showArrows) {
-            if (!renderedEdgeKeys.has(edgeKey)) {
-              this.drawEdgeArrowheads(
-                srcScreen.x, srcScreen.y, isSrcWS,
-                tgtScreen.x, tgtScreen.y, isTgtWS,
-                isTwoWay
-              );
-              renderedEdgeKeys.add(edgeKey);
+            if (isTwoWay) {
+              if (!renderedArrowKeys.has(edgeKey)) {
+                const isIdSmaller = id < targetId;
+                const x1 = isIdSmaller ? srcScreen.x : tgtScreen.x;
+                const y1 = isIdSmaller ? srcScreen.y : tgtScreen.y;
+                const isWS1 = isIdSmaller ? isSrcWS : isTgtWS;
+                const x2 = isIdSmaller ? tgtScreen.x : srcScreen.x;
+                const y2 = isIdSmaller ? tgtScreen.y : srcScreen.y;
+                const isWS2 = isIdSmaller ? isTgtWS : isSrcWS;
+
+                this.drawEdgeArrowheads(x1, y1, isWS1, x2, y2, isWS2, true);
+                renderedArrowKeys.add(edgeKey);
+              }
+            } else {
+              const directedKey = `${id}->${targetId}`;
+              if (!renderedArrowKeys.has(directedKey)) {
+                this.drawEdgeArrowheads(srcScreen.x, srcScreen.y, isSrcWS, tgtScreen.x, tgtScreen.y, isTgtWS, false);
+                renderedArrowKeys.add(directedKey);
+              }
             }
           }
         }
@@ -1161,29 +1218,116 @@ class FMSApp {
     }
   }
 
-  selectNodeAtScreen(sx, sy) {
-    if (this.hoveredWpId) {
-      this.selectNode(this.hoveredWpId);
-      return;
+  showToast(message, duration = 2500) {
+    let toastContainer = document.getElementById('fms-toast-container');
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.id = 'fms-toast-container';
+      toastContainer.style.cssText = `
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        pointer-events: none;
+      `;
+      document.body.appendChild(toastContainer);
     }
 
-    let clickedId = null;
+    const toast = document.createElement('div');
+    toast.className = 'fms-toast';
+    toast.style.cssText = `
+      background: rgba(15, 23, 42, 0.94);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 14px rgba(56, 189, 248, 0.25);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: Inter, -apple-system, sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+      pointer-events: auto;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+    `;
+    toast.innerHTML = message;
+    toastContainer.appendChild(toast);
 
-    for (const [id, wp] of Object.entries(this.waypoints)) {
-      if (!this.matchesFilter(id, wp)) continue;
-      if (!this.showUnconnected && this.isUnconnected(id, wp)) continue;
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0) scale(1)';
+    });
 
-      const pos = this.getWaypointUserPose(wp);
-      const imgPos = this.worldToImagePixel(pos.x, pos.y);
-      const screenPos = this.imagePixelToScreen(imgPos.x, imgPos.y);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-10px) scale(0.95)';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
 
-      const isWS = wp.type === 'workstation' || this.isCharger(id, wp);
-      const hitRadius = Math.max(14, (isWS ? 16 : 12) * Math.sqrt(this.view.zoom));
+  copyToClipboard(text, displayMsg) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.showToast(`📋 ${displayMsg}`);
+      }).catch(() => {
+        this.fallbackCopy(text, displayMsg);
+      });
+    } else {
+      this.fallbackCopy(text, displayMsg);
+    }
+  }
 
-      const dist = Math.hypot(sx - screenPos.x, sy - screenPos.y);
-      if (dist <= hitRadius) {
-        clickedId = id;
-        break;
+  fallbackCopy(text, displayMsg) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      this.showToast(`📋 ${displayMsg}`);
+    } catch (err) {
+      this.showToast(`❌ Failed to copy coordinates`);
+    }
+    document.body.removeChild(textArea);
+  }
+
+  selectNodeAtScreen(mouseX, mouseY) {
+    const rect = this.canvas.getBoundingClientRect();
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
+
+    const cx = mouseX * scaleX;
+    const cy = mouseY * scaleY;
+
+    let clickedId = this.hoveredWpId || null;
+    let clickedWp = clickedId ? this.waypoints[clickedId] : null;
+
+    if (!clickedId) {
+      for (const [id, wp] of Object.entries(this.waypoints)) {
+        if (!this.matchesFilter(id, wp)) continue;
+        if (!this.showUnconnected && this.isUnconnected(id, wp)) continue;
+
+        const pos = this.getWaypointUserPose(wp);
+        const imgP = this.worldToImagePixel(pos.x, pos.y);
+        const screenPos = this.imagePixelToScreen(imgP.x, imgP.y);
+
+        const isWS = wp.type === 'workstation' || this.isCharger(id, wp);
+        const hitRadius = Math.max(16, (isWS ? 20 : 14) * Math.sqrt(this.view.zoom));
+
+        const dist = Math.hypot(cx - screenPos.x, cy - screenPos.y);
+        if (dist <= hitRadius) {
+          clickedId = id;
+          clickedWp = wp;
+          break;
+        }
       }
     }
 
@@ -1264,8 +1408,16 @@ class FMSApp {
         </div>
         <div class="edges-title">CONNECTED TARGETS:</div>
         <div class="edges-list">${edgesHtml}</div>
+        <button id="btn-copy-node-detail" class="btn-copy-node-action">
+          <i class="fa-solid fa-copy"></i> 좌표 복사 (Copy Coordinate)
+        </button>
       </div>
     `;
+
+    document.getElementById('btn-copy-node-detail')?.addEventListener('click', () => {
+      const textToCopy = `${id} (x: ${pos.x.toFixed(2)}, y: ${pos.y.toFixed(2)})`;
+      this.copyToClipboard(textToCopy, `Copied <strong>${id}</strong> (x: ${pos.x.toFixed(2)}, y: ${pos.y.toFixed(2)})`);
+    });
   }
 
   populateWaypointsList(filterQuery = '') {

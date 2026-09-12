@@ -44,10 +44,14 @@ class TopologicalGraph:
             for edge in wp.get('connected_to', []):
                 tgt_id = edge['target']
                 dist = edge.get('distance_m', 1.0)
-                direction = edge.get('direction', 'one_way')
+                direction = (edge.get('direction') or 'one_way').lower()
 
                 if tgt_id in self.waypoints:
-                    self.adj[src_id].append((tgt_id, dist, direction))
+                    if not any(t == tgt_id for t, _, _ in self.adj[src_id]):
+                        self.adj[src_id].append((tgt_id, dist, direction))
+                    if direction in ['bidirectional', 'two_way', 'both', 'bi']:
+                        if not any(t == src_id for t, _, _ in self.adj[tgt_id]):
+                            self.adj[tgt_id].append((src_id, dist, direction))
 
         total_edges = sum(len(v) for v in self.adj.values())
         print(f"[TopologicalGraph] Successfully pre-loaded {len(self.waypoints)} waypoints and {total_edges} directed edges into memory graph.")

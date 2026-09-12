@@ -108,74 +108,69 @@
       <aside class="sidebar floating-drawer collapsed" id="main-sidebar">
         <!-- Tab Controls -->
         <div class="sidebar-tabs">
-          <button class="tab-btn active" data-tab="tab-calibration"><i class="fa-solid fa-sliders"></i> Calibration</button>
+          <button class="tab-btn active" data-tab="tab-telemetry"><i class="fa-solid fa-gauge-high"></i> Telemetry</button>
           <button class="tab-btn" data-tab="tab-inspector"><i class="fa-solid fa-list-check"></i> Inspector</button>
           <button class="sidebar-close-btn" id="btn-close-sidebar" title="Close Panel"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <div class="tab-content active" id="tab-calibration">
+        <!-- Tab 1: Operator Live Telemetry Monitoring -->
+        <div class="tab-content active" id="tab-telemetry">
           <div class="panel-card">
             <div class="panel-header">
-              <h3><i class="fa-solid fa-compass-drafting"></i> Map-Graph Fine Tuning</h3>
-              <button class="btn-xs btn-outline" id="btn-reset-calibration"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+              <h3><i class="fa-solid fa-robot"></i> lsm_bot_1 Live Monitoring</h3>
+              <span class="robot-status-pill idle" id="op-robot-status">IDLE</span>
             </div>
-            <p class="panel-desc">창고 맵 이미지와 웨이포인트 그래프 좌표의 싱크(Offset, Scale, Yaw)를 실시간 보정합니다.</p>
 
-            <button class="btn-auto-fit" id="btn-auto-fit">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> Reset Calibration (0, 0)
-            </button>
-
-            <div class="control-group">
-              <div class="control-label">
-                <span>Offset X (Offset Meter)</span>
-                <input type="number" id="num-offset-x" step="0.01" value="0">
+            <div class="telemetry-grid">
+              <div class="tel-card">
+                <span class="tel-lbl">Position X</span>
+                <span class="tel-val" id="tel-x">0.00 m</span>
               </div>
-              <input type="range" id="rng-offset-x" min="-40" max="40" step="0.01" value="0">
-            </div>
-
-            <div class="control-group">
-              <div class="control-label">
-                <span>Offset Y (Offset Meter)</span>
-                <input type="number" id="num-offset-y" step="0.01" value="0">
+              <div class="tel-card">
+                <span class="tel-lbl">Position Y</span>
+                <span class="tel-val" id="tel-y">0.00 m</span>
               </div>
-              <input type="range" id="rng-offset-y" min="-40" max="40" step="0.01" value="0">
-            </div>
-
-            <div class="control-group">
-              <div class="control-label">
-                <span>Scale Factor</span>
-                <input type="number" id="num-scale" step="0.01" value="1.0">
+              <div class="tel-card">
+                <span class="tel-lbl">Heading / Yaw</span>
+                <span class="tel-val" id="tel-yaw">0.0 °</span>
               </div>
-              <input type="range" id="rng-scale" min="0.1" max="5.0" step="0.01" value="1.0">
-            </div>
-
-            <div class="control-group">
-              <div class="control-label">
-                <span>Rotation / Yaw (Deg)</span>
-                <input type="number" id="num-yaw" step="0.1" value="0">
+              <div class="tel-card">
+                <span class="tel-lbl">Linear Speed</span>
+                <span class="tel-val" id="tel-v">0.00 m/s</span>
               </div>
-              <input type="range" id="rng-yaw" min="-180" max="180" step="0.5" value="0">
+              <div class="tel-card">
+                <span class="tel-lbl">Angular Speed</span>
+                <span class="tel-val" id="tel-w">0.00 rad/s</span>
+              </div>
+              <div class="tel-card">
+                <span class="tel-lbl">Battery Level</span>
+                <span class="tel-val neon-green" id="tel-battery">100%</span>
+              </div>
             </div>
 
-            <div class="action-buttons">
-              <button class="btn-primary" id="btn-save-calibration"><i class="fa-solid fa-floppy-disk"></i> Save Calibration</button>
-              <button class="btn-secondary" id="btn-export-config"><i class="fa-solid fa-download"></i> Export Config</button>
+            <div class="panel-header mt-12">
+              <h4><i class="fa-solid fa-chart-line"></i> AMCL Covariance (Uncertainty)</h4>
+            </div>
+            <div class="cov-grid">
+              <div class="cov-item"><span>σx:</span> <span id="cov-x">0.002 m</span></div>
+              <div class="cov-item"><span>σy:</span> <span id="cov-y">0.002 m</span></div>
+              <div class="cov-item"><span>σyaw:</span> <span id="cov-yaw">0.01 rad</span></div>
             </div>
           </div>
 
-          <!-- YAML & Map File re-loader -->
+          <!-- Data Source & Map Info -->
           <div class="panel-card mt-16">
             <div class="panel-header">
-              <h3><i class="fa-solid fa-file-import"></i> Data Source</h3>
+              <h3><i class="fa-solid fa-file-import"></i> Map Reference</h3>
             </div>
             <div class="file-info-box">
               <div class="info-row">
-                <span class="key">YAML Config:</span>
+                <span class="key">Graph System:</span>
                 <span class="val accent" id="yaml-filename">waypoints_graph.yaml</span>
               </div>
               <div class="info-row">
                 <span class="key">Map Image:</span>
-                <span class="val accent" id="map-filename">창고맵_이미지용_점제거.png (3160pt x 760pt)</span>
+                <span class="val accent" id="map-filename">창고맵 (3160pt x 760pt)</span>
               </div>
             </div>
           </div>

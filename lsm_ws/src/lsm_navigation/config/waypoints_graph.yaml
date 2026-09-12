@@ -19,21 +19,27 @@ waypoints:
     connected_to:
     - target: wp-a-3-3
       direction: one_way
-      distance_m: 0.88
+      distance_m: 1.29
   wp-ws-a-2:
     type: workstation
     status: active
     x: 6.9
     y: 8.7
     yaw_deg: 0.0
-    connected_to: []
+    connected_to:
+    - target: wp-a-4-5
+      direction: bidirectional
+      distance_m: 2.18
   wp-ws-a-3:
     type: workstation
     status: active
     x: 9.3
     y: 8.7
     yaw_deg: 0.0
-    connected_to: []
+    connected_to:
+    - target: wp-a-4-7
+      direction: bidirectional
+      distance_m: 2.16
   wp-ws-a-4:
     type: workstation
     status: active
@@ -43,7 +49,7 @@ waypoints:
     connected_to:
     - target: wp-a-9-3
       direction: one_way
-      distance_m: 1.2
+      distance_m: 2.02
   wp-ws-a-5:
     type: workstation
     status: active
@@ -53,7 +59,7 @@ waypoints:
     connected_to:
     - target: wp-a-6-5
       direction: bidirectional
-      distance_m: 1.44
+      distance_m: 2.18
   wp-ws-a-6:
     type: workstation
     status: active
@@ -63,13 +69,13 @@ waypoints:
     connected_to:
     - target: wp-a-6-7
       direction: bidirectional
-      distance_m: 1.42
+      distance_m: 2.16
   wp-ws-b-1-1:
     type: workstation
     status: active
     x: 16.5
     y: 9.9
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-1-5
       direction: one_way
@@ -79,7 +85,7 @@ waypoints:
     status: active
     x: 20.7
     y: 9.9
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-1-7
       direction: one_way
@@ -89,7 +95,7 @@ waypoints:
     status: active
     x: 24.9
     y: 9.9
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-1-9
       direction: one_way
@@ -99,7 +105,7 @@ waypoints:
     status: active
     x: 29.1
     y: 9.9
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-1-11
       direction: one_way
@@ -109,7 +115,7 @@ waypoints:
     status: active
     x: 16.5
     y: 7.5
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-3-5
       direction: one_way
@@ -119,7 +125,7 @@ waypoints:
     status: active
     x: 20.7
     y: 7.5
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-3-7
       direction: one_way
@@ -129,7 +135,7 @@ waypoints:
     status: active
     x: 24.9
     y: 7.5
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-3-9
       direction: one_way
@@ -139,7 +145,7 @@ waypoints:
     status: active
     x: 29.1
     y: 7.5
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-3-11
       direction: one_way
@@ -149,7 +155,7 @@ waypoints:
     status: active
     x: 16.5
     y: 5.1
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-5-5
       direction: one_way
@@ -159,7 +165,7 @@ waypoints:
     status: active
     x: 20.7
     y: 5.1
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-5-7
       direction: one_way
@@ -169,7 +175,7 @@ waypoints:
     status: active
     x: 24.9
     y: 5.1
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-5-9
       direction: one_way
@@ -179,7 +185,7 @@ waypoints:
     status: active
     x: 29.1
     y: 5.1
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-5-11
       direction: one_way
@@ -189,7 +195,7 @@ waypoints:
     status: active
     x: 16.5
     y: 2.7
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-7-5
       direction: one_way
@@ -199,7 +205,7 @@ waypoints:
     status: active
     x: 20.7
     y: 2.7
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-7-7
       direction: one_way
@@ -209,7 +215,7 @@ waypoints:
     status: active
     x: 24.9
     y: 2.7
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-7-9
       direction: one_way
@@ -219,7 +225,7 @@ waypoints:
     status: active
     x: 29.1
     y: 2.7
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-b-7-11
       direction: one_way
@@ -229,7 +235,7 @@ waypoints:
     status: active
     x: 41.1
     y: 0.9
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-c-10-5
       direction: one_way
@@ -239,7 +245,7 @@ waypoints:
     status: active
     x: 41.1
     y: 3.9
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-c-7-5
       direction: one_way
@@ -249,7 +255,7 @@ waypoints:
     status: active
     x: 41.1
     y: 6.9
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-c-4-5
       direction: one_way
@@ -259,7 +265,7 @@ waypoints:
     status: active
     x: 41.1
     y: 9.9
-    yaw_deg: 90.0
+    yaw_deg: -90.0
     connected_to:
     - target: wp-c-1-5
       direction: one_way
@@ -366,7 +372,7 @@ waypoints:
     connected_to:
     - target: wp-a-2-3
       direction: one_way
-      distance_m: 0.8
+      distance_m: 1.19
   wp-a-2-2:
     type: passage
     status: reserved
@@ -383,10 +389,10 @@ waypoints:
     connected_to:
     - target: wp-ws-a-1
       direction: one_way
-      distance_m: 0.63
+      distance_m: 0.96
     - target: wp-a-3-3
       direction: one_way
-      distance_m: 0.8
+      distance_m: 1.21
   wp-a-3-1:
     type: passage
     status: active
@@ -413,7 +419,7 @@ waypoints:
     connected_to:
     - target: wp-a-4-3
       direction: one_way
-      distance_m: 0.8
+      distance_m: 1.18
   wp-a-4-1:
     type: passage
     status: active
@@ -472,7 +478,7 @@ waypoints:
       distance_m: 0.82
     - target: wp-ws-a-2
       direction: bidirectional
-      distance_m: 1.5
+      distance_m: 2.18
     - target: wp-a-5-5
       direction: one_way
       distance_m: 0.8
@@ -493,12 +499,12 @@ waypoints:
     y: 6.6
     yaw_deg: 0.0
     connected_to:
-    - target: wp-a-4-8
+    - target: wp-b-4-1
       direction: one_way
       distance_m: 0.76
     - target: wp-ws-a-3
       direction: bidirectional
-      distance_m: 1.49
+      distance_m: 2.16
     - target: wp-a-5-7
       direction: one_way
       distance_m: 0.8
@@ -648,6 +654,9 @@ waypoints:
     - target: wp-a-5-5
       direction: one_way
       distance_m: 0.77
+    - target: wp-ws-a-5
+      direction: bidirectional
+      distance_m: 2.18
   wp-a-6-6:
     type: passage
     status: active
@@ -665,12 +674,15 @@ waypoints:
     y: 4.2
     yaw_deg: 0.0
     connected_to:
-    - target: wp-a-6-8
+    - target: wp-b-6-1
       direction: one_way
       distance_m: 0.76
     - target: wp-a-5-7
       direction: one_way
       distance_m: 0.77
+    - target: wp-ws-a-6
+      direction: bidirectional
+      distance_m: 2.16
   wp-a-6-8:
     type: passage
     status: active
@@ -707,10 +719,10 @@ waypoints:
     connected_to:
     - target: wp-ws-a-4
       direction: one_way
-      distance_m: 0.81
+      distance_m: 1.27
     - target: wp-a-8-3
       direction: one_way
-      distance_m: 0.8
+      distance_m: 1.2
   wp-a-8-1:
     type: passage
     status: active
@@ -737,7 +749,7 @@ waypoints:
     connected_to:
     - target: wp-a-9-3
       direction: one_way
-      distance_m: 0.8
+      distance_m: 1.19
   wp-a-9-1:
     type: passage
     status: active
@@ -1090,7 +1102,7 @@ waypoints:
     - target: wp-b-6-1
       direction: bidirectional
       distance_m: 0.8
-    - target: wp-a-5-8
+    - target: wp-a-5-7
       direction: one_way
       distance_m: 0.59
   wp-b-5-2:

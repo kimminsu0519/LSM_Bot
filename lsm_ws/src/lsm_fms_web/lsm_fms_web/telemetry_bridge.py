@@ -429,19 +429,23 @@ class FMSBridgeTelemetryNode:
             ori = ros_pose.get('orientation', {}) if isinstance(ros_pose, dict) else {}
 
             if 'x' in pos and 'y' in pos:
-                goal_x = float(pos['x'])
-                goal_y = float(pos['y'])
+                goal_world_x = float(pos['x'])
+                goal_world_y = float(pos['y'])
                 goal_qz = float(ori.get('qz', 0.0))
                 goal_qw = float(ori.get('qw', 1.0))
             else:
-                goal_x = float(target_wp.get('x', 0.0))
-                goal_y = float(target_wp.get('y', 0.0))
+                goal_world_x = float(target_wp.get('x', 0.0))
+                goal_world_y = float(target_wp.get('y', 0.0))
                 yaw_rad = math.radians(target_wp.get('yaw_deg', 0.0))
                 goal_qz = math.sin(yaw_rad / 2.0)
                 goal_qw = math.cos(yaw_rad / 2.0)
 
-            pose_msg.pose.position.x = goal_x
-            pose_msg.pose.position.y = goal_y
+            # Convert Canvas/Gazebo World coordinate to ROS2 AMCL map frame coordinate
+            goal_ros_x = goal_world_x + getattr(self, 'map_origin_x', -2.473)
+            goal_ros_y = goal_world_y + getattr(self, 'map_origin_y', -0.377)
+
+            pose_msg.pose.position.x = goal_ros_x
+            pose_msg.pose.position.y = goal_ros_y
             pose_msg.pose.position.z = 0.0
 
             pose_msg.pose.orientation.z = goal_qz
@@ -452,7 +456,7 @@ class FMSBridgeTelemetryNode:
                 self.goal_pub.publish(pose_msg)
             if self.goal_pub_bot:
                 self.goal_pub_bot.publish(pose_msg)
-            print(f"[ROS2 Nav2 Bridge] Published ROS2 Map Goal Pose: x={goal_x:.3f}, y={goal_y:.3f} to /goal_pose")
+            print(f"[ROS2 Nav2 Bridge] Published ROS2 Map Goal Pose: x={goal_ros_x:.3f}, y={goal_ros_y:.3f} (World: {goal_world_x:.2f}, {goal_world_y:.2f}) to /goal_pose")
 
             # 2. Action Client Dispatch (/navigate_to_pose)
             if HAS_NAV2_ACTION:
@@ -499,18 +503,18 @@ class FMSBridgeTelemetryNode:
         if self.robot_state["status"] == "OFFLINE":
             self.robot_state["status"] = "IDLE"
         
-        # Store AMCL pose specifically as ros_x / ros_y for debugging panel
+        # Convert ROS2 AMCL map coordinate to Canvas/Gazebo World coordinate
+        world_x = ros_x - getattr(self, 'map_origin_x', -2.473)
+        world_y = ros_y - getattr(self, 'map_origin_y', -0.377)
+
         self.robot_state["ros_x"] = round(ros_x, 3)
         self.robot_state["ros_y"] = round(ros_y, 3)
+        self.robot_state["x"] = round(world_x, 3)
+        self.robot_state["y"] = round(world_y, 3)
+        self.robot_state["yaw_deg"] = round(yaw_deg, 1)
         self.robot_state["covX"] = round(cov_x, 4)
         self.robot_state["covY"] = round(cov_y, 4)
         self.robot_state["covYaw"] = round(cov_yaw, 4)
-
-        # Fallback for main x and y if odom is not active
-        if not getattr(self, 'has_odom', False):
-            self.robot_state["x"] = round(ros_x, 3)
-            self.robot_state["y"] = round(ros_y, 3)
-            self.robot_state["yaw_deg"] = round(yaw_deg, 1)
 
     def update_odom(self, v, w, gz_x=None, gz_y=None, gz_yaw=None):
         self.last_msg_time = time.time()
@@ -525,10 +529,6 @@ class FMSBridgeTelemetryNode:
             self.robot_state["gz_x"] = round(gz_x, 3)
             self.robot_state["gz_y"] = round(gz_y, 3)
             self.robot_state["gz_yaw"] = round(gz_yaw, 1)
-            # Primary live pose source for FMS Canvas (100% direct Gazebo/Odom pose)
-            self.robot_state["x"] = round(gz_x, 3)
-            self.robot_state["y"] = round(gz_y, 3)
-            self.robot_state["yaw_deg"] = round(gz_yaw, 1)
 
 def main():
     if "ROS_DOMAIN_ID" not in os.environ:
@@ -656,22 +656,29 @@ def main():
             ori = msg.pose.pose.orientation
             siny_cosp = 2 * (ori.w * ori.z + ori.x * ori.y)
             cosy_cosp = 1 - 2 * (ori.y * ori.y + ori.z * ori.z)
-            yaw_deg = math.degrees(math.atan2(siny_cosp, cosy_cosp))
+            rel_yaw = math.degrees(math.atan2(siny_cosp, cosy_cosp))
             
-            gz_x = 2.4 + pos.x
-            gz_y = 0.3 + pos.y
-            bridge.update_odom(v, w, gz_x, gz_y, yaw_deg)
-            # Always sync live Gazebo/Odom position directly to FMS Web UI
-            bridge.update_amcl_pose(gz_x, gz_y, yaw_deg)
+            # Spawned at (2.4, 0.3) facing 180 deg (West)
+            # Moving forward (+x_body) decreases world X
+            gz_x = 2.4 - pos.x
+            gz_y = 0.3 - pos.y
+            gz_yaw = (180.0 + rel_yaw) % 360.0
+            if gz_yaw > 180.0:
+                gz_yaw -= 360.0
+
+            bridge.update_odom(v, w, gz_x, gz_y, gz_yaw)
 
         def auto_init_pose():
             if not bridge.has_pose:
+                from rclpy.time import Time
                 p = PoseWithCovarianceStamped()
                 p.header.frame_id = 'map'
-                p.header.stamp = node.get_clock().now().to_msg()
+                p.header.stamp = Time().to_msg()
                 p.pose.pose.position.x = 2.4
                 p.pose.pose.position.y = 0.3
-                p.pose.pose.orientation.w = 1.0
+                # Match Gazebo spawn heading: 180 deg (facing West) -> z=1.0, w=0.0
+                p.pose.pose.orientation.z = 1.0
+                p.pose.pose.orientation.w = 0.0
                 if bridge.initial_pose_pub:
                     bridge.initial_pose_pub.publish(p)
                 if bridge.initial_pose_pub_bot:

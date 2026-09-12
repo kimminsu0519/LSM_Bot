@@ -132,12 +132,16 @@ class DevFMSApp {
   }
 
   setupEventListeners() {
+    let mousedownPos = { x: 0, y: 0 };
     // Canvas Pan & Zoom
     this.canvas.onmousedown = (e) => {
+      mousedownPos = { x: e.clientX, y: e.clientY };
       this.view.isDragging = true;
       this.view.dragStartX = e.clientX - this.view.panX;
       this.view.dragStartY = e.clientY - this.view.panY;
     };
+
+
 
     this.canvas.onmousemove = (e) => {
       if (this.view.isDragging) {
@@ -288,7 +292,15 @@ class DevFMSApp {
 
     document.getElementById('btn-call-ws-a1')?.addEventListener('click', () => this.dispatchWorkstationCall('wp-ws-a-1'));
     document.getElementById('btn-call-ws-a2')?.addEventListener('click', () => this.dispatchWorkstationCall('wp-ws-a-2'));
+    document.getElementById('btn-call-ws-a3')?.addEventListener('click', () => this.dispatchWorkstationCall('wp-ws-a-3'));
+    document.getElementById('btn-call-ws-a4')?.addEventListener('click', () => this.dispatchWorkstationCall('wp-ws-a-4'));
+    document.getElementById('btn-call-ws-a5')?.addEventListener('click', () => this.dispatchWorkstationCall('wp-ws-a-5'));
+    document.getElementById('btn-call-ws-a6')?.addEventListener('click', () => this.dispatchWorkstationCall('wp-ws-a-6'));
     document.getElementById('btn-call-charger')?.addEventListener('click', () => this.dispatchWorkstationCall('wp-charge-1'));
+    document.getElementById('btn-dispatch-custom-scenario')?.addEventListener('click', () => {
+      const targetWp = document.getElementById('select-scenario-target-wp')?.value;
+      if (targetWp) this.dispatchWorkstationCall(targetWp);
+    });
 
     // WS Log Controls
     document.getElementById('btn-pause-log')?.addEventListener('click', (e) => {
@@ -316,8 +328,9 @@ class DevFMSApp {
     document.getElementById('btn-apply-delta-to-calib')?.addEventListener('click', () => this.applyDeltaToCalibration());
     document.getElementById('btn-reset-to-charger')?.addEventListener('click', () => {
       if (this.wsConnected && this.ws) {
-        this.sendWSMessage({ type: 'reset_initial_pose', wp_id: 'wp-charge-1' });
-        alert('⚡ 로봇 초기 위치(AMCL initialpose)를 wp-charge-1로 설정했습니다!');
+        const startWp = document.getElementById('select-start-wp')?.value || 'wp-charge-1';
+        this.sendWSMessage({ type: 'reset_initial_pose', wp_id: startWp });
+        alert(`⚡ 로봇 AMCL 초기 위치(initialpose)를 '${startWp}' 노드로 재설정했습니다!`);
       } else {
         alert('WebSocket 연결을 확인해주세요.');
       }
@@ -464,9 +477,18 @@ class DevFMSApp {
       for (const edge of wp.connected_to || []) {
         const tgtId = edge.target;
         const dist = edge.distance_m || 1.0;
-        const dir = edge.direction || 'one_way';
+        const dir = (edge.direction || 'one_way').toLowerCase();
         if (this.waypoints[tgtId]) {
-          this.adjGraph[srcId].push({ target: tgtId, distance_m: dist, direction: dir });
+          if (!this.adjGraph[srcId].some(e => e.target === tgtId)) {
+            this.adjGraph[srcId].push({ target: tgtId, distance_m: dist, direction: dir });
+          }
+          const isTwoWay = dir === 'bidirectional' || dir === 'two_way' || dir === 'both' || dir === 'bi';
+          if (isTwoWay) {
+            if (!this.adjGraph[tgtId]) this.adjGraph[tgtId] = [];
+            if (!this.adjGraph[tgtId].some(e => e.target === srcId)) {
+              this.adjGraph[tgtId].push({ target: srcId, distance_m: dist, direction: dir });
+            }
+          }
         }
       }
     }
@@ -475,10 +497,12 @@ class DevFMSApp {
   populateWaypointSelects() {
     const startSelect = document.getElementById('select-start-wp');
     const goalSelect = document.getElementById('select-goal-wp');
+    const scenarioSelect = document.getElementById('select-scenario-target-wp');
     if (!startSelect || !goalSelect) return;
 
     startSelect.innerHTML = '';
     goalSelect.innerHTML = '';
+    if (scenarioSelect) scenarioSelect.innerHTML = '';
 
     const sortedIds = Object.keys(this.waypoints).sort((a, b) => {
       const typeA = this.waypoints[a].type;
@@ -499,20 +523,34 @@ class DevFMSApp {
 
       startSelect.appendChild(opt1);
       goalSelect.appendChild(opt2);
+
+      if (scenarioSelect && (wp.type === 'workstation' || wp.type === 'charger' || id.includes('ws') || id.includes('charge'))) {
+        const opt3 = document.createElement('option');
+        opt3.value = id;
+        opt3.textContent = `${id} (${wp.type})`;
+        scenarioSelect.appendChild(opt3);
+      }
     });
 
     // Default selections
     if (this.waypoints['wp-charge-1']) startSelect.value = 'wp-charge-1';
-    if (this.waypoints['wp-ws-a-1']) goalSelect.value = 'wp-ws-a-1';
+    if (this.waypoints['wp-ws-a-1']) {
+      goalSelect.value = 'wp-ws-a-1';
+      if (scenarioSelect) scenarioSelect.value = 'wp-ws-a-1';
+    }
   }
 
   setStartToBotPose() {
-    if (!this.waypoints) return;
+    if (!this.waypoints || !this.robotState) return;
     let closestId = null;
     let minDist = Infinity;
 
+    // Use live robot pose (x, y) if available
+    const rx = (this.robotState.has_pose !== false && this.robotState.x !== undefined) ? this.robotState.x : 2.4;
+    const ry = (this.robotState.has_pose !== false && this.robotState.y !== undefined) ? this.robotState.y : 0.3;
+
     for (const [id, wp] of Object.entries(this.waypoints)) {
-      const dist = Math.hypot(wp.x - this.robotState.x, wp.y - this.robotState.y);
+      const dist = Math.hypot(wp.x - rx, wp.y - ry);
       if (dist < minDist) {
         minDist = dist;
         closestId = id;
@@ -635,23 +673,30 @@ class DevFMSApp {
   }
 
   dispatchWorkstationCall(wsId) {
+    if (!wsId || !this.waypoints[wsId]) {
+      alert(`유효하지 않은 스테이션 ID입니다: ${wsId}`);
+      return;
+    }
+
     this.setStartToBotPose();
     const startWp = document.getElementById('select-start-wp')?.value || 'wp-charge-1';
+    
     const goalSelect = document.getElementById('select-goal-wp');
-    if (goalSelect && this.waypoints[wsId]) goalSelect.value = wsId;
+    if (goalSelect) goalSelect.value = wsId;
+
+    const scenarioSelect = document.getElementById('select-scenario-target-wp');
+    if (scenarioSelect) scenarioSelect.value = wsId;
 
     this.calculateAndPreviewRoute();
 
-    if (this.wsConnected && this.ws) {
-      const payload = {
-        type: 'ws_call_request',
-        robot_id: this.robotState.id,
-        ws_id: wsId,
-        start_wp: startWp
-      };
-      this.sendWSMessage(payload);
+    if (this.activeRoute && this.activeRoute.length > 0) {
+      this.addDebugLog(`[QUICK SHORTCUT] Pressed '${wsId}' shortcut button. Start node: '${startWp}'`, 'dispatch');
+      this.addDebugLog(`[A* PLANNER] Route sequence (${this.activeRoute.length} steps): ${this.activeRoute.join(' -> ')}`, 'dispatch');
+      this.dispatchRouteGoal();
+    } else {
+      alert(`'${startWp}'에서 '${wsId}'까지 연결된 위상 경로(A*)를 찾을 수 없습니다.`);
+      this.addDebugLog(`[ERROR] No valid A* path found from '${startWp}' to '${wsId}'`, 'warn');
     }
-    this.dispatchRouteGoal();
   }
 
   renderRouteQueueList() {
@@ -709,8 +754,13 @@ class DevFMSApp {
   }
 
   dispatchRouteGoal() {
+    const goalWp = document.getElementById('select-goal-wp')?.value;
+    if (!this.activeRoute || this.activeRoute.length === 0 || this.activeGoalWp !== goalWp) {
+      this.calculateAndPreviewRoute();
+    }
+
     if (!this.activeRoute || this.activeRoute.length === 0) {
-      alert('Please calculate a path before dispatching.');
+      alert('선택한 출발지와 도착지 사이에 연결된 경로가 없습니다.');
       return;
     }
 
@@ -804,10 +854,8 @@ class DevFMSApp {
     }
 
     if (msg.type === 'telemetry') {
-      if (msg.has_pose !== false && msg.status !== 'OFFLINE') {
+      if (msg.has_pose !== false) {
         this.hasReceivedTelemetry = true;
-      } else if (msg.status === 'OFFLINE' || msg.has_pose === false) {
-        this.hasReceivedTelemetry = false;
       }
       this.robotState = { ...this.robotState, ...msg };
       this.updateTelemetryUI();
@@ -816,12 +864,16 @@ class DevFMSApp {
       this.currentStepIdx = msg.current_step || 0;
       this.renderRouteQueueList();
       this.renderBranchDecisionBox(this.currentStepIdx);
+    } else if (msg.type === 'scenario_telemetry_debug') {
+      this.updateScenarioDebugUI(msg);
+    } else if (msg.type === 'scenario_log_event') {
+      this.addDebugLog(msg.message, msg.log_type || 'system');
     }
   }
 
   updateTelemetryUI() {
-    const rx = this.robotState.ros_x ?? (this.robotState.x - 2.457);
-    const ry = this.robotState.ros_y ?? (this.robotState.y - 0.358);
+    const rx = this.robotState.ros_x ?? this.robotState.x;
+    const ry = this.robotState.ros_y ?? this.robotState.y;
     const cx = this.robotState.x;
     const cy = this.robotState.y;
     const gzx = this.robotState.gz_x || 0;
@@ -852,6 +904,85 @@ class DevFMSApp {
     document.getElementById('hud-pose').textContent = `Map: X ${cx.toFixed(2)}m, Y ${cy.toFixed(2)}m (ROS2: X ${rx.toFixed(2)}m, Y ${ry.toFixed(2)}m) | Yaw: ${this.robotState.yaw_deg.toFixed(1)}°`;
   }
 
+  updateScenarioDebugUI(msg) {
+    if (!msg) return;
+
+    // Update Status Badge
+    const statusBadge = document.getElementById('badge-debug-status');
+    if (statusBadge) {
+      statusBadge.textContent = msg.status || 'IDLE';
+      statusBadge.className = `badge-debug-status ${msg.status ? msg.status.toLowerCase() : 'idle'}`;
+    }
+
+    // Update Waypoint Target & Current Step
+    const tgtIdEl = document.getElementById('dbg-target-id');
+    const currIdEl = document.getElementById('dbg-current-id');
+    const stepProgEl = document.getElementById('dbg-step-progress');
+    const stepBadgeEl = document.getElementById('dbg-step-badge');
+
+    if (tgtIdEl) tgtIdEl.textContent = msg.target_wp_id || '-';
+    if (currIdEl) currIdEl.textContent = msg.current_wp_id || '-';
+    if (stepProgEl) stepProgEl.textContent = `Step ${msg.current_step || 0} / ${msg.total_steps || 0}`;
+
+    if (stepBadgeEl) {
+      stepBadgeEl.textContent = msg.status === 'NAVIGATING' ? 'NAVIGATING' : 'COMPLETE';
+      stepBadgeEl.className = `pass-tag ${msg.status === 'NAVIGATING' ? 'warn' : 'pass'}`;
+    }
+
+    // Update Target vs Live Coordinates
+    const txEl = document.getElementById('dbg-target-x');
+    const tyEl = document.getElementById('dbg-target-y');
+    const tyawEl = document.getElementById('dbg-target-yaw');
+
+    const rxEl = document.getElementById('dbg-robot-x');
+    const ryEl = document.getElementById('dbg-robot-y');
+    const ryawEl = document.getElementById('dbg-robot-yaw');
+
+    const dxEl = document.getElementById('dbg-delta-x');
+    const dyEl = document.getElementById('dbg-delta-y');
+    const dyawEl = document.getElementById('dbg-delta-yaw');
+    const distErrEl = document.getElementById('dbg-dist-error');
+
+    if (txEl) txEl.textContent = `${(msg.target_x || 0).toFixed(2)} m`;
+    if (tyEl) tyEl.textContent = `${(msg.target_y || 0).toFixed(2)} m`;
+    if (tyawEl) tyawEl.textContent = `${(msg.target_yaw || 0).toFixed(1)} °`;
+
+    if (rxEl) rxEl.textContent = `${(msg.robot_x || 0).toFixed(2)} m`;
+    if (ryEl) ryEl.textContent = `${(msg.robot_y || 0).toFixed(2)} m`;
+    if (ryawEl) ryawEl.textContent = `${(msg.robot_yaw || 0).toFixed(1)} °`;
+
+    if (dxEl) dxEl.textContent = `${(msg.delta_x || 0).toFixed(2)} m`;
+    if (dyEl) dyEl.textContent = `${(msg.delta_y || 0).toFixed(2)} m`;
+    if (dyawEl) dyawEl.textContent = `${(msg.yaw_error_deg || 0).toFixed(1)} °`;
+    if (distErrEl) distErrEl.textContent = `${(msg.dist_error_m || 0).toFixed(2)} m`;
+
+    // Pass/Fail Indicators
+    const passDistEl = document.getElementById('dbg-pass-dist');
+    if (passDistEl) {
+      const isPass = msg.dist_error_m <= 0.45;
+      passDistEl.textContent = isPass ? 'PASS (<0.45m)' : 'WARN (>0.45m)';
+      passDistEl.className = `pass-tag ${isPass ? 'pass' : 'warn'}`;
+    }
+
+    const passYawEl = document.getElementById('dbg-pass-yaw');
+    if (passYawEl) {
+      const isYawPass = msg.yaw_error_deg <= 10.0;
+      passYawEl.textContent = isYawPass ? 'PASS (<10°)' : 'WARN (>10°)';
+      passYawEl.className = `pass-tag ${isYawPass ? 'pass' : 'warn'}`;
+    }
+  }
+
+  addDebugLog(text, logType = 'system') {
+    const consoleEl = document.getElementById('debug-log-console');
+    if (!consoleEl) return;
+    const now = new Date().toLocaleTimeString();
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${logType}`;
+    entry.textContent = `[${now}] ${text}`;
+    consoleEl.appendChild(entry);
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+  }
+
   /* --- Position Recorder & Debugger Methods --- */
   loadSavedSnapshots() {
     const saved = localStorage.getItem('lsm_pose_snapshots');
@@ -866,8 +997,8 @@ class DevFMSApp {
   }
 
   recordPoseSnapshot() {
-    const ros_x = this.robotState.ros_x ?? (this.robotState.x - 2.457);
-    const ros_y = this.robotState.ros_y ?? (this.robotState.y - 0.358);
+    const ros_x = this.robotState.ros_x ?? this.robotState.x;
+    const ros_y = this.robotState.ros_y ?? this.robotState.y;
     const canvas_x = this.robotState.x;
     const canvas_y = this.robotState.y;
     const yaw_deg = this.robotState.yaw_deg || 0;
@@ -966,8 +1097,8 @@ class DevFMSApp {
   }
 
   applyDeltaToCalibration() {
-    const rx = this.robotState.ros_x ?? (this.robotState.x - 2.457);
-    const ry = this.robotState.ros_y ?? (this.robotState.y - 0.358);
+    const rx = this.robotState.ros_x ?? this.robotState.x;
+    const ry = this.robotState.ros_y ?? this.robotState.y;
     const gz_x = this.robotState.gz_x || 0;
     const gz_y = this.robotState.gz_y || 0;
     const delta_x = gz_x - rx;
@@ -1182,6 +1313,87 @@ class DevFMSApp {
     return { x: wx, y: wy };
   }
 
+  showToast(message, duration = 2500) {
+    let toastContainer = document.getElementById('fms-toast-container');
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.id = 'fms-toast-container';
+      toastContainer.style.cssText = `
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        pointer-events: none;
+      `;
+      document.body.appendChild(toastContainer);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'fms-toast';
+    toast.style.cssText = `
+      background: rgba(15, 23, 42, 0.94);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 14px rgba(56, 189, 248, 0.25);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: Inter, -apple-system, sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+      pointer-events: auto;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+    `;
+    toast.innerHTML = message;
+    toastContainer.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0) scale(1)';
+    });
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-10px) scale(0.95)';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  copyToClipboard(text, displayMsg) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.showToast(`📋 ${displayMsg}`);
+      }).catch(() => {
+        this.fallbackCopy(text, displayMsg);
+      });
+    } else {
+      this.fallbackCopy(text, displayMsg);
+    }
+  }
+
+  fallbackCopy(text, displayMsg) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      this.showToast(`📋 ${displayMsg}`);
+    } catch (err) {
+      this.showToast(`❌ Failed to copy coordinates`);
+    }
+    document.body.removeChild(textArea);
+  }
+
   drawCanvas() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -1222,12 +1434,30 @@ class DevFMSApp {
     this.drawRobotState();
   }
 
+  isEdgeBidirectional(id1, id2) {
+    const wp1 = this.waypoints[id1];
+    const wp2 = this.waypoints[id2];
+    if (!wp1 || !wp2) return false;
+
+    const edge1 = (wp1.connected_to || []).find(e => e.target === id2);
+    const edge2 = (wp2.connected_to || []).find(e => e.target === id1);
+
+    const dir1 = edge1 ? (edge1.direction || '').toLowerCase() : '';
+    const dir2 = edge2 ? (edge2.direction || '').toLowerCase() : '';
+
+    const isBidi1 = dir1 === 'bidirectional' || dir1 === 'two_way' || dir1 === 'both' || dir1 === 'bi';
+    const isBidi2 = dir2 === 'bidirectional' || dir2 === 'two_way' || dir2 === 'both' || dir2 === 'bi';
+
+    return isBidi1 || isBidi2 || (Boolean(edge1) && Boolean(edge2));
+  }
+
   drawEdges() {
     this.ctx.lineWidth = Math.max(1, 1.2 * this.view.zoom);
     this.ctx.strokeStyle = 'rgba(2, 132, 199, 0.35)';
     this.ctx.fillStyle = 'rgba(2, 132, 199, 0.55)';
 
-    const renderedEdgeKeys = new Set();
+    const renderedLineKeys = new Set();
+    const renderedArrowKeys = new Set();
 
     Object.entries(this.waypoints).forEach(([id, wp]) => {
       if (!wp.connected_to || wp.connected_to.length === 0) return;
@@ -1240,27 +1470,41 @@ class DevFMSApp {
         const targetWp = this.waypoints[targetId];
         if (targetWp) {
           const edgeKey = id < targetId ? `${id}__${targetId}` : `${targetId}__${id}`;
-          const dirStr = (edge.direction || '').toLowerCase();
-          const isTwoWay = dirStr === 'bidirectional' || dirStr === 'two_way' || dirStr === 'both' || dirStr === 'bi';
+          const isTwoWay = this.isEdgeBidirectional(id, targetId);
 
           const tgtPt = this.worldToCanvas(targetWp.x, targetWp.y);
           const isTgtWS = targetWp.type === 'workstation' || targetId.toLowerCase().includes('charger') || targetId.toLowerCase().includes('wp-ch');
 
-          // Draw Line
-          this.ctx.beginPath();
-          this.ctx.moveTo(srcPt.x, srcPt.y);
-          this.ctx.lineTo(tgtPt.x, tgtPt.y);
-          this.ctx.stroke();
+          // Draw Line Once per pair
+          if (!renderedLineKeys.has(edgeKey)) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(srcPt.x, srcPt.y);
+            this.ctx.lineTo(tgtPt.x, tgtPt.y);
+            this.ctx.stroke();
+            renderedLineKeys.add(edgeKey);
+          }
 
-          // Draw Arrowhead at Edge Endpoints (Identical to Operator Monitoring)
+          // Draw Arrowhead at Edge Endpoints
           if (this.showArrows) {
-            if (!renderedEdgeKeys.has(edgeKey)) {
-              this.drawEdgeArrowheads(
-                srcPt.x, srcPt.y, isSrcWS,
-                tgtPt.x, tgtPt.y, isTgtWS,
-                isTwoWay
-              );
-              renderedEdgeKeys.add(edgeKey);
+            if (isTwoWay) {
+              if (!renderedArrowKeys.has(edgeKey)) {
+                const isIdSmaller = id < targetId;
+                const x1 = isIdSmaller ? srcPt.x : tgtPt.x;
+                const y1 = isIdSmaller ? srcPt.y : tgtPt.y;
+                const isWS1 = isIdSmaller ? isSrcWS : isTgtWS;
+                const x2 = isIdSmaller ? tgtPt.x : srcPt.x;
+                const y2 = isIdSmaller ? tgtPt.y : srcPt.y;
+                const isWS2 = isIdSmaller ? isTgtWS : isSrcWS;
+
+                this.drawEdgeArrowheads(x1, y1, isWS1, x2, y2, isWS2, true);
+                renderedArrowKeys.add(edgeKey);
+              }
+            } else {
+              const directedKey = `${id}->${targetId}`;
+              if (!renderedArrowKeys.has(directedKey)) {
+                this.drawEdgeArrowheads(srcPt.x, srcPt.y, isSrcWS, tgtPt.x, tgtPt.y, isTgtWS, false);
+                renderedArrowKeys.add(directedKey);
+              }
             }
           }
         }
