@@ -279,10 +279,6 @@ class FMSBridgeTelemetryNode:
                 path, dist = self.graph.find_shortest_path(start_wp, ws_id)
                 details = self.graph.get_route_details(path) if path else []
                 
-                self.active_route = path or []
-                self.current_step = 0
-                self.robot_state["status"] = "NAVIGATING"
-
                 resp = {
                     "type": "route_plan",
                     "start_wp": start_wp,
@@ -294,25 +290,33 @@ class FMSBridgeTelemetryNode:
                 self.ws_server.broadcast(resp)
                 print(f"[TelemetryBridge] WS Call Scenario: {start_wp} -> {ws_id} ({dist:.2f}m)")
                 
-                # Publish ROS 2 Nav2 Goal if available
-                if path and len(path) > 1:
-                    target_wp_id = path[-1]
-                    target_wp = self.graph.waypoints.get(target_wp_id)
-                    if target_wp and self.ros_node and self.goal_pub:
-                        self.publish_ros2_goal(target_wp)
+                if path:
+                    self.active_route = path
+                    first_wp = self.graph.waypoints.get(path[0])
+                    if first_wp:
+                        d_start = math.hypot(self.robot_state["x"] - first_wp.get("x", 0), self.robot_state["y"] - first_wp.get("y", 0))
+                        self.current_step = 1 if (d_start < 0.6 and len(path) > 1) else 0
+                    else:
+                        self.current_step = 0
+                    self.dispatch_next_waypoint()
 
             elif msg_type == "dispatch_route":
                 goal_wp_id = data.get("goal_wp")
                 route = data.get("route", [])
-                if not goal_wp_id and route:
-                    goal_wp_id = route[-1]
+                if not route and goal_wp_id:
+                    start_wp = self.find_nearest_waypoint(self.robot_state["x"], self.robot_state["y"])
+                    route, _ = self.graph.find_shortest_path(start_wp, goal_wp_id)
 
-                if goal_wp_id:
-                    target_wp = self.graph.waypoints.get(goal_wp_id)
-                    if target_wp and self.ros_node and self.goal_pub:
-                        self.robot_state["status"] = "NAVIGATING"
-                        self.publish_ros2_goal(target_wp)
-                        print(f"[TelemetryBridge] Dispatched Route Goal to ROS2 Nav2: '{goal_wp_id}' ({target_wp.get('x')}, {target_wp.get('y')})")
+                if route:
+                    self.active_route = route
+                    first_wp = self.graph.waypoints.get(route[0])
+                    if first_wp:
+                        d_start = math.hypot(self.robot_state["x"] - first_wp.get("x", 0), self.robot_state["y"] - first_wp.get("y", 0))
+                        self.current_step = 1 if (d_start < 0.6 and len(route) > 1) else 0
+                    else:
+                        self.current_step = 0
+                    print(f"[SequentialNavigator] Dispatched Route Sequence: {route}")
+                    self.dispatch_next_waypoint()
 
             elif msg_type == "reset_initial_pose":
                 wp_id = data.get("wp_id", "wp-charge-1")
@@ -496,6 +500,56 @@ class FMSBridgeTelemetryNode:
             else:
                 time.sleep(0.1)
 
+    def dispatch_next_waypoint(self):
+        if not getattr(self, 'active_route', None) or self.current_step >= len(self.active_route):
+            end_wp = getattr(self, 'target_wp_id', 'Done')
+            print(f"[SequentialNavigator] Route Completed! Arrived at final destination: '{end_wp}'")
+            self.robot_state["status"] = "IDLE"
+            self.target_wp_id = None
+            self.ws_server.broadcast({
+                "type": "route_progress",
+                "active_route": getattr(self, 'active_route', []),
+                "current_step": getattr(self, 'current_step', 0),
+                "status": "COMPLETED"
+            })
+            return
+
+        target_wp_id = self.active_route[self.current_step]
+        self.target_wp_id = target_wp_id
+        target_wp = self.graph.waypoints.get(target_wp_id)
+        if target_wp:
+            self.robot_state["status"] = "NAVIGATING"
+            self.publish_ros2_goal(target_wp)
+            print(f"[SequentialNavigator] Step [{self.current_step + 1}/{len(self.active_route)}]: Dispatching Waypoint '{target_wp_id}' ({target_wp.get('x')}, {target_wp.get('y')})")
+            self.ws_server.broadcast({
+                "type": "route_progress",
+                "active_route": self.active_route,
+                "current_step": self.current_step,
+                "current_wp": target_wp_id,
+                "status": "NAVIGATING"
+            })
+
+    def check_route_step_progression(self, current_x, current_y):
+        if self.robot_state.get("status") != "NAVIGATING" or not getattr(self, 'active_route', None) or not getattr(self, 'target_wp_id', None):
+            return
+
+        target_wp = self.graph.waypoints.get(self.target_wp_id)
+        if not target_wp:
+            return
+
+        tx = float(target_wp.get("x", 0.0))
+        ty = float(target_wp.get("y", 0.0))
+        dist = math.hypot(current_x - tx, current_y - ty)
+
+        # Arrival threshold: 0.45m for intermediate waypoints, 0.30m for final goal
+        is_final = (self.current_step == len(self.active_route) - 1)
+        threshold = 0.30 if is_final else 0.45
+
+        if dist <= threshold:
+            print(f"[SequentialNavigator] Reached Waypoint [{self.current_step + 1}/{len(self.active_route)}] '{self.target_wp_id}' (dist={dist:.2f}m <= {threshold}m)")
+            self.current_step += 1
+            self.dispatch_next_waypoint()
+
     def update_amcl_pose(self, ros_x, ros_y, yaw_deg, cov_x=0.002, cov_y=0.002, cov_yaw=0.01):
         self.last_msg_time = time.time()
         self.has_pose = True
@@ -515,6 +569,8 @@ class FMSBridgeTelemetryNode:
         self.robot_state["covX"] = round(cov_x, 4)
         self.robot_state["covY"] = round(cov_y, 4)
         self.robot_state["covYaw"] = round(cov_yaw, 4)
+
+        self.check_route_step_progression(world_x, world_y)
 
     def update_odom(self, v, w, gz_x=None, gz_y=None, gz_yaw=None):
         self.last_msg_time = time.time()
