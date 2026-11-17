@@ -17,6 +17,7 @@ def generate_launch_description():
     # Default Paths
     default_map_path = os.path.join(pkg_lsm_navigation, 'maps', 'lsm_warehouse_map.yaml')
     default_params_path = os.path.join(pkg_lsm_navigation, 'config', 'nav2_params.yaml')
+    ekf_config_path = os.path.join(pkg_lsm_navigation, 'config', 'ekf.yaml')
 
     # Launch Configurations
     map_yaml_file = LaunchConfiguration('map')
@@ -56,6 +57,27 @@ def generate_launch_description():
         )
     )
 
+    # 1.5 EKF Sensor Fusion Node (robot_localization: fuses /odom + /imu -> /odometry/filtered & odom->base_footprint TF)
+    ekf_node_cmd = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[
+            ekf_config_path,
+            {'use_sim_time': use_sim_time}
+        ]
+    )
+
+    # 1.6 5-Stage Logistics AMR Finite State Machine Node
+    fsm_node_cmd = Node(
+        package='lsm_navigation',
+        executable='amr_state_machine_node',
+        name='amr_state_machine_node',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}]
+    )
+
     # 2. Include Nav2 Bringup Launch
     nav2_bringup_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -87,6 +109,8 @@ def generate_launch_description():
     ld.add_action(declare_autostart_cmd)
 
     ld.add_action(spawn_warehouse_cmd)
+    ld.add_action(ekf_node_cmd)
+    ld.add_action(fsm_node_cmd)
     ld.add_action(nav2_bringup_cmd)
     ld.add_action(rviz_cmd)
 

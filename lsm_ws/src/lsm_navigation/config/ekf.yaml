@@ -1,0 +1,117 @@
+### LSM Bot EKF Sensor Fusion Configuration (robot_localization) ###
+# Fuses 30Hz Differential Drive Wheel Odometry (/odom) with 100Hz IMU (/imu)
+# to publish filtered 2D odometry (/odometry/filtered) and sole odom -> base_footprint TF.
+
+ekf_filter_node:
+  ros__parameters:
+    use_sim_time: true
+
+    # Filter update rate (Hz). Matches wheel odometry cadence while integrating 100Hz IMU queue.
+    frequency: 30.0
+    sensor_timeout: 0.1
+
+    # Planar warehouse floor operation: locks Z, roll, pitch, vz, vroll, vpitch, az to zero.
+    two_d_mode: true
+
+    transform_time_offset: 0.0
+    transform_timeout: 0.1
+    print_diagnostics: true
+    debug: false
+    permit_corrected_publication: false
+    publish_acceleration: false
+
+    # Exclusive TF broadcaster for odom -> base_footprint (Gazebo DiffDrive TF disabled in URDF & bridge)
+    publish_tf: true
+
+    # REP-105 Frame Topology (map -> odom handled by AMCL; odom -> base_footprint handled by EKF)
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_footprint
+    world_frame: odom
+
+    # --------------------------------------------------------------------------
+    # Sensor Input 0: Wheel Odometry (/odom @ 30Hz)
+    # State order: [x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az]
+    # Rationale: Fuse body-frame linear velocity (vx, non-holonomic vy=0) and angular rate (vyaw).
+    #            Exclude integrated wheel pose (x, y, yaw) so encoder slip drift does not
+    #            corrupt the global heading/position estimate directly.
+    # --------------------------------------------------------------------------
+    odom0: /odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  true,  false,
+                   false, false, true,
+                   false, false, false]
+    odom0_queue_size: 10
+    odom0_nodelay: true
+    odom0_differential: false
+    odom0_relative: false
+
+    # --------------------------------------------------------------------------
+    # Sensor Input 1: 6-Axis IMU (/imu @ 100Hz, imu_link)
+    # Rationale: Fuse absolute yaw orientation (relative to startup), yaw rate (vyaw),
+    #            and longitudinal linear acceleration (ax) to anchor heading during
+    #            wheel slip, rapid in-place spins, and high-acceleration maneuvers.
+    # --------------------------------------------------------------------------
+    imu0: /imu
+    imu0_config: [false, false, false,
+                  false, false, true,
+                  false, false, false,
+                  false, false, true,
+                  true,  false, false]
+    imu0_queue_size: 20
+    imu0_nodelay: true
+    imu0_differential: false
+    imu0_relative: true
+    imu0_remove_gravitational_acceleration: true
+
+    # --------------------------------------------------------------------------
+    # 15x15 Process Noise Covariance Matrix (Q)
+    # Tuning Rationale:
+    # - x, y (0.05): Moderate prediction uncertainty allowing smooth velocity integration
+    #                without jitter while trusting kinematic updates.
+    # - yaw (0.08): Higher process noise on yaw so EKF responds rapidly to
+    #               high-rate 100Hz IMU orientation updates during fast turns (1.82 rad/s).
+    # - vx, vy (0.05): Tracks wheel odometry linear velocity updates immediately
+    #                  while filtering transient caster pitch disturbances.
+    # - vyaw (0.04): Allows EKF to track IMU angular velocity smoothly over slipping wheels.
+    # - ax (0.001): Tight acceleration process noise prevents static tilt / braking
+    #               gravity leakage from drifting linear velocity vx.
+    # - 3D-only states (z, roll, pitch, vz, vroll, vpitch, ay, az): Constrained by two_d_mode: true.
+    # --------------------------------------------------------------------------
+    process_noise_covariance: [0.05, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.05, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.06, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.03, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.03, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.08, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.05, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.05, 0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.04, 0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.01, 0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.01, 0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.04, 0.0,   0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.001, 0.0,  0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.01, 0.0,
+                               0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.015]
+
+    # --------------------------------------------------------------------------
+    # 15x15 Initial Estimate Covariance Matrix (P0)
+    # Small initial variances (1e-9) reflect exact known spawn alignment at startup,
+    # preventing initial jump while rapidly adapting to incoming sensor covariances.
+    # --------------------------------------------------------------------------
+    initial_estimate_covariance: [1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9]

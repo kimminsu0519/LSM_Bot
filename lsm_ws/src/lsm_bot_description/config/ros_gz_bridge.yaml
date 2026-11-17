@@ -24,8 +24,23 @@
   direction: GZ_TO_ROS
   frame_id: "odom"
 
-- ros_topic_name: "tf"
-  gz_topic_name: "tf"
+- ros_topic_name: "imu"
+  gz_topic_name: "imu"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "gz.msgs.IMU"
+  direction: GZ_TO_ROS
+  frame_id: "imu_link"
+
+# Ground Truth 3D Pose from Gazebo Sim SceneBroadcaster for EKF benchmarking (separate topic, never /tf)
+- ros_topic_name: "ground_truth_poses"
+  gz_topic_name: "/world/lsm_custom_warehouse/dynamic_pose/info"
   ros_type_name: "tf2_msgs/msg/TFMessage"
   gz_type_name: "gz.msgs.Pose_V"
   direction: GZ_TO_ROS
+
+# Disabled raw Gazebo TF bridge so ekf_filter_node is the sole publisher of odom -> base_footprint on /tf
+# - ros_topic_name: "tf"
+#   gz_topic_name: "tf"
+#   ros_type_name: "tf2_msgs/msg/TFMessage"
+#   gz_type_name: "gz.msgs.Pose_V"
+#   direction: GZ_TO_ROS
