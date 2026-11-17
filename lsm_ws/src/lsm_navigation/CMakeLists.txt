@@ -19,7 +19,14 @@ install(PROGRAMS
 )
 
 install(PROGRAMS
+  lsm_navigation/amr_state_machine_node.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME amr_state_machine_node
+)
+
+install(PROGRAMS
   lsm_navigation/waypoint_navigator.py
+  lsm_navigation/amr_state_machine_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

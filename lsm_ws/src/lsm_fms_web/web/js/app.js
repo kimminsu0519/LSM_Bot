@@ -57,6 +57,9 @@ class FMSApp {
       w: 0.0,
       battery: 100,
       status: 'IDLE',
+      fsm_state: 0,
+      fsm_state_name: 'CHARGING',
+      current_task_id: '',
       covX: 0.002,
       covY: 0.002,
       covYaw: 0.01
@@ -543,6 +546,9 @@ class FMSApp {
             this.robotState.w = data.w ?? this.robotState.w;
             this.robotState.battery = data.battery ?? this.robotState.battery;
             this.robotState.status = data.status || this.robotState.status;
+            if (data.fsm_state !== undefined) this.robotState.fsm_state = data.fsm_state;
+            if (data.fsm_state_name !== undefined) this.robotState.fsm_state_name = data.fsm_state_name;
+            if (data.current_task_id !== undefined) this.robotState.current_task_id = data.current_task_id;
             if (data.covX !== undefined) this.robotState.covX = data.covX;
             if (data.covY !== undefined) this.robotState.covY = data.covY;
             if (data.covYaw !== undefined) this.robotState.covYaw = data.covYaw;
@@ -588,6 +594,26 @@ class FMSApp {
     if (statusEl) {
       statusEl.textContent = this.robotState.status || 'IDLE';
       statusEl.className = `robot-status-pill ${(this.robotState.status || 'idle').toLowerCase()}`;
+    }
+
+    const fsmState = Number(this.robotState.fsm_state ?? 0);
+    const fsmNames = ['CHARGING', 'MOVING_UNLOADED', 'WORKING_LOADING', 'MOVING_LOADED', 'WORKING_UNLOADING'];
+    const fsmName = this.robotState.fsm_state_name || fsmNames[fsmState] || 'CHARGING';
+    ['op-header-fsm-badge', 'op-fsm-badge'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = `${fsmState}: ${fsmName}`;
+        el.className = `fsm-badge state-${fsmState}`;
+      }
+    });
+    setTxt('op-task-id', this.robotState.current_task_id || 'NONE');
+    const stepper = document.getElementById('op-fsm-stepper');
+    if (stepper) {
+      stepper.querySelectorAll('.fsm-step').forEach(stepEl => {
+        const s = Number(stepEl.getAttribute('data-state'));
+        stepEl.classList.toggle('active', s === fsmState);
+        stepEl.classList.toggle('passed', fsmState > 0 && s < fsmState);
+      });
     }
   }
 
@@ -1006,6 +1032,28 @@ class FMSApp {
     document.getElementById('chk-show-arrows')?.addEventListener('change', (e) => { this.showArrows = e.target.checked; this.saveViewOptions(); this.render(); });
     document.getElementById('chk-show-labels')?.addEventListener('change', (e) => { this.showLabels = e.target.checked; this.saveViewOptions(); this.render(); });
     document.getElementById('chk-show-unconnected')?.addEventListener('change', (e) => { this.showUnconnected = e.target.checked; this.saveViewOptions(); this.render(); });
+
+    // 5-Stage FSM Operator Buttons
+    const sendWS = (payload) => {
+      if (this.ws && this.wsConnected) {
+        this.ws.send(JSON.stringify(payload));
+      } else {
+        this.showToast('WebSocket 연결을 확인해주세요.');
+      }
+    };
+    document.getElementById('op-btn-fsm-dispatch')?.addEventListener('click', () => {
+      const taskId = `TASK_OP_${Date.now().toString().slice(-4)}`;
+      sendWS({ type: 'fsm_dispatch_task', task_id: taskId, task_type: 1, target_station_id: 'wp-ws-a-4->wp-ws-a-5->wp-charge-1' });
+      this.showToast(`🚀 물류 미션 시작 (${taskId})`);
+    });
+    document.getElementById('op-btn-trigger-loaded')?.addEventListener('click', () => {
+      sendWS({ type: 'fsm_trigger_mock', station_id: 'wp-ws-a-4', event_type: 2 });
+      this.showToast('📦 적재 완료 트리거 전송 (CARGO_LOADED)');
+    });
+    document.getElementById('op-btn-trigger-unloaded')?.addEventListener('click', () => {
+      sendWS({ type: 'fsm_trigger_mock', station_id: 'wp-ws-a-5', event_type: 3 });
+      this.showToast('📤 하역 완료 트리거 전송 (CARGO_UNLOADED)');
+    });
 
     const btnAutoFit = document.getElementById('btn-auto-fit');
     if (btnAutoFit) btnAutoFit.onclick = () => this.autoFitGraph(true);

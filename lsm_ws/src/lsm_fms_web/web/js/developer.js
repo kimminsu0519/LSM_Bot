@@ -22,6 +22,9 @@ class DevFMSApp {
       w: 0.0,
       battery: 100,
       status: 'IDLE',
+      fsm_state: 0,
+      fsm_state_name: 'CHARGING',
+      current_task_id: '',
       covX: 0.002,
       covY: 0.002,
       covYaw: 0.01
@@ -300,6 +303,43 @@ class DevFMSApp {
     document.getElementById('btn-dispatch-custom-scenario')?.addEventListener('click', () => {
       const targetWp = document.getElementById('select-scenario-target-wp')?.value;
       if (targetWp) this.dispatchWorkstationCall(targetWp);
+    });
+
+    // 5-Stage Logistics FSM Dispatch & Trigger Buttons
+    document.getElementById('btn-fsm-dispatch-mission')?.addEventListener('click', () => {
+      const pickup = document.getElementById('select-fsm-pickup')?.value || 'wp-ws-a-4';
+      const delivery = document.getElementById('select-fsm-delivery')?.value || 'wp-ws-a-5';
+      const taskId = `TASK_${pickup.replace('wp-ws-', '').toUpperCase()}_${delivery.replace('wp-ws-', '').toUpperCase()}_${Date.now().toString().slice(-4)}`;
+      this.sendWSMessage({
+        type: 'fsm_dispatch_task',
+        task_id: taskId,
+        task_type: 1,
+        target_station_id: `${pickup}->${delivery}->wp-charge-1`
+      });
+      this.addDebugLog(`[FSM DISPATCH] ${taskId}: ${pickup} -> ${delivery} -> wp-charge-1`, 'dispatch');
+      this.showToast(`🚀 5단계 물류 미션 시작: ${pickup} → ${delivery}`);
+    });
+
+    document.getElementById('btn-fsm-trigger-loaded')?.addEventListener('click', () => {
+      const pickup = document.getElementById('select-fsm-pickup')?.value || 'wp-ws-a-4';
+      this.sendWSMessage({
+        type: 'fsm_trigger_mock',
+        station_id: pickup,
+        event_type: 2
+      });
+      this.addDebugLog(`[FSM TRIGGER] TriggerMockEvent CARGO_LOADED @ ${pickup}`, 'pass');
+      this.showToast(`📦 적재 완료 트리거 전송 (${pickup})`);
+    });
+
+    document.getElementById('btn-fsm-trigger-unloaded')?.addEventListener('click', () => {
+      const delivery = document.getElementById('select-fsm-delivery')?.value || 'wp-ws-a-5';
+      this.sendWSMessage({
+        type: 'fsm_trigger_mock',
+        station_id: delivery,
+        event_type: 3
+      });
+      this.addDebugLog(`[FSM TRIGGER] TriggerMockEvent CARGO_UNLOADED @ ${delivery}`, 'pass');
+      this.showToast(`📤 하역 완료 트리거 전송 (${delivery})`);
     });
 
     // WS Log Controls
@@ -860,10 +900,36 @@ class DevFMSApp {
       this.robotState = { ...this.robotState, ...msg };
       this.updateTelemetryUI();
       this.drawCanvas(); // Synchronous immediate canvas redraw on every WebSocket packet (unfocused window support)
+    } else if (msg.type === 'route_plan') {
+      if (Array.isArray(msg.path) && msg.path.length > 0) {
+        this.activeRoute = msg.path;
+        this.routeDetails = this.extractRouteDetails(msg.path);
+        this.activeGoalWp = msg.goal_wp || msg.path[msg.path.length - 1];
+        this.currentStepIdx = 0;
+        const distEl = document.getElementById('route-total-dist');
+        const cntEl = document.getElementById('route-wp-count');
+        const estEl = document.getElementById('route-est-time');
+        const hudGoalEl = document.getElementById('hud-goal');
+        if (distEl) distEl.textContent = `${Number(msg.total_dist_m || 0).toFixed(2)} m`;
+        if (cntEl) cntEl.textContent = `${msg.path.length}`;
+        if (estEl) estEl.textContent = `${Math.ceil(Number(msg.total_dist_m || 0) / 0.25)}s`;
+        if (hudGoalEl) hudGoalEl.textContent = this.activeGoalWp;
+        this.renderRouteQueueList();
+        this.renderBranchDecisionBox(0);
+      }
     } else if (msg.type === 'route_progress') {
+      if (Array.isArray(msg.active_route) && msg.active_route.length > 0) {
+        this.activeRoute = msg.active_route;
+        this.routeDetails = this.extractRouteDetails(msg.active_route);
+        this.activeGoalWp = msg.active_route[msg.active_route.length - 1];
+        const hudGoalEl = document.getElementById('hud-goal');
+        if (hudGoalEl) hudGoalEl.textContent = this.activeGoalWp;
+      }
       this.currentStepIdx = msg.current_step || 0;
       this.renderRouteQueueList();
       this.renderBranchDecisionBox(this.currentStepIdx);
+    } else if (msg.type === 'fsm_event_ack') {
+      this.addDebugLog(`[FSM ACK] ${msg.message}`, msg.success ? 'pass' : 'warn');
     } else if (msg.type === 'scenario_telemetry_debug') {
       this.updateScenarioDebugUI(msg);
     } else if (msg.type === 'scenario_log_event') {
@@ -902,6 +968,39 @@ class DevFMSApp {
     if (recDelta) recDelta.textContent = `ΔX: ${dx.toFixed(3)}m | ΔY: ${dy.toFixed(3)}m`;
 
     document.getElementById('hud-pose').textContent = `Map: X ${cx.toFixed(2)}m, Y ${cy.toFixed(2)}m (ROS2: X ${rx.toFixed(2)}m, Y ${ry.toFixed(2)}m) | Yaw: ${this.robotState.yaw_deg.toFixed(1)}°`;
+
+    // Update 5-Stage FSM Status Badges & Steppers
+    const fsmState = Number(this.robotState.fsm_state ?? 0);
+    const fsmNames = ['CHARGING', 'MOVING_UNLOADED', 'WORKING_LOADING', 'MOVING_LOADED', 'WORKING_UNLOADING'];
+    const fsmName = this.robotState.fsm_state_name || fsmNames[fsmState] || 'CHARGING';
+    const taskIdText = this.robotState.current_task_id || 'NONE';
+
+    ['hud-fsm-badge', 'tel-fsm-badge', 'planner-fsm-badge'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = `${fsmState}: ${fsmName}`;
+        el.className = `fsm-badge state-${fsmState}`;
+      }
+    });
+    ['hud-task-id', 'tel-task-id', 'planner-task-id'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = taskIdText;
+    });
+    ['tel-fsm-stepper', 'planner-fsm-stepper'].forEach(stepperId => {
+      const stepper = document.getElementById(stepperId);
+      if (!stepper) return;
+      stepper.querySelectorAll('.fsm-step').forEach(stepEl => {
+        const s = Number(stepEl.getAttribute('data-state'));
+        stepEl.classList.toggle('active', s === fsmState);
+        stepEl.classList.toggle('passed', fsmState > 0 && s < fsmState);
+      });
+    });
+
+    const devStatusEl = document.getElementById('dev-robot-status');
+    if (devStatusEl) {
+      devStatusEl.textContent = this.robotState.status || 'IDLE';
+      devStatusEl.className = `robot-status-pill ${(this.robotState.status || 'idle').toLowerCase()}`;
+    }
   }
 
   updateScenarioDebugUI(msg) {

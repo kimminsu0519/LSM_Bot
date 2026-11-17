@@ -47,6 +47,9 @@
         </button>
 
         <div class="header-status">
+          <div class="fsm-badge state-0" id="op-header-fsm-badge">
+            0: CHARGING
+          </div>
           <div class="status-badge live">
             <span class="pulse-dot"></span> FMS ACTIVE
           </div>
@@ -145,6 +148,35 @@
               <div class="tel-card">
                 <span class="tel-lbl">Battery Level</span>
                 <span class="tel-val neon-green" id="tel-battery">100%</span>
+              </div>
+            </div>
+
+            <div class="panel-header mt-12">
+              <h4><i class="fa-solid fa-diagram-project"></i> 5-Stage Logistics FSM</h4>
+              <span class="fsm-badge state-0" id="op-fsm-badge">0: CHARGING</span>
+            </div>
+            <div class="fsm-stepper" id="op-fsm-stepper">
+              <div class="fsm-step active" data-state="0"><span>0</span>CHARGING</div>
+              <div class="fsm-step" data-state="1"><span>1</span>UNLOADED</div>
+              <div class="fsm-step" data-state="2"><span>2</span>LOADING</div>
+              <div class="fsm-step" data-state="3"><span>3</span>LOADED</div>
+              <div class="fsm-step" data-state="4"><span>4</span>UNLOADING</div>
+            </div>
+            <div class="fsm-task-row">
+              <span class="lbl">Task ID:</span>
+              <span class="val" id="op-task-id">NONE</span>
+            </div>
+            <div class="fsm-mission-inputs mt-8">
+              <button class="btn-fsm-dispatch" id="op-btn-fsm-dispatch">
+                <i class="fa-solid fa-play"></i> 물류 미션 시작 (A-4 → A-5)
+              </button>
+              <div class="fsm-trigger-row mt-8">
+                <button class="btn-fsm-trigger load" id="op-btn-trigger-loaded">
+                  <i class="fa-solid fa-box-open"></i> 적재 완료
+                </button>
+                <button class="btn-fsm-trigger unload" id="op-btn-trigger-unloaded">
+                  <i class="fa-solid fa-dolly"></i> 하역 완료
+                </button>
               </div>
             </div>
 

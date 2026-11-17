@@ -119,6 +119,14 @@
           <!-- Developer Map HUD -->
           <div class="dev-hud-overlay">
             <div class="hud-item">
+              <span class="hud-label">FSM STATE:</span>
+              <span class="fsm-badge state-0" id="hud-fsm-badge">0: CHARGING</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-label">TASK ID:</span>
+              <span class="hud-value neon-purple" id="hud-task-id">NONE</span>
+            </div>
+            <div class="hud-item">
               <span class="hud-label">AMR POSE:</span>
               <span class="hud-value neon-cyan" id="hud-pose">X: 0.00m | Y: 0.00m | Yaw: 0.0°</span>
             </div>
@@ -180,6 +188,22 @@
                 <span class="tel-lbl">Battery Level</span>
                 <span class="tel-val neon-green" id="tel-battery">100%</span>
               </div>
+            </div>
+
+            <div class="panel-header mt-12">
+              <h4><i class="fa-solid fa-diagram-project"></i> 5-Stage Logistics FSM</h4>
+              <span class="fsm-badge state-0" id="tel-fsm-badge">0: CHARGING</span>
+            </div>
+            <div class="fsm-stepper" id="tel-fsm-stepper">
+              <div class="fsm-step active" data-state="0"><span>0</span>CHARGING</div>
+              <div class="fsm-step" data-state="1"><span>1</span>UNLOADED</div>
+              <div class="fsm-step" data-state="2"><span>2</span>LOADING</div>
+              <div class="fsm-step" data-state="3"><span>3</span>LOADED</div>
+              <div class="fsm-step" data-state="4"><span>4</span>UNLOADING</div>
+            </div>
+            <div class="fsm-task-row">
+              <span class="lbl">Task ID:</span>
+              <span class="val" id="tel-task-id">NONE</span>
             </div>
 
             <div class="panel-header mt-12">
@@ -307,8 +331,62 @@
 
         <!-- Tab 3: Topological Route Planner & Scenario Control -->
         <div class="tab-content" id="tab-planner">
+          <!-- Section 0: 5-Stage Logistics FSM Mission & Trigger Controls -->
+          <div class="panel-card fsm-control-card">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-cubes"></i> 5단계 물류 FSM 관제</h3>
+              <span class="fsm-badge state-0" id="planner-fsm-badge">0: CHARGING</span>
+            </div>
+            <div class="fsm-stepper" id="planner-fsm-stepper">
+              <div class="fsm-step active" data-state="0"><span>0</span>CHARGING</div>
+              <div class="fsm-step" data-state="1"><span>1</span>UNLOADED</div>
+              <div class="fsm-step" data-state="2"><span>2</span>LOADING</div>
+              <div class="fsm-step" data-state="3"><span>3</span>LOADED</div>
+              <div class="fsm-step" data-state="4"><span>4</span>UNLOADING</div>
+            </div>
+            <div class="fsm-task-row mt-8">
+              <span class="lbl">Active Task ID:</span>
+              <span class="val neon-purple" id="planner-task-id">NONE</span>
+            </div>
+            <div class="fsm-mission-inputs mt-8">
+              <div class="fsm-select-pair">
+                <div>
+                  <label class="input-lbl">픽업 작업장 (Pickup):</label>
+                  <select id="select-fsm-pickup" class="scenario-select">
+                    <option value="wp-ws-a-4" selected>wp-ws-a-4 (A-4)</option>
+                    <option value="wp-ws-a-1">wp-ws-a-1 (A-1)</option>
+                    <option value="wp-ws-a-2">wp-ws-a-2 (A-2)</option>
+                    <option value="wp-ws-a-5">wp-ws-a-5 (A-5)</option>
+                    <option value="wp-ws-a-6">wp-ws-a-6 (A-6)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="input-lbl">하역 작업장 (Delivery):</label>
+                  <select id="select-fsm-delivery" class="scenario-select">
+                    <option value="wp-ws-a-5" selected>wp-ws-a-5 (A-5)</option>
+                    <option value="wp-ws-a-2">wp-ws-a-2 (A-2)</option>
+                    <option value="wp-ws-a-3">wp-ws-a-3 (A-3)</option>
+                    <option value="wp-ws-a-4">wp-ws-a-4 (A-4)</option>
+                    <option value="wp-ws-a-6">wp-ws-a-6 (A-6)</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn-fsm-dispatch mt-8" id="btn-fsm-dispatch-mission">
+                <i class="fa-solid fa-play"></i> 5단계 E2E 물류 미션 시작 (DispatchTask)
+              </button>
+              <div class="fsm-trigger-row mt-8">
+                <button class="btn-fsm-trigger load" id="btn-fsm-trigger-loaded">
+                  <i class="fa-solid fa-box-open"></i> 적재 완료 (CARGO_LOADED)
+                </button>
+                <button class="btn-fsm-trigger unload" id="btn-fsm-trigger-unloaded">
+                  <i class="fa-solid fa-dolly"></i> 하역 완료 (CARGO_UNLOADED)
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Section 1: Quick Scenario Dispatch -->
-          <div class="panel-card scenario-dispatch-card">
+          <div class="panel-card scenario-dispatch-card mt-12">
             <div class="panel-header">
               <h3><i class="fa-solid fa-bolt-lightning"></i> 시나리오 주행 (Scenario Call)</h3>
               <span class="badge-scenario-mode">AUTO FMS</span>

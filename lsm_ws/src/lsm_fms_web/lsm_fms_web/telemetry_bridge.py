@@ -27,11 +27,13 @@ except ModuleNotFoundError:
 
 HAS_ROS2 = False
 HAS_NAV2_ACTION = False
+HAS_LSM_INTERFACES = False
 try:
     import rclpy
     from rclpy.node import Node
     from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
     from rclpy.action import ActionClient
+    from std_msgs.msg import String
     from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
     from nav_msgs.msg import Odometry
     HAS_ROS2 = True
@@ -40,8 +42,23 @@ try:
         HAS_NAV2_ACTION = True
     except ImportError:
         HAS_NAV2_ACTION = False
+    try:
+        from lsm_interfaces.msg import RobotStatus
+        from lsm_interfaces.action import DispatchTask
+        from lsm_interfaces.srv import TriggerMockEvent
+        HAS_LSM_INTERFACES = True
+    except ImportError:
+        HAS_LSM_INTERFACES = False
 except ImportError:
     HAS_ROS2 = False
+
+FSM_STATE_NAMES = {
+    0: "CHARGING",
+    1: "MOVING_UNLOADED",
+    2: "WORKING_LOADING",
+    3: "MOVING_LOADED",
+    4: "WORKING_UNLOADING",
+}
 
 WS_PORT = 9090
 
@@ -204,7 +221,12 @@ class FMSBridgeTelemetryNode:
         self.action_client_bot = None
         self.initial_pose_pub = None
         self.initial_pose_pub_bot = None
+        self.route_status_pub = None
+        self.dispatch_task_client = None
+        self.mock_event_client = None
         self.has_pose = False
+        self.last_filtered_odom_time = 0.0
+        self.fsm_managed_goal = None
 
         # Parse map origin from lsm_warehouse_map.yaml if available
         self.map_origin_x = 0.0
@@ -232,6 +254,9 @@ class FMSBridgeTelemetryNode:
             "w": 0.0,
             "battery": 100,
             "status": "OFFLINE",
+            "fsm_state": 0,
+            "fsm_state_name": "CHARGING",
+            "current_task_id": "",
             "covX": 0.0,
             "covY": 0.0,
             "covYaw": 0.0
@@ -322,6 +347,17 @@ class FMSBridgeTelemetryNode:
                 wp_id = data.get("wp_id", "wp-charge-1")
                 self.publish_initial_pose(wp_id)
 
+            elif msg_type == "fsm_dispatch_task":
+                task_id = data.get("task_id") or f"TASK_{int(time.time())}"
+                task_type = int(data.get("task_type", 1))
+                target_station = data.get("target_station_id", "wp-ws-a-4->wp-ws-a-5->wp-charge-1")
+                self.send_fsm_dispatch_task(task_id, task_type, target_station)
+
+            elif msg_type == "fsm_trigger_mock":
+                station_id = data.get("station_id", "ACTIVE")
+                event_type = int(data.get("event_type", 2))
+                self.call_trigger_mock_event(station_id, event_type)
+
             elif msg_type == "save_pose_snapshot":
                 snap_dir = os.path.expanduser("~/dev/LSM_repository/lsm_ws/pose_snapshots")
                 os.makedirs(snap_dir, exist_ok=True)
@@ -377,6 +413,69 @@ class FMSBridgeTelemetryNode:
 
         except Exception as e:
             print(f"[TelemetryBridge] Error handling WS message: {e}")
+
+    def send_fsm_dispatch_task(self, task_id, task_type, target_station):
+        if not HAS_ROS2 or not HAS_LSM_INTERFACES or not self.dispatch_task_client:
+            print("[FSM Bridge] DispatchTask action client unavailable")
+            return
+        try:
+            if not self.dispatch_task_client.wait_for_server(timeout_sec=1.0):
+                print("[FSM Bridge] /fms/dispatch_task action server not ready")
+                self.ws_server.broadcast({
+                    "type": "fsm_event_ack",
+                    "success": False,
+                    "message": "/fms/dispatch_task action server not available"
+                })
+                return
+            goal = DispatchTask.Goal()
+            goal.task_id = str(task_id)
+            goal.task_type = int(task_type)
+            goal.target_station_id = str(target_station)
+            goal.target_pose.header.frame_id = "map"
+            goal.target_pose.header.stamp = self.ros_node.get_clock().now().to_msg()
+            self.dispatch_task_client.send_goal_async(goal)
+            print(f"[FSM Bridge] Sent DispatchTask goal: {task_id} -> {target_station}")
+            self.ws_server.broadcast({
+                "type": "fsm_event_ack",
+                "success": True,
+                "message": f"Dispatched FSM task {task_id}: {target_station}"
+            })
+        except Exception as e:
+            print(f"[FSM Bridge] Failed to send DispatchTask: {e}")
+
+    def call_trigger_mock_event(self, station_id, event_type):
+        if not HAS_ROS2 or not HAS_LSM_INTERFACES or not self.mock_event_client:
+            print("[FSM Bridge] TriggerMockEvent service client unavailable")
+            return
+        try:
+            if not self.mock_event_client.wait_for_service(timeout_sec=1.0):
+                print("[FSM Bridge] /workstation/trigger_mock service not ready")
+                self.ws_server.broadcast({
+                    "type": "fsm_event_ack",
+                    "success": False,
+                    "message": "/workstation/trigger_mock service unavailable"
+                })
+                return
+            req = TriggerMockEvent.Request()
+            req.station_id = str(station_id)
+            req.event_type = int(event_type)
+            future = self.mock_event_client.call_async(req)
+
+            def _on_done(fut):
+                try:
+                    res = fut.result()
+                    self.ws_server.broadcast({
+                        "type": "fsm_event_ack",
+                        "success": bool(res.success),
+                        "message": res.message
+                    })
+                except Exception as exc:
+                    print(f"[FSM Bridge] TriggerMockEvent response error: {exc}")
+
+            future.add_done_callback(_on_done)
+            print(f"[FSM Bridge] Called /workstation/trigger_mock station={station_id}, event_type={event_type}")
+        except Exception as e:
+            print(f"[FSM Bridge] Failed to call TriggerMockEvent: {e}")
 
     def publish_initial_pose(self, wp_id="wp-charge-1"):
         if not HAS_ROS2 or not self.ros_node:
@@ -502,16 +601,26 @@ class FMSBridgeTelemetryNode:
 
     def dispatch_next_waypoint(self):
         if not getattr(self, 'active_route', None) or self.current_step >= len(self.active_route):
-            end_wp = getattr(self, 'target_wp_id', 'Done')
+            end_wp = getattr(self, 'target_wp_id', None) or getattr(self, 'fsm_managed_goal', 'Done')
             print(f"[SequentialNavigator] Route Completed! Arrived at final destination: '{end_wp}'")
             self.robot_state["status"] = "IDLE"
             self.target_wp_id = None
+            self.fsm_managed_goal = None
             self.ws_server.broadcast({
                 "type": "route_progress",
                 "active_route": getattr(self, 'active_route', []),
                 "current_step": getattr(self, 'current_step', 0),
                 "status": "COMPLETED"
             })
+            if HAS_ROS2 and self.route_status_pub is not None:
+                status_msg = String()
+                status_msg.data = json.dumps({
+                    "event": "COMPLETED",
+                    "goal_wp": end_wp,
+                    "x": self.robot_state.get("x", 0.0),
+                    "y": self.robot_state.get("y", 0.0)
+                })
+                self.route_status_pub.publish(status_msg)
             return
 
         target_wp_id = self.active_route[self.current_step]
@@ -645,11 +754,15 @@ def main():
         bridge.goal_pub_bot = node.create_publisher(PoseStamped, '/lsm_bot_1/goal_pose', 10)
         bridge.initial_pose_pub = node.create_publisher(PoseWithCovarianceStamped, '/initialpose', 10)
         bridge.initial_pose_pub_bot = node.create_publisher(PoseWithCovarianceStamped, '/lsm_bot_1/initialpose', 10)
+        bridge.route_status_pub = node.create_publisher(String, '/fms/route_status', 10)
         
         # Action Clients
         if HAS_NAV2_ACTION:
             bridge.action_client = ActionClient(node, NavigateToPose, '/navigate_to_pose')
             bridge.action_client_bot = ActionClient(node, NavigateToPose, '/lsm_bot_1/navigate_to_pose')
+        if HAS_LSM_INTERFACES:
+            bridge.dispatch_task_client = ActionClient(node, DispatchTask, '/fms/dispatch_task')
+            bridge.mock_event_client = node.create_client(TriggerMockEvent, '/workstation/trigger_mock')
         
         # Subscriptions
         # Subscriptions & TF Listener for continuous real-time pose tracking
@@ -705,7 +818,7 @@ def main():
             cov = msg.pose.covariance
             bridge.update_amcl_pose(pos.x, pos.y, yaw_deg, cov[0], cov[7], cov[35])
 
-        def odom_cb(msg):
+        def _process_odom_msg(msg):
             v = msg.twist.twist.linear.x
             w = msg.twist.twist.angular.z
             pos = msg.pose.pose.position
@@ -723,6 +836,61 @@ def main():
                 gz_yaw -= 360.0
 
             bridge.update_odom(v, w, gz_x, gz_y, gz_yaw)
+
+        def filtered_odom_cb(msg):
+            bridge.last_filtered_odom_time = time.time()
+            _process_odom_msg(msg)
+
+        def raw_odom_cb(msg):
+            # Fallback only when EKF /odometry/filtered has not published recently
+            if time.time() - getattr(bridge, 'last_filtered_odom_time', 0.0) > 2.0:
+                _process_odom_msg(msg)
+
+        def robot_status_cb(msg):
+            state_code = int(msg.current_state)
+            bridge.robot_state["fsm_state"] = state_code
+            bridge.robot_state["fsm_state_name"] = FSM_STATE_NAMES.get(state_code, f"UNKNOWN({state_code})")
+            bridge.robot_state["current_task_id"] = msg.current_task_id
+            bridge.robot_state["battery"] = round(float(msg.battery_level), 1)
+
+        def fsm_route_cmd_cb(msg):
+            try:
+                cmd = json.loads(msg.data)
+            except Exception:
+                return
+            if cmd.get("command") == "navigate":
+                goal_wp = cmd.get("goal_wp")
+                if not goal_wp:
+                    return
+                start_wp = bridge.find_nearest_waypoint(bridge.robot_state.get("x", 2.4), bridge.robot_state.get("y", 0.3))
+                path, dist = bridge.graph.find_shortest_path(start_wp, goal_wp)
+                details = bridge.graph.get_route_details(path) if path else []
+                if path:
+                    bridge.ws_server.broadcast({
+                        "type": "route_plan",
+                        "start_wp": start_wp,
+                        "goal_wp": goal_wp,
+                        "path": path,
+                        "total_dist_m": dist,
+                        "details": details
+                    })
+                    bridge.active_route = path
+                    bridge.fsm_managed_goal = goal_wp
+                    first_wp = bridge.graph.waypoints.get(path[0])
+                    if first_wp:
+                        d_start = math.hypot(bridge.robot_state["x"] - first_wp.get("x", 0), bridge.robot_state["y"] - first_wp.get("y", 0))
+                        bridge.current_step = 1 if (d_start < 0.6 and len(path) > 1) else 0
+                    else:
+                        bridge.current_step = 0
+                    started_msg = String()
+                    started_msg.data = json.dumps({"event": "STARTED", "goal_wp": goal_wp, "path": path})
+                    bridge.route_status_pub.publish(started_msg)
+                    print(f"[FSM -> SequentialNavigator] Route {start_wp} -> {goal_wp} ({len(path)} wps, {dist:.2f}m)")
+                    bridge.dispatch_next_waypoint()
+                else:
+                    fail_msg = String()
+                    fail_msg.data = json.dumps({"event": "FAILED", "goal_wp": goal_wp})
+                    bridge.route_status_pub.publish(fail_msg)
 
         def auto_init_pose():
             if not bridge.has_pose:
@@ -747,10 +915,14 @@ def main():
         node.create_subscription(PoseWithCovarianceStamped, '/lsm_bot_1/amcl_pose', amcl_cb, amcl_qos)
         node.create_subscription(PoseWithCovarianceStamped, '/lsm_bot_1/amcl_pose', amcl_cb, 10)
 
-        node.create_subscription(Odometry, '/odom', odom_cb, odom_qos)
-        node.create_subscription(Odometry, '/lsm_bot_1/odom', odom_cb, odom_qos)
+        node.create_subscription(Odometry, '/odometry/filtered', filtered_odom_cb, odom_qos)
+        node.create_subscription(Odometry, '/odom', raw_odom_cb, odom_qos)
+        node.create_subscription(Odometry, '/lsm_bot_1/odom', raw_odom_cb, odom_qos)
+        node.create_subscription(String, '/fms/fsm_route_cmd', fsm_route_cmd_cb, 10)
+        if HAS_LSM_INTERFACES:
+            node.create_subscription(RobotStatus, '/lsm01/robot_status', robot_status_cb, 10)
 
-        print("[ROS2 Active] Listening to /amcl_pose (TRANSIENT_LOCAL), /odom and connected to Gazebo Nav2 /goal_pose...")
+        print("[ROS2 Active] Listening to /odometry/filtered (EKF), /amcl_pose, /lsm01/robot_status and connected to Nav2/FSM...")
         try:
             rclpy.spin(node)
         except KeyboardInterrupt:
