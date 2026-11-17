@@ -16,3 +16,4 @@ __pycache__/
 # Temporary logs & snapshots
 lsm_ws/pose_comparison_log.csv
 lsm_ws/pose_snapshots/
+lsm_ws/scenario_logs/
