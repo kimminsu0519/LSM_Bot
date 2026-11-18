@@ -3,17 +3,27 @@
 <package format="3">
   <name>lsm_navigation</name>
   <version>0.0.1</version>
-  <description>ROS 2 Navigation2 Bringup and Waypoints configuration for LSM Bot</description>
+  <description>ROS 2 C++17 &amp; Python Navigation2, EKF, Precision Docking, A* Route Planner, and 5-Stage Logistics FSM for LSM Bot</description>
   <maintainer email="kms@todo.todo">kms</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
+  <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
+  <depend>ament_index_cpp</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nav2_msgs</depend>
+  <depend>action_msgs</depend>
+  <depend>lsm_interfaces</depend>
+
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>nav2_msgs</exec_depend>
-  <exec_depend>action_msgs</exec_depend>
   <exec_depend>nav2_bringup</exec_depend>
   <exec_depend>nav2_amcl</exec_depend>
   <exec_depend>nav2_navfn_planner</exec_depend>
@@ -21,7 +31,6 @@
   <exec_depend>nav2_map_server</exec_depend>
   <exec_depend>robot_localization</exec_depend>
   <exec_depend>lsm_bot_description</exec_depend>
-  <exec_depend>lsm_interfaces</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

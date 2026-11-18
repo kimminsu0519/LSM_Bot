@@ -86,11 +86,29 @@ def generate_launch_description():
         ]
     )
 
-    # 1.6 5-Stage Logistics AMR Finite State Machine Node
+    # 1.6 5-Stage Logistics AMR Finite State Machine Node (C++17 rclcpp)
     fsm_node_cmd = Node(
         package='lsm_navigation',
         executable='amr_state_machine_node',
         name='amr_state_machine_node',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}]
+    )
+
+    # 1.7 50Hz Closed-Loop PID Precision Docking & 360° LiDAR Safety Supervisor Node (C++17 rclcpp)
+    docking_node_cmd = Node(
+        package='lsm_navigation',
+        executable='precision_docking_node',
+        name='precision_docking_node',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}]
+    )
+
+    # 1.8 206-Node Topological A* Route Planner Server Node (C++17 rclcpp)
+    route_planner_cpp_cmd = Node(
+        package='lsm_navigation',
+        executable='topological_route_planner_node',
+        name='topological_route_planner_node',
         output='screen',
         parameters=[{'use_sim_time': use_sim_time}]
     )
@@ -129,6 +147,8 @@ def generate_launch_description():
     ld.add_action(spawn_warehouse_cmd)
     ld.add_action(ekf_node_cmd)
     ld.add_action(fsm_node_cmd)
+    ld.add_action(docking_node_cmd)
+    ld.add_action(route_planner_cpp_cmd)
     ld.add_action(nav2_bringup_cmd)
     ld.add_action(rviz_cmd)
 

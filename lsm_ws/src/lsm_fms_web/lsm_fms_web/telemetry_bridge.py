@@ -681,6 +681,13 @@ class FMSBridgeTelemetryNode:
             self.robot_state["status"] = "IDLE"
             self.target_wp_id = None
             self.fsm_managed_goal = None
+            # Release Nav2 goal handle so C++ 50Hz PrecisionDockingSafetyNode has exclusive /cmd_vel control
+            if getattr(self, 'active_nav_goal_handle', None) is not None:
+                try:
+                    self.active_nav_goal_handle.cancel_goal_async()
+                except Exception:
+                    pass
+                self.active_nav_goal_handle = None
             self.ws_server.broadcast({
                 "type": "route_progress",
                 "active_route": getattr(self, 'active_route', []),
