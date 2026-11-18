@@ -227,22 +227,35 @@ class FMSBridgeTelemetryNode:
         self.has_pose = False
         self.last_filtered_odom_time = 0.0
         self.fsm_managed_goal = None
+        self.active_nav_goal_handle = None
 
-        # Parse map origin from lsm_warehouse_map.yaml if available
-        self.map_origin_x = 0.0
-        self.map_origin_y = 0.0
-        map_yaml = "/home/kms/dev/LSM_repository/lsm_ws/src/lsm_navigation/maps/lsm_warehouse_map.yaml"
-        if os.path.exists(map_yaml):
+        # Parse map origin from lsm_warehouse_map.yaml (ament_index first, relative repo fallback second)
+        self.map_origin_x = -2.4
+        self.map_origin_y = -0.3
+        module_dir = os.path.dirname(os.path.abspath(__file__))
+        ws_src_dir = os.path.abspath(os.path.join(module_dir, "..", ".."))
+        map_candidates = [
+            os.path.join(ws_src_dir, "lsm_navigation", "maps", "lsm_warehouse_map.yaml"),
+        ]
+        if HAS_ROS2:
             try:
-                import yaml
-                with open(map_yaml, 'r') as f_map:
-                    mdata = yaml.safe_load(f_map)
-                    if mdata and "origin" in mdata and len(mdata["origin"]) >= 2:
-                        self.map_origin_x = float(mdata["origin"][0])
-                        self.map_origin_y = float(mdata["origin"][1])
-                        print(f"[TelemetryBridge] Loaded Map Origin from YAML: [{self.map_origin_x}, {self.map_origin_y}]")
-            except Exception as e:
-                print(f"[TelemetryBridge] Map origin read note: {e}")
+                from ament_index_python.packages import get_package_share_directory
+                map_candidates.insert(0, os.path.join(get_package_share_directory('lsm_navigation'), 'maps', 'lsm_warehouse_map.yaml'))
+            except Exception:
+                pass
+        for map_yaml in map_candidates:
+            if os.path.exists(map_yaml):
+                try:
+                    import yaml
+                    with open(map_yaml, 'r', encoding='utf-8') as f_map:
+                        mdata = yaml.safe_load(f_map)
+                        if mdata and "origin" in mdata and len(mdata["origin"]) >= 2:
+                            self.map_origin_x = float(mdata["origin"][0])
+                            self.map_origin_y = float(mdata["origin"][1])
+                            print(f"[TelemetryBridge] Loaded Map Origin from YAML ({map_yaml}): [{self.map_origin_x}, {self.map_origin_y}]")
+                            break
+                except Exception as e:
+                    print(f"[TelemetryBridge] Map origin read note: {e}")
         self.robot_state = {
             "type": "telemetry",
             "robot_id": "lsm_bot_1",
@@ -358,8 +371,12 @@ class FMSBridgeTelemetryNode:
                 event_type = int(data.get("event_type", 2))
                 self.call_trigger_mock_event(station_id, event_type)
 
+            elif msg_type == "cancel_route":
+                self.cancel_active_route(reason="Cancelled from Web UI", send_nav2_cancel=True)
+
             elif msg_type == "save_pose_snapshot":
-                snap_dir = os.path.expanduser("~/dev/LSM_repository/lsm_ws/pose_snapshots")
+                ws_root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
+                snap_dir = os.path.join(ws_root, "pose_snapshots")
                 os.makedirs(snap_dir, exist_ok=True)
                 from datetime import datetime
                 ts_str = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -561,14 +578,40 @@ class FMSBridgeTelemetryNode:
                 self.goal_pub_bot.publish(pose_msg)
             print(f"[ROS2 Nav2 Bridge] Published ROS2 Map Goal Pose: x={goal_ros_x:.3f}, y={goal_ros_y:.3f} (World: {goal_world_x:.2f}, {goal_world_y:.2f}) to /goal_pose")
 
-            # 2. Action Client Dispatch (/navigate_to_pose)
+            # 2. Action Client Dispatch (/navigate_to_pose) with goal handle tracking & external cancel detection
             if HAS_NAV2_ACTION:
                 goal_msg = NavigateToPose.Goal()
                 goal_msg.pose = pose_msg
+                dispatched_wp_id = getattr(self, 'target_wp_id', None)
+
+                def _make_goal_response_cb(wp_id):
+                    def _on_goal_response(fut):
+                        try:
+                            gh = fut.result()
+                            if not gh or not gh.accepted:
+                                return
+                            self.active_nav_goal_handle = gh
+                            res_fut = gh.get_result_async()
+
+                            def _on_nav_result(rf):
+                                try:
+                                    wrap = rf.result()
+                                    # GoalStatus.STATUS_CANCELED == 5
+                                    if wrap and wrap.status == 5 and getattr(self, 'target_wp_id', None) == wp_id:
+                                        print(f"[SequentialNavigator] Nav2 goal '{wp_id}' canceled externally; halting active route.")
+                                        self.cancel_active_route(reason=f"Nav2 goal {wp_id} canceled", send_nav2_cancel=False)
+                                except Exception:
+                                    pass
+
+                            res_fut.add_done_callback(_on_nav_result)
+                        except Exception:
+                            pass
+                    return _on_goal_response
 
                 def send_action(client, action_name):
                     if client and client.wait_for_server(timeout_sec=0.2):
-                        client.send_goal_async(goal_msg)
+                        fut = client.send_goal_async(goal_msg)
+                        fut.add_done_callback(_make_goal_response_cb(dispatched_wp_id))
                         print(f"[ROS2 Action Bridge] Sent NavigateToPose goal to {action_name}")
                         return True
                     return False
@@ -579,6 +622,38 @@ class FMSBridgeTelemetryNode:
 
         except Exception as e:
             print(f"[ROS2 Nav2 Bridge] Failed to publish goal pose: {e}")
+
+    def cancel_active_route(self, reason="Route canceled", send_nav2_cancel=True):
+        canceled_goal = getattr(self, 'fsm_managed_goal', None) or getattr(self, 'target_wp_id', None) or ""
+        print(f"[SequentialNavigator] Cancelling active route ({reason}); goal='{canceled_goal}'")
+        self.active_route = []
+        self.current_step = 0
+        self.target_wp_id = None
+        self.fsm_managed_goal = None
+        self.robot_state["status"] = "IDLE"
+
+        if send_nav2_cancel and getattr(self, 'active_nav_goal_handle', None) is not None:
+            try:
+                self.active_nav_goal_handle.cancel_goal_async()
+            except Exception as e:
+                print(f"[SequentialNavigator] Nav2 cancel_goal_async note: {e}")
+        self.active_nav_goal_handle = None
+
+        self.ws_server.broadcast({
+            "type": "route_progress",
+            "active_route": [],
+            "current_step": 0,
+            "status": "CANCELLED",
+            "reason": reason,
+        })
+        if HAS_ROS2 and self.route_status_pub is not None:
+            status_msg = String()
+            status_msg.data = json.dumps({
+                "event": "CANCELLED",
+                "goal_wp": canceled_goal,
+                "reason": reason,
+            })
+            self.route_status_pub.publish(status_msg)
 
     def _broadcast_loop(self):
         while True:
@@ -702,9 +777,11 @@ def main():
     else:
         print(f"[ROS2 Environment] Using ROS_DOMAIN_ID={os.environ['ROS_DOMAIN_ID']}")
 
+    module_dir = os.path.dirname(os.path.abspath(__file__))
+    ws_src_dir = os.path.abspath(os.path.join(module_dir, "..", ".."))
     search_paths = [
-        "/home/kms/dev/LSM_repository/lsm_ws/src/lsm_navigation/config/waypoints_graph.yaml",
-        "/home/kms/dev/LSM_repository/lsm_ws/src/lsm_fms_web/web/config/waypoints_graph.yaml",
+        os.path.join(ws_src_dir, "lsm_navigation", "config", "waypoints_graph.yaml"),
+        os.path.join(ws_src_dir, "lsm_fms_web", "web", "config", "waypoints_graph.yaml"),
     ]
     if HAS_ROS2:
         try:
@@ -858,7 +935,11 @@ def main():
                 cmd = json.loads(msg.data)
             except Exception:
                 return
-            if cmd.get("command") == "navigate":
+            command = cmd.get("command")
+            if command == "cancel":
+                bridge.cancel_active_route(reason="Cancelled by FSM node", send_nav2_cancel=True)
+                return
+            if command == "navigate":
                 goal_wp = cmd.get("goal_wp")
                 if not goal_wp:
                     return

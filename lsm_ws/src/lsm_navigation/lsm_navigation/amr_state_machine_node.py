@@ -55,6 +55,9 @@ STATE_NAMES = {
     RobotStatus.STATE_WORKING_UNLOADING: "WORKING_UNLOADING",
 }
 
+MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+PKG_ROOT_FALLBACK = os.path.abspath(os.path.join(MODULE_DIR, ".."))
+
 
 class AMRStateMachineNode(Node):
     def __init__(self):
@@ -164,7 +167,7 @@ class AMRStateMachineNode(Node):
 
     def _load_map_origin(self):
         search_paths = [
-            "/home/kms/dev/LSM_repository/lsm_ws/src/lsm_navigation/maps/lsm_warehouse_map.yaml",
+            os.path.join(PKG_ROOT_FALLBACK, 'maps', 'lsm_warehouse_map.yaml'),
         ]
         try:
             search_paths.insert(0, os.path.join(get_package_share_directory('lsm_navigation'), 'maps', 'lsm_warehouse_map.yaml'))
@@ -183,7 +186,7 @@ class AMRStateMachineNode(Node):
 
     def _load_waypoints(self):
         search_paths = [
-            "/home/kms/dev/LSM_repository/lsm_ws/src/lsm_navigation/config/waypoints_graph.yaml",
+            os.path.join(PKG_ROOT_FALLBACK, 'config', 'waypoints_graph.yaml'),
         ]
         try:
             search_paths.insert(0, os.path.join(get_package_share_directory('lsm_navigation'), 'config', 'waypoints_graph.yaml'))
@@ -243,7 +246,6 @@ class AMRStateMachineNode(Node):
 
     def _odom_cb(self, msg: Odometry):
         self.linear_speed = float(msg.twist.twist.linear.x)
-        # Update pose via TF map->base_footprint when available
         try:
             if self.tf_buffer.can_transform('map', 'base_footprint', rclpy.time.Time()):
                 t = self.tf_buffer.lookup_transform('map', 'base_footprint', rclpy.time.Time())
@@ -267,7 +269,6 @@ class AMRStateMachineNode(Node):
         self.get_logger().info(f"[FSM TRANSITION] {old_name}({old_state}) -> {new_name}({new_state}) | {task_info} | {reason}")
 
     def _publish_robot_status(self):
-        # Update battery smoothly depending on state
         with self.state_lock:
             state = self.current_state
             task_id = self.current_task_id
@@ -307,7 +308,7 @@ class AMRStateMachineNode(Node):
             if not self.nav_target_wp or goal_wp == self.nav_target_wp:
                 self.nav_success = True
                 self.nav_done_event.set()
-        elif event == "FAILED":
+        elif event in ("FAILED", "CANCELLED"):
             if not self.nav_target_wp or goal_wp == self.nav_target_wp:
                 self.nav_success = False
                 self.nav_done_event.set()
@@ -354,6 +355,13 @@ class AMRStateMachineNode(Node):
         return response
 
     def _goal_callback(self, goal_request):
+        with self.state_lock:
+            busy = bool(self.current_task_id)
+        if busy:
+            self.get_logger().warn(
+                f"[DispatchTask] Rejecting concurrent goal '{goal_request.task_id}' while '{self.current_task_id}' is active"
+            )
+            return GoalResponse.REJECT
         self.get_logger().info(
             f"[DispatchTask] Received goal: task_id='{goal_request.task_id}', "
             f"type={goal_request.task_type}, target='{goal_request.target_station_id}'"
@@ -361,8 +369,18 @@ class AMRStateMachineNode(Node):
         return GoalResponse.ACCEPT
 
     def _cancel_callback(self, goal_handle):
-        self.get_logger().warn("[DispatchTask] Cancel requested")
+        self.get_logger().warn("[DispatchTask] Cancel requested; notifying SequentialNavigator")
+        self._send_route_cancel()
         return CancelResponse.ACCEPT
+
+    def _send_route_cancel(self, target_wp: str = ""):
+        cancel_msg = String()
+        cancel_msg.data = json.dumps({
+            "command": "cancel",
+            "task_id": self.current_task_id,
+            "goal_wp": target_wp or self.nav_target_wp,
+        })
+        self.route_cmd_pub.publish(cancel_msg)
 
     def _compute_distance_to_wp(self, wp_id: str) -> float:
         coords = self._get_wp_world_xy(wp_id)
@@ -398,7 +416,6 @@ class AMRStateMachineNode(Node):
         self.route_cmd_pub.publish(cmd_msg)
         self.get_logger().info(f"[FSM -> SequentialNavigator] Requested A* route to '{target_wp}'")
 
-        # Wait briefly for SequentialNavigator ack; if offline, fall back to direct Nav2 action
         if not self.nav_started_event.wait(timeout=2.5):
             self.get_logger().warn(f"SequentialNavigator did not ack within 2.5s; falling back to direct Nav2 for '{target_wp}'")
             return self._navigate_direct_nav2(goal_handle, target_wp)
@@ -406,9 +423,11 @@ class AMRStateMachineNode(Node):
         t0 = time.monotonic()
         while rclpy.ok() and not self.nav_done_event.is_set():
             if goal_handle.is_cancel_requested:
+                self._send_route_cancel(target_wp)
                 return False
             if time.monotonic() - t0 > self.nav_timeout_sec:
                 self.get_logger().error(f"Navigation to '{target_wp}' timed out after {self.nav_timeout_sec}s")
+                self._send_route_cancel(target_wp)
                 return False
             self._publish_feedback(goal_handle, target_wp)
             self.nav_done_event.wait(timeout=0.5)
@@ -465,7 +484,8 @@ class AMRStateMachineNode(Node):
     def _execute_dispatch_task(self, goal_handle):
         req = goal_handle.request
         start_time = time.monotonic()
-        self.current_task_id = req.task_id or f"TASK_{int(time.time())}"
+        with self.state_lock:
+            self.current_task_id = req.task_id or f"TASK_{int(time.time())}"
 
         result = DispatchTask.Result()
         raw_target = (req.target_station_id or "").strip()
@@ -513,7 +533,8 @@ class AMRStateMachineNode(Node):
                     raise RuntimeError(f"Failed returning to charger {return_wp}")
 
                 self._transition_state(RobotStatus.STATE_CHARGING, f"Docked at {return_wp}; cycle complete")
-                self.current_task_id = ""
+                with self.state_lock:
+                    self.current_task_id = ""
                 result.success = True
                 result.message = f"Full 5-stage E2E logistics mission completed ({pickup_wp} -> {delivery_wp} -> {return_wp})"
                 result.total_execution_time = float(round(time.monotonic() - start_time, 2))
@@ -543,13 +564,14 @@ class AMRStateMachineNode(Node):
                 if not self._navigate_to_waypoint(goal_handle, target_wp):
                     raise RuntimeError(f"Return home navigation failed for {target_wp}")
                 self._transition_state(RobotStatus.STATE_CHARGING, f"Docked at {target_wp}")
-                self.current_task_id = ""
                 result.message = f"Returned to {target_wp}; state=CHARGING"
             else:
                 raise ValueError(f"Unsupported task_type: {req.task_type}")
 
             result.success = True
             result.total_execution_time = float(round(time.monotonic() - start_time, 2))
+            with self.state_lock:
+                self.current_task_id = ""
             goal_handle.succeed()
             return result
 
@@ -562,7 +584,8 @@ class AMRStateMachineNode(Node):
             result.success = False
             result.message = str(exc)
             result.total_execution_time = float(round(time.monotonic() - start_time, 2))
-            self.current_task_id = ""
+            with self.state_lock:
+                self.current_task_id = ""
             return result
 
 

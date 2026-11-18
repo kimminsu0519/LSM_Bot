@@ -147,14 +147,23 @@ def main():
     parser.add_argument('--goal', type=str, default='wp-ws-a-1', help="Goal Waypoint ID")
     parser.add_argument('--yaml', type=str, default='', help="Path to waypoints_graph.yaml")
 
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
 
-    # Default YAML path if not specified
+    # Default YAML path if not specified (ament_index first, relative repo fallback second)
     if not args.yaml:
-        default_yaml = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../lsm_navigation/config/waypoints_graph.yaml'))
-        if not os.path.exists(default_yaml):
-            default_yaml = os.path.abspath(os.path.join(os.path.dirname(__file__), '../web/config/waypoints_graph.yaml'))
-        args.yaml = default_yaml
+        candidates = []
+        try:
+            from ament_index_python.packages import get_package_share_directory
+            candidates.append(os.path.join(get_package_share_directory('lsm_navigation'), 'config', 'waypoints_graph.yaml'))
+            candidates.append(os.path.join(get_package_share_directory('lsm_fms_web'), 'web', 'config', 'waypoints_graph.yaml'))
+        except Exception:
+            pass
+        candidates.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../lsm_navigation/config/waypoints_graph.yaml')))
+        candidates.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../web/config/waypoints_graph.yaml')))
+        for c in candidates:
+            if os.path.exists(c):
+                args.yaml = c
+                break
 
     print(f"=== LSM FMS Topological Route Server ===")
     print(f"Using Graph Data: {args.yaml}")
