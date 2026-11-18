@@ -18,12 +18,16 @@ def generate_launch_description():
     default_map_path = os.path.join(pkg_lsm_navigation, 'maps', 'lsm_warehouse_map.yaml')
     default_params_path = os.path.join(pkg_lsm_navigation, 'config', 'nav2_params.yaml')
     ekf_config_path = os.path.join(pkg_lsm_navigation, 'config', 'ekf.yaml')
+    custom_rviz_path = os.path.join(pkg_lsm_navigation, 'rviz', 'lsm_nav2_view.rviz')
+    default_rviz_path = custom_rviz_path if os.path.exists(custom_rviz_path) else os.path.join(pkg_nav2_bringup, 'rviz', 'nav2_default_view.rviz')
 
     # Launch Configurations
     map_yaml_file = LaunchConfiguration('map')
     params_file = LaunchConfiguration('params_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
+    slip_mode = LaunchConfiguration('slip_mode')
+    rviz_config = LaunchConfiguration('rviz_config')
 
     # Declare Arguments
     declare_map_yaml_cmd = DeclareLaunchArgument(
@@ -50,11 +54,24 @@ def generate_launch_description():
         description='Automatically startup the nav2 stack'
     )
 
+    declare_slip_mode_cmd = DeclareLaunchArgument(
+        'slip_mode',
+        default_value='false',
+        description='Enable asymmetric wheel-slip friction (wheel_left=0.35, wheel_right=0.28) for EKF benchmark'
+    )
+
+    declare_rviz_config_cmd = DeclareLaunchArgument(
+        'rviz_config',
+        default_value=default_rviz_path,
+        description='Full path to RViz2 configuration file'
+    )
+
     # 1. Include Gazebo World & Robot Spawn Launch
     spawn_warehouse_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_lsm_bot_description, 'launch', 'spawn_waffle_warehouse.launch.py')
-        )
+        ),
+        launch_arguments={'slip_mode': slip_mode}.items()
     )
 
     # 1.5 EKF Sensor Fusion Node (robot_localization: fuses /odom + /imu -> /odometry/filtered & odom->base_footprint TF)
@@ -91,13 +108,12 @@ def generate_launch_description():
         }.items()
     )
 
-    # 3. RViz2 Node with Nav2 Config
-    rviz_config_dir = os.path.join(pkg_nav2_bringup, 'rviz', 'nav2_default_view.rviz')
+    # 3. RViz2 Node with Warehouse Full-View Config
     rviz_cmd = Node(
         package='rviz2',
         executable='rviz2',
         name='rviz2',
-        arguments=['-d', rviz_config_dir],
+        arguments=['-d', rviz_config],
         parameters=[{'use_sim_time': use_sim_time}],
         output='screen'
     )
@@ -107,6 +123,8 @@ def generate_launch_description():
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_autostart_cmd)
+    ld.add_action(declare_slip_mode_cmd)
+    ld.add_action(declare_rviz_config_cmd)
 
     ld.add_action(spawn_warehouse_cmd)
     ld.add_action(ekf_node_cmd)

@@ -30,11 +30,12 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Install Launch & Config & Maps directories
+# Install Launch & Config & Maps & RViz directories
 install(DIRECTORY
   config
   launch
   maps
+  rviz
   DESTINATION share/${PROJECT_NAME}
 )
 

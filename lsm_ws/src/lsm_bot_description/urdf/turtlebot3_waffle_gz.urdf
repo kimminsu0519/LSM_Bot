@@ -210,17 +210,17 @@
     </plugin>
   </gazebo>
 
-  <!-- Wheel & Caster Friction Tuning (Induces physical slip under aggressive spin/accel) -->
+  <!-- Wheel & Caster Friction (Default: Symmetric normal warehouse traction mu=1.0; overridden when slip_mode:=true) -->
   <gazebo reference="wheel_left_link">
-    <mu1>0.35</mu1>
-    <mu2>0.35</mu2>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
     <kp>500000.0</kp>
     <kd>10.0</kd>
   </gazebo>
 
   <gazebo reference="wheel_right_link">
-    <mu1>0.28</mu1>
-    <mu2>0.28</mu2>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
     <kp>500000.0</kp>
     <kd>10.0</kd>
   </gazebo>
@@ -247,29 +247,30 @@
       <frame_id>imu_link</frame_id>
       <gz_frame_id>imu_link</gz_frame_id>
       <imu>
+        <!-- Realistic consumer MEMS 6-axis IMU gyro noise & turn-on bias (e.g., ICM-42688 / MPU-6050 class) -->
         <angular_velocity>
           <x>
             <noise type="gaussian">
               <mean>0.0</mean>
-              <stddev>2e-4</stddev>
-              <bias_mean>0.0000075</bias_mean>
-              <bias_stddev>0.0000008</bias_stddev>
+              <stddev>0.008</stddev>
+              <bias_mean>0.0012</bias_mean>
+              <bias_stddev>0.0002</bias_stddev>
             </noise>
           </x>
           <y>
             <noise type="gaussian">
               <mean>0.0</mean>
-              <stddev>2e-4</stddev>
-              <bias_mean>0.0000075</bias_mean>
-              <bias_stddev>0.0000008</bias_stddev>
+              <stddev>0.008</stddev>
+              <bias_mean>0.0012</bias_mean>
+              <bias_stddev>0.0002</bias_stddev>
             </noise>
           </y>
           <z>
             <noise type="gaussian">
               <mean>0.0</mean>
-              <stddev>2e-4</stddev>
-              <bias_mean>0.0000075</bias_mean>
-              <bias_stddev>0.0000008</bias_stddev>
+              <stddev>0.008</stddev>
+              <bias_mean>0.0012</bias_mean>
+              <bias_stddev>0.0002</bias_stddev>
             </noise>
           </z>
         </angular_velocity>
