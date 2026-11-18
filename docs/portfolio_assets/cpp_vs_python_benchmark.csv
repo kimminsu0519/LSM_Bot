@@ -1,0 +1,7 @@
+benchmark_metric,unit,python_mean,python_p99,python_max,cpp17_mean,cpp17_p99,cpp17_max,cpp17_speedup_or_improvement_x
+"206-Node A* Path Search (1,000 runs)",Latency (us),57.574,85.836,108.676,1.473,3.046,11.582,39.09
+"2D EKF Predict+Update Step (10,000 runs)",Latency (us),32.078,42.039,139.694,0.295,0.371,10.389,108.74
+"360-Pt LiDAR Safety Check (10,000 runs)",Latency (us),61.649,70.564,97.114,0.866,0.902,6.913,71.19
+50Hz ROS 2 Timer Callback Jitter (150 ticks),Jitter (us),63.593,192.997,212.165,12.109,49.289,69.378,5.25
+Node Process Memory Footprint (RSS),Memory (MB),97.09,97.09,97.09,27.63,27.63,27.63,3.51
+Workstation Docking Position Error (E2E),Position Error (cm),29.27,29.6,29.6,3.42,5.35,5.35,8.56
