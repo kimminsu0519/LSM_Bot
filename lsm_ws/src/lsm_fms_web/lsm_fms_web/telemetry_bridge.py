@@ -501,18 +501,18 @@ class FMSBridgeTelemetryNode:
         if not target_wp:
             return
         try:
-            ros_pose = target_wp.get('pose', {})
-            pos = ros_pose.get('position', {}) if isinstance(ros_pose, dict) else {}
-            ori = ros_pose.get('orientation', {}) if isinstance(ros_pose, dict) else {}
+            world_x = float(target_wp.get('x', 2.4))
+            world_y = float(target_wp.get('y', 0.3))
+            yaw_rad = math.radians(float(target_wp.get('yaw_deg', 180.0)))
 
             msg = PoseWithCovarianceStamped()
             msg.header.frame_id = 'map'
             msg.header.stamp = self.ros_node.get_clock().now().to_msg()
-            msg.pose.pose.position.x = float(pos.get('x', -0.052))
-            msg.pose.pose.position.y = float(pos.get('y', -0.258))
+            msg.pose.pose.position.x = world_x + getattr(self, 'map_origin_x', -2.4)
+            msg.pose.pose.position.y = world_y + getattr(self, 'map_origin_y', -0.3)
             msg.pose.pose.position.z = 0.0
-            msg.pose.pose.orientation.z = float(ori.get('qz', 0.0))
-            msg.pose.pose.orientation.w = float(ori.get('qw', 1.0))
+            msg.pose.pose.orientation.z = math.sin(yaw_rad / 2.0)
+            msg.pose.pose.orientation.w = math.cos(yaw_rad / 2.0)
             msg.pose.covariance[0] = 0.05
             msg.pose.covariance[7] = 0.05
             msg.pose.covariance[35] = 0.05
@@ -521,9 +521,9 @@ class FMSBridgeTelemetryNode:
                 self.initial_pose_pub.publish(msg)
             if self.initial_pose_pub_bot:
                 self.initial_pose_pub_bot.publish(msg)
-            print(f"[ROS2 AMCL Bridge] Reset Initial Pose to {wp_id}: ({msg.pose.pose.position.x}, {msg.pose.pose.position.y})")
+            print(f"[ROS2 AMCL Bridge] Reset Initial Pose to {wp_id}: map=({msg.pose.pose.position.x:.3f}, {msg.pose.pose.position.y:.3f}) world=({world_x:.2f}, {world_y:.2f})", flush=True)
         except Exception as e:
-            print(f"[ROS2 AMCL Bridge] Failed to set initial pose: {e}")
+            print(f"[ROS2 AMCL Bridge] Failed to set initial pose: {e}", flush=True)
 
     def find_nearest_waypoint(self, rx, ry):
         closest_id = "wp-charge-1"
@@ -778,11 +778,7 @@ class FMSBridgeTelemetryNode:
             self.robot_state["gz_yaw"] = round(gz_yaw, 1)
 
 def main():
-    if "ROS_DOMAIN_ID" not in os.environ:
-        os.environ["ROS_DOMAIN_ID"] = "13"
-        print("[ROS2 Environment] Set default ROS_DOMAIN_ID=13")
-    else:
-        print(f"[ROS2 Environment] Using ROS_DOMAIN_ID={os.environ['ROS_DOMAIN_ID']}")
+    print(f"[ROS2 Environment] Using ROS_DOMAIN_ID={os.environ.get('ROS_DOMAIN_ID', '0 (default)')}", flush=True)
 
     module_dir = os.path.dirname(os.path.abspath(__file__))
     ws_src_dir = os.path.abspath(os.path.join(module_dir, "..", ".."))
@@ -986,8 +982,9 @@ def main():
                 p = PoseWithCovarianceStamped()
                 p.header.frame_id = 'map'
                 p.header.stamp = Time().to_msg()
-                p.pose.pose.position.x = 2.4
-                p.pose.pose.position.y = 0.3
+                # wp-charge-1 is at World (2.4, 0.3); with map_origin=(-2.4, -0.3), Map frame is (0.0, 0.0)
+                p.pose.pose.position.x = 2.4 + getattr(bridge, 'map_origin_x', -2.4)
+                p.pose.pose.position.y = 0.3 + getattr(bridge, 'map_origin_y', -0.3)
                 # Match Gazebo spawn heading: 180 deg (facing West) -> z=1.0, w=0.0
                 p.pose.pose.orientation.z = 1.0
                 p.pose.pose.orientation.w = 0.0
