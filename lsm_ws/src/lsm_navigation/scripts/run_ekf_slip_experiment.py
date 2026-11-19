@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """
-LSM Bot EKF Wheel-Slip 3-Way Ablation Benchmark & Quantitative Comparison Script
+LSM Bot EKF Wheel-Slip 4-Way Ablation Benchmark & Quantitative Comparison Script
 Package: lsm_navigation
 
-Drives LSM01_Waffle through an aggressive slip-inducing maneuver (1.82 rad/s spin,
-rapid reversals, S-curve slalom, and straight dash) under slip_mode:=true while
-synchronously logging:
+Drives LSM01_Waffle through an aggressive forward-progressing slip-inducing maneuver
+(1.82 rad/s spin reversals, S-curve slalom, J-turn Eastward realignment, and forward
+straight dash) under slip_mode:=true while synchronously logging:
   0. Gazebo Harmonic Ground Truth Pose (/ground_truth_poses -> LSM01_Waffle)
   1. Case A: Raw Differential-Drive Wheel Odometry (/odom)
-  2. Case B (Main): EKF 6-Axis Gyro-Rate (/odometry/filtered: Wheel vx + 100Hz Noisy Gyro vyaw & ax, yaw=false)
-  3. Case C (Ablation Ref): EKF 9-Axis Ideal AHRS (/odometry/filtered_ahrs: yaw=true with simulator orientation)
+  2. Case B1 (Main): EKF 6-Axis Gyro+Accel (/odometry/filtered: Wheel vx + 100Hz Noisy Gyro vyaw & ax=true, yaw=false)
+  3. Case B2 (Ablation): EKF 6-Axis Gyro-Only (/odometry/filtered_no_ax: Wheel vx + 100Hz Noisy Gyro vyaw, ax=false, yaw=false)
+  4. Case C (Ablation Ref): EKF 9-Axis Ideal AHRS (/odometry/filtered_ahrs: yaw=true with simulator orientation)
 
 Outputs:
   - <repo_root>/docs/portfolio_assets/ekf_comparison.csv
-  - <repo_root>/docs/portfolio_assets/ekf_comparison_plot.png (300 DPI)
+  - <repo_root>/docs/portfolio_assets/lsm_04_ekf_plot_v2.png (300 DPI)
   - <repo_root>/docs/portfolio_assets/04_ekf_comparison_plot.png (300 DPI)
+  - <repo_root>/docs/portfolio_assets/ekf_comparison_plot.png (300 DPI)
 """
 
 import os
@@ -45,13 +47,13 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", "..", ".."))
 
 
-def resolve_ahrs_config_path() -> str:
+def resolve_config_path(filename: str) -> str:
     candidates = []
     try:
-        candidates.append(os.path.join(get_package_share_directory('lsm_navigation'), 'config', 'ekf_ahrs_ref.yaml'))
+        candidates.append(os.path.join(get_package_share_directory('lsm_navigation'), 'config', filename))
     except Exception:
         pass
-    candidates.append(os.path.abspath(os.path.join(SCRIPT_DIR, "..", "config", "ekf_ahrs_ref.yaml")))
+    candidates.append(os.path.abspath(os.path.join(SCRIPT_DIR, "..", "config", filename)))
     for c in candidates:
         if os.path.exists(c):
             return c
@@ -89,7 +91,8 @@ class EKFSlipExperimentNode(Node):
         self.lock = threading.Lock()
         self.gt_pose = None       # (x, y, yaw_rad)
         self.raw_pose = None      # Case A: /odom
-        self.ekf_pose = None      # Case B (Main): /odometry/filtered (yaw=false, Gyro-Rate)
+        self.ekf_pose = None      # Case B1 (Main): /odometry/filtered (yaw=false, vyaw=true, ax=true)
+        self.noax_pose = None     # Case B2 (Ablation): /odometry/filtered_no_ax (yaw=false, vyaw=true, ax=false)
         self.ahrs_pose = None     # Case C (Ablation Ref): /odometry/filtered_ahrs (yaw=true)
 
         qos = QoSProfile(
@@ -103,6 +106,7 @@ class EKFSlipExperimentNode(Node):
         self.create_subscription(TFMessage, '/ground_truth_poses', self._gt_cb, qos)
         self.create_subscription(Odometry, '/odom', self._raw_odom_cb, qos)
         self.create_subscription(Odometry, '/odometry/filtered', self._ekf_odom_cb, qos)
+        self.create_subscription(Odometry, '/odometry/filtered_no_ax', self._noax_odom_cb, qos)
         self.create_subscription(Odometry, '/odometry/filtered_ahrs', self._ahrs_odom_cb, qos)
 
     def _gt_cb(self, msg: TFMessage):
@@ -113,7 +117,6 @@ class EKFSlipExperimentNode(Node):
                 with self.lock:
                     self.gt_pose = (float(t.x), float(t.y), quat_to_yaw(r))
                 return
-        # ros_gz_bridge Pose_V -> TFMessage leaves child_frame_id empty; index 0 is the dynamic model (LSM01_Waffle)
         if msg.transforms and msg.transforms[0].child_frame_id == '':
             tf = msg.transforms[0]
             t = tf.transform.translation
@@ -133,6 +136,12 @@ class EKFSlipExperimentNode(Node):
         with self.lock:
             self.ekf_pose = (float(p.x), float(p.y), quat_to_yaw(q))
 
+    def _noax_odom_cb(self, msg: Odometry):
+        p = msg.pose.pose.position
+        q = msg.pose.pose.orientation
+        with self.lock:
+            self.noax_pose = (float(p.x), float(p.y), quat_to_yaw(q))
+
     def _ahrs_odom_cb(self, msg: Odometry):
         p = msg.pose.pose.position
         q = msg.pose.pose.orientation
@@ -141,7 +150,7 @@ class EKFSlipExperimentNode(Node):
 
     def get_snapshot(self):
         with self.lock:
-            return self.gt_pose, self.raw_pose, self.ekf_pose, self.ahrs_pose
+            return self.gt_pose, self.raw_pose, self.ekf_pose, self.noax_pose, self.ahrs_pose
 
     def send_cmd(self, v: float, w: float):
         msg = Twist()
@@ -172,6 +181,7 @@ def generate_plot_and_metrics(csv_path: str, out_plot_paths: list):
     if len(data) < 10:
         raise RuntimeError(f"Insufficient samples in {csv_path}: {len(data)}")
 
+    has_noax = 'noax_pos_err_m' in data[0]
     has_ahrs = 'ahrs_pos_err_m' in data[0]
 
     t = np.array([r['time_s'] for r in data])
@@ -191,6 +201,8 @@ def generate_plot_and_metrics(csv_path: str, out_plot_paths: list):
     ekf_xy_rmse = float(np.sqrt(np.mean(ekf_pos_err ** 2)))
     raw_xy_max = float(np.max(raw_pos_err))
     ekf_xy_max = float(np.max(ekf_pos_err))
+    raw_xy_final = float(raw_pos_err[-1])
+    ekf_xy_final = float(ekf_pos_err[-1])
 
     raw_yaw_rmse = float(np.sqrt(np.mean(raw_yaw_err ** 2)))
     ekf_yaw_rmse = float(np.sqrt(np.mean(ekf_yaw_err ** 2)))
@@ -204,6 +216,23 @@ def generate_plot_and_metrics(csv_path: str, out_plot_paths: list):
     yaw_rmse_imp = (1.0 - ekf_yaw_rmse / max(raw_yaw_rmse, 1e-6)) * 100.0
     yaw_max_imp = (1.0 - ekf_yaw_max / max(raw_yaw_max, 1e-6)) * 100.0
 
+    if has_noax:
+        noax_x = np.array([r['noax_x'] for r in data])
+        noax_y = np.array([r['noax_y'] for r in data])
+        noax_pos_err = np.array([r['noax_pos_err_m'] for r in data])
+        noax_yaw_err = np.abs(np.array([r['noax_yaw_err_deg'] for r in data]))
+        noax_xy_rmse = float(np.sqrt(np.mean(noax_pos_err ** 2)))
+        noax_xy_max = float(np.max(noax_pos_err))
+        noax_xy_final = float(noax_pos_err[-1])
+        noax_yaw_rmse = float(np.sqrt(np.mean(noax_yaw_err ** 2)))
+        noax_yaw_max = float(np.max(noax_yaw_err))
+        noax_yaw_final = float(noax_yaw_err[-1])
+        noax_xy_rmse_imp = (1.0 - noax_xy_rmse / max(raw_xy_rmse, 1e-6)) * 100.0
+        noax_yaw_rmse_imp = (1.0 - noax_yaw_rmse / max(raw_yaw_rmse, 1e-6)) * 100.0
+    else:
+        noax_xy_rmse = noax_xy_max = noax_xy_final = noax_yaw_rmse = noax_yaw_max = noax_yaw_final = 0.0
+        noax_xy_rmse_imp = noax_yaw_rmse_imp = 0.0
+
     if has_ahrs:
         ahrs_x = np.array([r['ahrs_x'] for r in data])
         ahrs_y = np.array([r['ahrs_y'] for r in data])
@@ -211,13 +240,14 @@ def generate_plot_and_metrics(csv_path: str, out_plot_paths: list):
         ahrs_yaw_err = np.abs(np.array([r['ahrs_yaw_err_deg'] for r in data]))
         ahrs_xy_rmse = float(np.sqrt(np.mean(ahrs_pos_err ** 2)))
         ahrs_xy_max = float(np.max(ahrs_pos_err))
+        ahrs_xy_final = float(ahrs_pos_err[-1])
         ahrs_yaw_rmse = float(np.sqrt(np.mean(ahrs_yaw_err ** 2)))
         ahrs_yaw_max = float(np.max(ahrs_yaw_err))
         ahrs_yaw_final = float(ahrs_yaw_err[-1])
         ahrs_xy_rmse_imp = (1.0 - ahrs_xy_rmse / max(raw_xy_rmse, 1e-6)) * 100.0
         ahrs_yaw_rmse_imp = (1.0 - ahrs_yaw_rmse / max(raw_yaw_rmse, 1e-6)) * 100.0
     else:
-        ahrs_xy_rmse = ahrs_xy_max = ahrs_yaw_rmse = ahrs_yaw_max = ahrs_yaw_final = 0.0
+        ahrs_xy_rmse = ahrs_xy_max = ahrs_xy_final = ahrs_yaw_rmse = ahrs_yaw_max = ahrs_yaw_final = 0.0
         ahrs_xy_rmse_imp = ahrs_yaw_rmse_imp = 0.0
 
     metrics = {
@@ -229,6 +259,8 @@ def generate_plot_and_metrics(csv_path: str, out_plot_paths: list):
         "raw_xy_max_m": raw_xy_max,
         "ekf_xy_max_m": ekf_xy_max,
         "xy_max_improvement_pct": xy_max_imp,
+        "raw_xy_final_m": raw_xy_final,
+        "ekf_xy_final_m": ekf_xy_final,
         "raw_yaw_rmse_deg": raw_yaw_rmse,
         "ekf_yaw_rmse_deg": ekf_yaw_rmse,
         "yaw_rmse_improvement_pct": yaw_rmse_imp,
@@ -237,19 +269,28 @@ def generate_plot_and_metrics(csv_path: str, out_plot_paths: list):
         "yaw_max_improvement_pct": yaw_max_imp,
         "raw_yaw_final_deg": raw_yaw_final,
         "ekf_yaw_final_deg": ekf_yaw_final,
+        "noax_xy_rmse_m": noax_xy_rmse,
+        "noax_xy_max_m": noax_xy_max,
+        "noax_xy_final_m": noax_xy_final,
+        "noax_yaw_rmse_deg": noax_yaw_rmse,
+        "noax_yaw_max_deg": noax_yaw_max,
+        "noax_yaw_final_deg": noax_yaw_final,
         "ahrs_xy_rmse_m": ahrs_xy_rmse,
         "ahrs_xy_max_m": ahrs_xy_max,
+        "ahrs_xy_final_m": ahrs_xy_final,
         "ahrs_yaw_rmse_deg": ahrs_yaw_rmse,
         "ahrs_yaw_max_deg": ahrs_yaw_max,
         "ahrs_yaw_final_deg": ahrs_yaw_final,
     }
 
-    print("\n================ EKF WHEEL-SLIP 3-WAY ABLATION RESULTS ================")
+    print("\n================ EKF WHEEL-SLIP 4-WAY ABLATION RESULTS ================")
     print(f"Samples: {metrics['samples']} | Sim Duration: {metrics['duration_s']:.2f} s")
-    print(f"[Case A] Raw /odom           : XY RMSE={raw_xy_rmse:.4f} m (Max={raw_xy_max:.4f} m) | Yaw RMSE={raw_yaw_rmse:.3f} deg (Max={raw_yaw_max:.3f} deg, Final={raw_yaw_final:.3f} deg)")
-    print(f"[Case B] EKF Gyro (yaw=false): XY RMSE={ekf_xy_rmse:.4f} m ({xy_rmse_imp:+.1f}%, Max={ekf_xy_max:.4f} m, {xy_max_imp:+.1f}%) | Yaw RMSE={ekf_yaw_rmse:.3f} deg ({yaw_rmse_imp:+.1f}%, Max={ekf_yaw_max:.3f} deg, {yaw_max_imp:+.1f}%, Final={ekf_yaw_final:.3f} deg)")
+    print(f"[Case A ] Raw /odom                  : XY RMSE={raw_xy_rmse:.4f} m (Max={raw_xy_max:.4f} m, Final={raw_xy_final:.4f} m) | Yaw RMSE={raw_yaw_rmse:.3f} deg (Max={raw_yaw_max:.3f} deg, Final={raw_yaw_final:.3f} deg)")
+    print(f"[Case B1] EKF Gyro+Accel (ax=true)   : XY RMSE={ekf_xy_rmse:.4f} m ({xy_rmse_imp:+.1f}%, Max={ekf_xy_max:.4f} m, Final={ekf_xy_final:.4f} m) | Yaw RMSE={ekf_yaw_rmse:.3f} deg ({yaw_rmse_imp:+.1f}%, Max={ekf_yaw_max:.3f} deg, Final={ekf_yaw_final:.3f} deg)")
+    if has_noax:
+        print(f"[Case B2] EKF Gyro-Only  (ax=false)  : XY RMSE={noax_xy_rmse:.4f} m ({noax_xy_rmse_imp:+.1f}%, Max={noax_xy_max:.4f} m, Final={noax_xy_final:.4f} m) | Yaw RMSE={noax_yaw_rmse:.3f} deg ({noax_yaw_rmse_imp:+.1f}%, Max={noax_yaw_max:.3f} deg, Final={noax_yaw_final:.3f} deg)")
     if has_ahrs:
-        print(f"[Case C] EKF AHRS (yaw=true) : XY RMSE={ahrs_xy_rmse:.4f} m ({ahrs_xy_rmse_imp:+.1f}%, Max={ahrs_xy_max:.4f} m) | Yaw RMSE={ahrs_yaw_rmse:.3f} deg ({ahrs_yaw_rmse_imp:+.1f}%, Max={ahrs_yaw_max:.3f} deg, Final={ahrs_yaw_final:.3f} deg)")
+        print(f"[Case C ] EKF Ideal AHRS (yaw=true)  : XY RMSE={ahrs_xy_rmse:.4f} m ({ahrs_xy_rmse_imp:+.1f}%, Max={ahrs_xy_max:.4f} m, Final={ahrs_xy_final:.4f} m) | Yaw RMSE={ahrs_yaw_rmse:.3f} deg ({ahrs_yaw_rmse_imp:+.1f}%, Max={ahrs_yaw_max:.3f} deg, Final={ahrs_yaw_final:.3f} deg)")
     print("=======================================================================\n")
 
     plt.rcParams.update({
@@ -259,76 +300,85 @@ def generate_plot_and_metrics(csv_path: str, out_plot_paths: list):
         'axes.linewidth': 1.0,
     })
 
-    fig = plt.figure(figsize=(15.0, 7.0), dpi=300)
+    fig = plt.figure(figsize=(15.5, 7.2), dpi=300)
     fig.patch.set_facecolor('#FFFFFF')
-    gs = fig.add_gridspec(2, 2, width_ratios=[1.18, 1.0], hspace=0.36, wspace=0.24)
+    gs = fig.add_gridspec(2, 2, width_ratios=[1.20, 1.0], hspace=0.36, wspace=0.23)
 
     ax_traj = fig.add_subplot(gs[:, 0])
     ax_pos = fig.add_subplot(gs[0, 1])
     ax_yaw = fig.add_subplot(gs[1, 1])
 
     # 1. 2D XY Trajectory Comparison
-    ax_traj.plot(gt_x, gt_y, color='#0F172A', linewidth=2.5, label='Gazebo Ground Truth', zorder=3)
-    ax_traj.plot(raw_x, raw_y, color='#DC2626', linestyle='--', linewidth=1.9, alpha=0.9, label='Case A: Raw Wheel Odom (/odom)', zorder=2)
-    ax_traj.plot(ekf_x, ekf_y, color='#0284C7', linewidth=2.2, alpha=0.95, label='Case B (Main): EKF Gyro-Rate (yaw=false, vyaw+ax)', zorder=5)
+    ax_traj.plot(gt_x, gt_y, color='#0F172A', linewidth=2.6, label='Gazebo Ground Truth', zorder=3)
+    ax_traj.plot(raw_x, raw_y, color='#DC2626', linestyle='--', linewidth=2.0, alpha=0.92, label='Case A: Raw Wheel Odom (/odom)', zorder=2)
+    ax_traj.plot(ekf_x, ekf_y, color='#0284C7', linewidth=2.3, alpha=0.96, label='Case B1 (Main): EKF Gyro+Accel (yaw=false, vyaw+ax)', zorder=6)
+    if has_noax:
+        ax_traj.plot(noax_x, noax_y, color='#7C3AED', linestyle=':', linewidth=2.0, alpha=0.90, label='Case B2 (Ablation): EKF Gyro-Only (yaw=false, ax=false)', zorder=5)
     if has_ahrs:
         ax_traj.plot(ahrs_x, ahrs_y, color='#10B981', linestyle='-.', linewidth=1.6, alpha=0.85, label='Case C (Ref): EKF Ideal AHRS (yaw=true)', zorder=4)
 
-    ax_traj.scatter([gt_x[0]], [gt_y[0]], color='#16A34A', s=80, marker='o', edgecolors='white', linewidths=1.5, zorder=6, label='Start (0, 0)')
-    ax_traj.scatter([gt_x[-1]], [gt_y[-1]], color='#0F172A', s=80, marker='X', zorder=6, label='GT End')
-    ax_traj.scatter([raw_x[-1]], [raw_y[-1]], color='#DC2626', s=70, marker='^', zorder=6)
-    ax_traj.scatter([ekf_x[-1]], [ekf_y[-1]], color='#0284C7', s=70, marker='s', zorder=6)
+    ax_traj.scatter([gt_x[0]], [gt_y[0]], color='#16A34A', s=85, marker='o', edgecolors='white', linewidths=1.5, zorder=7, label='Start (0, 0)')
+    ax_traj.scatter([gt_x[-1]], [gt_y[-1]], color='#0F172A', s=85, marker='X', zorder=7, label=f'GT End ({gt_x[-1]:.2f}, {gt_y[-1]:.2f})')
+    ax_traj.scatter([raw_x[-1]], [raw_y[-1]], color='#DC2626', s=75, marker='^', zorder=7, label=f'Raw End ({raw_x[-1]:.2f}, {raw_y[-1]:.2f})')
+    ax_traj.scatter([ekf_x[-1]], [ekf_y[-1]], color='#0284C7', s=75, marker='s', zorder=7, label=f'EKF End ({ekf_x[-1]:.2f}, {ekf_y[-1]:.2f})')
 
-    ax_traj.set_title('2D XY Trajectory under Wheel-Slip & High-Rate Turns', fontsize=12, fontweight='bold', pad=10, color='#0F172A')
-    ax_traj.set_xlabel('Local X Displacement (m)', fontweight='bold')
-    ax_traj.set_ylabel('Local Y Displacement (m)', fontweight='bold')
+    ax_traj.set_title('2D XY Forward Trajectory under Wheel-Slip (S-Curve + J-Turn + Straight Dash)', fontsize=11.8, fontweight='bold', pad=10, color='#0F172A')
+    ax_traj.set_xlabel('Local X Displacement Along East-West Aisle (m)', fontweight='bold')
+    ax_traj.set_ylabel('Local Y Lateral Displacement (m)', fontweight='bold')
     ax_traj.grid(True, linestyle=':', alpha=0.6, color='#94A3B8')
     ax_traj.axis('equal')
-    ax_traj.legend(loc='upper left', frameon=True, facecolor='#F8FAFC', edgecolor='#CBD5E1', fontsize=8.4)
+    ax_traj.legend(loc='upper left', frameon=True, facecolor='#F8FAFC', edgecolor='#CBD5E1', fontsize=8.0)
 
+    noax_line = f"Case B2 (ax=false) XY RMSE: {noax_xy_rmse:.3f} m | Yaw: {noax_yaw_rmse:.2f}°\n" if has_noax else ""
     summary_text = (
-        f"Case A (Raw) vs. Case B (Main Gyro-Rate EKF)\n"
-        f"────────────────────────────────────────────\n"
+        f"Case A (Raw) vs. Case B1 (Main Gyro+Accel EKF)\n"
+        f"──────────────────────────────────────────────\n"
         f"XY RMSE     : {raw_xy_rmse:.3f} m -> {ekf_xy_rmse:.3f} m ({xy_rmse_imp:+.1f}%)\n"
         f"XY Max Err  : {raw_xy_max:.3f} m -> {ekf_xy_max:.3f} m ({xy_max_imp:+.1f}%)\n"
         f"Yaw RMSE    : {raw_yaw_rmse:.2f}° -> {ekf_yaw_rmse:.2f}° ({yaw_rmse_imp:+.1f}%)\n"
+        f"{noax_line}"
         f"Final Drift : {raw_yaw_final:.2f}° -> {ekf_yaw_final:.2f}° (No GT snap)"
     )
     ax_traj.text(
-        0.025, 0.03, summary_text,
+        0.975, 0.025, summary_text,
         transform=ax_traj.transAxes,
-        fontsize=8.4,
+        fontsize=8.2,
         family='DejaVu Sans Mono',
         verticalalignment='bottom',
+        horizontalalignment='right',
         bbox=dict(boxstyle='round,pad=0.55', facecolor='#F8FAFC', edgecolor='#0284C7', linewidth=1.2, alpha=0.95)
     )
 
     # 2. Euclidean XY Position Error over Time
-    ax_pos.plot(t, raw_pos_err, color='#DC2626', linestyle='--', linewidth=1.8, label=f'Case A: Raw /odom (RMSE: {raw_xy_rmse:.3f} m)')
-    ax_pos.plot(t, ekf_pos_err, color='#0284C7', linewidth=2.1, label=f'Case B: EKF Gyro yaw=false (RMSE: {ekf_xy_rmse:.3f} m)')
+    ax_pos.plot(t, raw_pos_err, color='#DC2626', linestyle='--', linewidth=1.8, label=f'Case A: Raw /odom (RMSE: {raw_xy_rmse:.3f} m, Max: {raw_xy_max:.3f} m)')
+    ax_pos.plot(t, ekf_pos_err, color='#0284C7', linewidth=2.2, label=f'Case B1: EKF ax=true (RMSE: {ekf_xy_rmse:.3f} m, Max: {ekf_xy_max:.3f} m)')
+    if has_noax:
+        ax_pos.plot(t, noax_pos_err, color='#7C3AED', linestyle=':', linewidth=1.9, label=f'Case B2: EKF ax=false (RMSE: {noax_xy_rmse:.3f} m, Max: {noax_xy_max:.3f} m)')
     if has_ahrs:
-        ax_pos.plot(t, ahrs_pos_err, color='#10B981', linestyle='-.', linewidth=1.5, alpha=0.85, label=f'Case C: EKF AHRS yaw=true (RMSE: {ahrs_xy_rmse:.3f} m)')
+        ax_pos.plot(t, ahrs_pos_err, color='#10B981', linestyle='-.', linewidth=1.5, alpha=0.85, label=f'Case C: EKF yaw=true (RMSE: {ahrs_xy_rmse:.3f} m)')
     ax_pos.fill_between(t, ekf_pos_err, raw_pos_err, where=(raw_pos_err >= ekf_pos_err), color='#0284C7', alpha=0.10)
-    ax_pos.set_title('Euclidean XY Position Error vs. Ground Truth', fontsize=11, fontweight='bold', pad=8, color='#0F172A')
+    ax_pos.set_title('Euclidean XY Position Error vs. Ground Truth (Monotonic Divergence)', fontsize=10.8, fontweight='bold', pad=8, color='#0F172A')
     ax_pos.set_ylabel('Position Error (m)', fontweight='bold')
     ax_pos.grid(True, linestyle=':', alpha=0.6, color='#94A3B8')
-    ax_pos.legend(loc='upper left', frameon=True, facecolor='#F8FAFC', edgecolor='#CBD5E1', fontsize=8.2)
+    ax_pos.legend(loc='upper left', frameon=True, facecolor='#F8FAFC', edgecolor='#CBD5E1', fontsize=7.9)
 
     # 3. Absolute Heading (Yaw) Error over Time
     ax_yaw.plot(t, raw_yaw_err, color='#DC2626', linestyle='--', linewidth=1.8, label=f'Case A: Raw /odom (RMSE: {raw_yaw_rmse:.2f}°, Final: {raw_yaw_final:.2f}°)')
-    ax_yaw.plot(t, ekf_yaw_err, color='#0284C7', linewidth=2.1, label=f'Case B: EKF Gyro yaw=false (RMSE: {ekf_yaw_rmse:.2f}°, Final: {ekf_yaw_final:.2f}°)')
+    ax_yaw.plot(t, ekf_yaw_err, color='#0284C7', linewidth=2.2, label=f'Case B1: EKF ax=true (RMSE: {ekf_yaw_rmse:.2f}°, Final: {ekf_yaw_final:.2f}°)')
+    if has_noax:
+        ax_yaw.plot(t, noax_yaw_err, color='#7C3AED', linestyle=':', linewidth=1.9, label=f'Case B2: EKF ax=false (RMSE: {noax_yaw_rmse:.2f}°, Final: {noax_yaw_final:.2f}°)')
     if has_ahrs:
-        ax_yaw.plot(t, ahrs_yaw_err, color='#10B981', linestyle='-.', linewidth=1.5, alpha=0.85, label=f'Case C: EKF AHRS yaw=true (RMSE: {ahrs_yaw_rmse:.2f}°, Final: {ahrs_yaw_final:.2f}°)')
+        ax_yaw.plot(t, ahrs_yaw_err, color='#10B981', linestyle='-.', linewidth=1.5, alpha=0.85, label=f'Case C: EKF yaw=true (RMSE: {ahrs_yaw_rmse:.2f}°, Final: {ahrs_yaw_final:.2f}°)')
     ax_yaw.fill_between(t, ekf_yaw_err, raw_yaw_err, where=(raw_yaw_err >= ekf_yaw_err), color='#059669', alpha=0.10)
-    ax_yaw.set_title('Absolute Heading (Yaw) Drift Error over Time (Ablation)', fontsize=11, fontweight='bold', pad=8, color='#0F172A')
+    ax_yaw.set_title('Absolute Heading (Yaw) Drift Error over Time (4-Way Ablation)', fontsize=10.8, fontweight='bold', pad=8, color='#0F172A')
     ax_yaw.set_xlabel('Elapsed Simulation Time (s)', fontweight='bold')
     ax_yaw.set_ylabel('Yaw Error (deg)', fontweight='bold')
     ax_yaw.grid(True, linestyle=':', alpha=0.6, color='#94A3B8')
-    ax_yaw.legend(loc='upper left', frameon=True, facecolor='#F8FAFC', edgecolor='#CBD5E1', fontsize=8.2)
+    ax_yaw.legend(loc='upper left', frameon=True, facecolor='#F8FAFC', edgecolor='#CBD5E1', fontsize=7.9)
 
     fig.suptitle(
-        'LSM Bot EKF Sensor Fusion Ablation Benchmark (Wheel Odometry + 100Hz IMU) under Wheel-Slip',
-        fontsize=13.2, fontweight='bold', color='#0F172A', y=0.98
+        'LSM Bot EKF Sensor Fusion 4-Way Ablation Benchmark (Wheel Odometry + 100Hz 6-Axis IMU) under Wheel-Slip',
+        fontsize=13.0, fontweight='bold', color='#0F172A', y=0.98
     )
 
     for p in out_plot_paths:
@@ -342,7 +392,7 @@ def generate_plot_and_metrics(csv_path: str, out_plot_paths: list):
 def turn_to_world_yaw(node: EKFSlipExperimentNode, target_yaw: float, tol: float = 0.08):
     t_start = node.sim_now_sec()
     while rclpy.ok() and node.sim_now_sec() - t_start < 15.0:
-        gt, _, _, _ = node.get_snapshot()
+        gt, _, _, _, _ = node.get_snapshot()
         err = wrap_pi(target_yaw - gt[2])
         if abs(err) <= tol:
             break
@@ -356,25 +406,25 @@ def turn_to_world_yaw(node: EKFSlipExperimentNode, target_yaw: float, tol: float
 
 def move_to_central_aisle(node: EKFSlipExperimentNode):
     """Move robot into unobstructed central East-West aisle (y ~ 5.4, x in [1.5, 4.0], yaw ~ 0 deg)."""
-    gt, _, _, _ = node.get_snapshot()
+    gt, _, _, _, _ = node.get_snapshot()
     if gt[0] < 1.5:
         turn_to_world_yaw(node, 0.0)
         t_s = node.sim_now_sec()
         while rclpy.ok() and node.sim_now_sec() - t_s < 10.0:
-            gt, _, _, _ = node.get_snapshot()
+            gt, _, _, _, _ = node.get_snapshot()
             if gt[0] >= 2.0:
                 break
             node.send_cmd(0.30, 0.0)
             time.sleep(0.02)
         drive_duration(node, 0.0, 0.0, 0.5)
 
-    gt, _, _, _ = node.get_snapshot()
+    gt, _, _, _, _ = node.get_snapshot()
     if abs(gt[1] - 5.4) > 0.4:
         target_y_heading = math.pi / 2.0 if gt[1] < 5.4 else -math.pi / 2.0
         turn_to_world_yaw(node, target_y_heading)
         t_s = node.sim_now_sec()
         while rclpy.ok() and node.sim_now_sec() - t_s < 20.0:
-            gt, _, _, _ = node.get_snapshot()
+            gt, _, _, _, _ = node.get_snapshot()
             if (target_y_heading > 0 and gt[1] >= 5.3) or (target_y_heading < 0 and gt[1] <= 5.5):
                 break
             node.send_cmd(0.35, 0.0)
@@ -386,10 +436,29 @@ def move_to_central_aisle(node: EKFSlipExperimentNode):
 
 
 def run_live_experiment(csv_path: str, out_plot_paths: list):
-    ahrs_cfg = resolve_ahrs_config_path()
+    noax_cfg = resolve_config_path('ekf_no_ax_ref.yaml')
+    ahrs_cfg = resolve_config_path('ekf_ahrs_ref.yaml')
+    noax_proc = None
     ahrs_proc = None
+
+    if os.path.exists(noax_cfg):
+        print(f"[EKF Experiment] Launching Case B2 Ablation node (ekf_no_ax_ref_node, ax=false) using {noax_cfg}...")
+        noax_proc = subprocess.Popen(
+            [
+                "ros2", "run", "robot_localization", "ekf_node",
+                "--ros-args",
+                "-r", "__node:=ekf_no_ax_ref_node",
+                "-r", "odometry/filtered:=/odometry/filtered_no_ax",
+                "--params-file", noax_cfg,
+                "-p", "use_sim_time:=true",
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            preexec_fn=os.setsid,
+        )
+
     if os.path.exists(ahrs_cfg):
-        print(f"[EKF Experiment] Launching secondary Case C Ablation Reference node (ekf_ahrs_ref_node) using {ahrs_cfg}...")
+        print(f"[EKF Experiment] Launching Case C Ablation Reference node (ekf_ahrs_ref_node, yaw=true) using {ahrs_cfg}...")
         ahrs_proc = subprocess.Popen(
             [
                 "ros2", "run", "robot_localization", "ekf_node",
@@ -410,71 +479,88 @@ def run_live_experiment(csv_path: str, out_plot_paths: list):
     spin_thread.start()
 
     try:
-        print("[EKF Experiment] Waiting for /ground_truth_poses, /odom, /odometry/filtered, /odometry/filtered_ahrs...")
+        print("[EKF Experiment] Waiting for /ground_truth_poses, /odom, /odometry/filtered, /odometry/filtered_no_ax, /odometry/filtered_ahrs...")
         t_wait = time.time()
         while rclpy.ok():
-            gt, raw, ekf, ahrs = node.get_snapshot()
-            if gt is not None and raw is not None and ekf is not None and (ahrs is not None or ahrs_proc is None) and node.sim_now_sec() > 0.1:
+            gt, raw, ekf, noax, ahrs = node.get_snapshot()
+            if (
+                gt is not None
+                and raw is not None
+                and ekf is not None
+                and (noax is not None or noax_proc is None)
+                and (ahrs is not None or ahrs_proc is None)
+                and node.sim_now_sec() > 0.1
+            ):
                 break
             if time.time() - t_wait > 25.0:
                 raise RuntimeError(
-                    f"Timed out waiting for topics: gt={gt is not None}, raw={raw is not None}, ekf={ekf is not None}, ahrs={ahrs is not None}"
+                    f"Timed out waiting for topics: gt={gt is not None}, raw={raw is not None}, ekf={ekf is not None}, noax={noax is not None}, ahrs={ahrs is not None}"
                 )
             time.sleep(0.05)
 
-        gt, raw, ekf, ahrs = node.get_snapshot()
+        gt, raw, ekf, noax, ahrs = node.get_snapshot()
         print(f"[EKF Experiment] Streams ready! GT=({gt[0]:.2f}, {gt[1]:.2f}, {math.degrees(gt[2]):.1f} deg)")
 
         print("[EKF Experiment] Positioning into unobstructed central East-West aisle (y~5.4, yaw~0 deg)...")
         move_to_central_aisle(node)
-        gt, raw, ekf, ahrs = node.get_snapshot()
+        gt, raw, ekf, noax, ahrs = node.get_snapshot()
         print(f"[EKF Experiment] Open-aisle starting pose: GT=({gt[0]:.2f}, {gt[1]:.2f}, {math.degrees(gt[2]):.1f} deg)")
 
         # Anchor SE(2) local reference frame at t=0
-        gt0, raw0, ekf0, ahrs0 = node.get_snapshot()
+        gt0, raw0, ekf0, noax0, ahrs0 = node.get_snapshot()
+        if noax0 is None:
+            noax0 = ekf0
         if ahrs0 is None:
             ahrs0 = ekf0
         t0_sim = node.sim_now_sec()
 
-        # Slip-inducing maneuver schedule: (duration_s, linear_v, angular_w, label)
+        # Forward-progressing slip-inducing maneuver schedule: (duration_s, linear_v, angular_w, label)
+        # Note: Phase 3a uses dt=0.55s at w=+1.82 rad/s to realign GT heading from -32 deg back to
+        # ~0 deg (Eastward) after the S-curve, so Phase 3b Straight Dash continues forward (+X) from
+        # x=1.8m to x=3.6m without folding back over the S-curve trajectory.
         phases = [
-            (2.0, 0.00, +1.82, "Phase 1a: Max-rate CCW Spin (+1.82 rad/s)"),
-            (2.0, 0.00, -1.82, "Phase 1b: Reversal CW Spin (-1.82 rad/s)"),
-            (1.3, 0.42, +1.40, "Phase 2a: High-Accel S-Curve Left"),
-            (2.5, 0.42, -1.40, "Phase 2b: High-Accel S-Curve Right"),
-            (2.5, 0.42, +1.40, "Phase 2c: High-Accel S-Curve Left"),
-            (1.3, 0.42, -1.40, "Phase 2d: High-Accel S-Curve Right"),
-            (2.8, 0.00, +1.82, "Phase 3a: J-Turn Braking & Spin (+1.82 rad/s)"),
-            (4.5, 0.42,  0.00, "Phase 3b: Straight Dash (Yaw->XY Divergence)"),
-            (2.0, 0.00,  0.00, "Phase 4: Full Stop & Settle"),
+            (2.0,  0.00, +1.82, "Phase 1a: Max-rate CCW Spin (+1.82 rad/s)"),
+            (2.0,  0.00, -1.82, "Phase 1b: Reversal CW Spin (-1.82 rad/s)"),
+            (1.3,  0.42, +1.40, "Phase 2a: High-Accel S-Curve Left"),
+            (2.5,  0.42, -1.40, "Phase 2b: High-Accel S-Curve Right"),
+            (2.5,  0.42, +1.40, "Phase 2c: High-Accel S-Curve Left"),
+            (1.3,  0.42, -1.40, "Phase 2d: High-Accel S-Curve Right"),
+            (0.55, 0.00, +1.82, "Phase 3a: High-Jerk J-Turn Braking & Eastward Realign (+1.82 rad/s)"),
+            (4.5,  0.42,  0.00, "Phase 3b: Eastward Straight Dash (Monotonic Yaw->XY Divergence)"),
+            (2.0,  0.00,  0.00, "Phase 4: Full Stop & Settle"),
         ]
 
         os.makedirs(os.path.dirname(csv_path), exist_ok=True)
         rows = []
         last_log_sim = -1.0
 
-        print("[EKF Experiment] Starting 23.0s aggressive wheel-slip test maneuver...")
+        print("[EKF Experiment] Starting 18.65s forward-progressing wheel-slip test maneuver...")
         for dur, v, w, label in phases:
-            print(f"  -> {label} (v={v:.2f} m/s, w={w:+.2f} rad/s, dt={dur:.1f}s)")
+            print(f"  -> {label} (v={v:.2f} m/s, w={w:+.2f} rad/s, dt={dur:.2f}s)")
             p_start = node.sim_now_sec()
             while rclpy.ok():
                 node.send_cmd(v, w)
                 now_sim = node.sim_now_sec()
                 if now_sim - last_log_sim >= 0.05:  # 20Hz synchronized logging
-                    gt_c, raw_c, ekf_c, ahrs_c = node.get_snapshot()
+                    gt_c, raw_c, ekf_c, noax_c, ahrs_c = node.get_snapshot()
+                    if noax_c is None:
+                        noax_c = ekf_c
                     if ahrs_c is None:
                         ahrs_c = ekf_c
                     gx, gy, gyaw = to_local_frame(gt_c, gt0)
                     rx, ry, ryaw = to_local_frame(raw_c, raw0)
                     ex, ey, eyaw = to_local_frame(ekf_c, ekf0)
+                    nx, ny, nyaw = to_local_frame(noax_c, noax0)
                     ax_x, ax_y, ax_yaw = to_local_frame(ahrs_c, ahrs0)
 
                     raw_pos_err = math.hypot(rx - gx, ry - gy)
                     ekf_pos_err = math.hypot(ex - gx, ey - gy)
+                    noax_pos_err = math.hypot(nx - gx, ny - gy)
                     ahrs_pos_err = math.hypot(ax_x - gx, ax_y - gy)
 
                     raw_yaw_err = math.degrees(wrap_pi(ryaw - gyaw))
                     ekf_yaw_err = math.degrees(wrap_pi(eyaw - gyaw))
+                    noax_yaw_err = math.degrees(wrap_pi(nyaw - gyaw))
                     ahrs_yaw_err = math.degrees(wrap_pi(ax_yaw - gyaw))
 
                     rows.append([
@@ -482,9 +568,10 @@ def run_live_experiment(csv_path: str, out_plot_paths: list):
                         round(gx, 5), round(gy, 5), round(math.degrees(gyaw), 3),
                         round(rx, 5), round(ry, 5), round(math.degrees(ryaw), 3),
                         round(ex, 5), round(ey, 5), round(math.degrees(eyaw), 3),
+                        round(nx, 5), round(ny, 5), round(math.degrees(nyaw), 3),
                         round(ax_x, 5), round(ax_y, 5), round(math.degrees(ax_yaw), 3),
-                        round(raw_pos_err, 5), round(ekf_pos_err, 5), round(ahrs_pos_err, 5),
-                        round(raw_yaw_err, 3), round(ekf_yaw_err, 3), round(ahrs_yaw_err, 3),
+                        round(raw_pos_err, 5), round(ekf_pos_err, 5), round(noax_pos_err, 5), round(ahrs_pos_err, 5),
+                        round(raw_yaw_err, 3), round(ekf_yaw_err, 3), round(noax_yaw_err, 3), round(ahrs_yaw_err, 3),
                     ])
                     last_log_sim = now_sim
 
@@ -501,9 +588,10 @@ def run_live_experiment(csv_path: str, out_plot_paths: list):
                 'gt_x', 'gt_y', 'gt_yaw_deg',
                 'raw_x', 'raw_y', 'raw_yaw_deg',
                 'ekf_x', 'ekf_y', 'ekf_yaw_deg',
+                'noax_x', 'noax_y', 'noax_yaw_deg',
                 'ahrs_x', 'ahrs_y', 'ahrs_yaw_deg',
-                'raw_pos_err_m', 'ekf_pos_err_m', 'ahrs_pos_err_m',
-                'raw_yaw_err_deg', 'ekf_yaw_err_deg', 'ahrs_yaw_err_deg',
+                'raw_pos_err_m', 'ekf_pos_err_m', 'noax_pos_err_m', 'ahrs_pos_err_m',
+                'raw_yaw_err_deg', 'ekf_yaw_err_deg', 'noax_yaw_err_deg', 'ahrs_yaw_err_deg',
             ])
             writer.writerows(rows)
 
@@ -512,12 +600,13 @@ def run_live_experiment(csv_path: str, out_plot_paths: list):
         rclpy.shutdown()
         spin_thread.join(timeout=2.0)
         node.destroy_node()
-        if ahrs_proc is not None:
-            try:
-                os.killpg(os.getpgid(ahrs_proc.pid), signal.SIGTERM)
-                ahrs_proc.wait(timeout=3.0)
-            except Exception:
-                pass
+        for proc in (noax_proc, ahrs_proc):
+            if proc is not None:
+                try:
+                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                    proc.wait(timeout=3.0)
+                except Exception:
+                    pass
 
     return generate_plot_and_metrics(csv_path, out_plot_paths)
 
@@ -526,11 +615,12 @@ def main():
     default_assets = os.path.join(REPO_ROOT, "docs", "portfolio_assets")
     default_csv = os.path.join(default_assets, "ekf_comparison.csv")
     default_plots = [
-        os.path.join(default_assets, "ekf_comparison_plot.png"),
+        os.path.join(default_assets, "lsm_04_ekf_plot_v2.png"),
         os.path.join(default_assets, "04_ekf_comparison_plot.png"),
+        os.path.join(default_assets, "ekf_comparison_plot.png"),
     ]
 
-    parser = argparse.ArgumentParser(description="LSM Bot EKF Wheel-Slip 3-Way Ablation Benchmark & Plotter")
+    parser = argparse.ArgumentParser(description="LSM Bot EKF Wheel-Slip 4-Way Ablation Benchmark & Plotter")
     parser.add_argument('--csv', default=default_csv, help="Output CSV path")
     parser.add_argument('--replot-only', action='store_true', help="Regenerate plot & metrics from existing CSV")
     args, _ = parser.parse_known_args()

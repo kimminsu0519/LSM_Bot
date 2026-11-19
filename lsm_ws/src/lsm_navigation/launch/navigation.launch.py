@@ -17,13 +17,14 @@ def generate_launch_description():
     # Default Paths
     default_map_path = os.path.join(pkg_lsm_navigation, 'maps', 'lsm_warehouse_map.yaml')
     default_params_path = os.path.join(pkg_lsm_navigation, 'config', 'nav2_params.yaml')
-    ekf_config_path = os.path.join(pkg_lsm_navigation, 'config', 'ekf.yaml')
+    default_ekf_config_path = os.path.join(pkg_lsm_navigation, 'config', 'ekf.yaml')
     custom_rviz_path = os.path.join(pkg_lsm_navigation, 'rviz', 'lsm_nav2_view.rviz')
     default_rviz_path = custom_rviz_path if os.path.exists(custom_rviz_path) else os.path.join(pkg_nav2_bringup, 'rviz', 'nav2_default_view.rviz')
 
     # Launch Configurations
     map_yaml_file = LaunchConfiguration('map')
     params_file = LaunchConfiguration('params_file')
+    ekf_params_file = LaunchConfiguration('ekf_params_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
     slip_mode = LaunchConfiguration('slip_mode')
@@ -40,6 +41,12 @@ def generate_launch_description():
         'params_file',
         default_value=default_params_path,
         description='Full path to the ROS2 parameters file to use for all launched nodes'
+    )
+
+    declare_ekf_params_file_cmd = DeclareLaunchArgument(
+        'ekf_params_file',
+        default_value=default_ekf_config_path,
+        description='Full path to the EKF parameters file (default: 6-axis gyro ekf.yaml; ablation: ekf_raw_odom_ref.yaml)'
     )
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
@@ -81,7 +88,7 @@ def generate_launch_description():
         name='ekf_filter_node',
         output='screen',
         parameters=[
-            ekf_config_path,
+            ekf_params_file,
             {'use_sim_time': use_sim_time}
         ]
     )
@@ -139,6 +146,7 @@ def generate_launch_description():
     ld = LaunchDescription()
     ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_params_file_cmd)
+    ld.add_action(declare_ekf_params_file_cmd)
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_autostart_cmd)
     ld.add_action(declare_slip_mode_cmd)

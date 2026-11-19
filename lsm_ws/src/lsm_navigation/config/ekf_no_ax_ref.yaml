@@ -1,0 +1,82 @@
+### LSM Bot EKF Ablation Reference Configuration (Case B2: Gyro-Only vyaw=true, ax=false, yaw=false) ###
+# Used ONLY by run_ekf_slip_experiment.py as a secondary non-TF reference node (ekf_no_ax_ref_node)
+# publishing to /odometry/filtered_no_ax to quantitatively isolate the effect of longitudinal linear
+# acceleration (ax) in 2D differential-drive wheel-slip dead-reckoning:
+#   - Case B1 (Main, ekf.yaml):        6-Axis IMU Gyro + Accel (yaw=false, vyaw=true, ax=true)
+#   - Case B2 (Ablation, this file):   6-Axis IMU Gyro-Only    (yaw=false, vyaw=true, ax=false)
+
+ekf_no_ax_ref_node:
+  ros__parameters:
+    use_sim_time: true
+    frequency: 30.0
+    sensor_timeout: 0.1
+    two_d_mode: true
+    transform_time_offset: 0.0
+    transform_timeout: 0.1
+    print_diagnostics: false
+    debug: false
+    permit_corrected_publication: false
+    publish_acceleration: false
+
+    # Must NOT publish TF so ekf_filter_node remains the sole odom -> base_footprint publisher
+    publish_tf: false
+
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_footprint
+    world_frame: odom
+
+    odom0: /odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  false, false,
+                   false, false, false,
+                   false, false, false]
+    odom0_queue_size: 10
+    odom0_nodelay: true
+    odom0_differential: false
+    odom0_relative: false
+
+    imu0: /imu
+    imu0_config: [false, false, false,
+                  false, false, false,
+                  false, false, false,
+                  false, false, true,
+                  false, false, false]
+    imu0_queue_size: 20
+    imu0_nodelay: true
+    imu0_differential: false
+    imu0_relative: true
+    imu0_remove_gravitational_acceleration: true
+
+    process_noise_covariance: [0.05, 0.0,    0.0,  0.0,  0.0,  0.0,  0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.05,   0.0,  0.0,  0.0,  0.0,  0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.06, 0.0,  0.0,  0.0,  0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.03, 0.0,  0.0,  0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.03, 0.0,  0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.0,  0.02, 0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.05, 0.0,    0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,  0.0001, 0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,  0.0,    0.04, 0.0,  0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,  0.0,    0.0,  0.01, 0.0,  0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,  0.0,    0.0,  0.0,  0.01, 0.0,  0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,  0.0,    0.0,  0.0,  0.0,  0.04, 0.0,   0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.001, 0.0,  0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,   0.01, 0.0,
+                               0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,  0.0,    0.0,  0.0,  0.0,  0.0,  0.0,   0.0,  0.015]
+
+    initial_estimate_covariance: [1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,  0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9, 0.0,
+                                  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-9]
